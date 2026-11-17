@@ -11,58 +11,67 @@ import { images, alts } from '../data/images';
 
 const questions = [
   {
-    title: 'Where does the day begin?',
+    title: 'Suasana apa yang Anda cari?',
     image: images.corridor,
     alt: alts.corridor,
     options: [
       {
-        label: 'A library after closing.',
+        label: 'Hangat dan tenang',
+        hint: 'Seperti perpustakaan setelah tutup.',
         scores: { 'oud-intime': 3, 'vetiver-obscura': 2, 'ambrette-12': 1 },
       },
       {
-        label: 'A greenhouse at noon.',
+        label: 'Segar dan hijau',
+        hint: 'Seperti rumah kaca saat tengah hari.',
         scores: { 'fig-nocturne': 3, 'iris-cendre': 2, 'vetiver-obscura': 1 },
       },
       {
-        label: 'A stone beach in wind.',
+        label: 'Bersih dan asin',
+        hint: 'Seperti pantai berbatu dan angin.',
         scores: { 'sel-brut': 3, 'fig-nocturne': 1, 'ambrette-12': 1 },
       },
     ],
   },
   {
-    title: 'What do you reach for?',
+    title: 'Material apa yang paling Anda sukai?',
     image: images.atelier,
     alt: alts.atelier,
     options: [
       {
-        label: 'Root and smoke.',
+        label: 'Akar dan asap',
+        hint: 'Vetiver, oud, kayu.',
         scores: { 'vetiver-obscura': 3, 'oud-intime': 2, 'fig-nocturne': 1 },
       },
       {
-        label: 'Petals and powder.',
+        label: 'Bunga dan bedak',
+        hint: 'Iris, violet, suede.',
         scores: { 'iris-cendre': 3, 'ambrette-12': 2, 'oud-intime': 1 },
       },
       {
-        label: 'Salt and sap.',
+        label: 'Garam dan getah',
+        hint: 'Fig, citrus, udara laut.',
         scores: { 'sel-brut': 3, 'fig-nocturne': 2, 'ambrette-12': 1 },
       },
     ],
   },
   {
-    title: 'How much space should it take?',
+    title: 'Seberapa kuat jejak yang Anda inginkan?',
     image: images.macroOud,
     alt: alts.macroOud,
     options: [
       {
-        label: "A hand's width.",
+        label: 'Dekat di kulit',
+        hint: 'Hanya tercium oleh Anda.',
         scores: { 'ambrette-12': 3, 'iris-cendre': 2, 'sel-brut': 1 },
       },
       {
-        label: 'Across the arm.',
+        label: 'Sepanjang lengan',
+        hint: 'Terasa saat orang mendekat.',
         scores: { 'fig-nocturne': 3, 'sel-brut': 2, 'vetiver-obscura': 1 },
       },
       {
-        label: 'Down the corridor.',
+        label: 'Memenuhi ruangan',
+        hint: 'Jejak yang panjang dan berani.',
         scores: { 'oud-intime': 3, 'vetiver-obscura': 2, 'iris-cendre': 1 },
       },
     ],
@@ -72,10 +81,10 @@ const questions = [
 
 <BaseLayout
   title="Find your scent"
-  description="Three questions about the room, the material and the trace. The Omoo scent finder points you to one composition."
+  description="Jawab tiga pertanyaan singkat dan temukan parfum Omoo yang paling sesuai dengan selera Anda."
 >
   <PageHeader
-    deck="Three questions about the room you want to enter, the material you reach for, and the trace you leave. No account, no countdown."
+    deck="Tiga pertanyaan singkat tentang suasana, material, dan seberapa kuat parfum yang Anda inginkan. Kami akan menunjukkan satu komposisi yang paling dekat."
   >
     <Fragment slot="title">Find your <span class="italic">scent</span>.</Fragment>
   </PageHeader>
@@ -106,7 +115,7 @@ const questions = [
               data-quiz-progress
               aria-live="polite"
             >
-              Question 1 of 3
+              Pertanyaan 1 dari 3
             </p>
             <div class="flex items-center gap-5">
               <button
@@ -115,7 +124,7 @@ const questions = [
                 hidden
                 class="text-[0.65rem] font-medium uppercase tracking-[0.1em] text-muted transition-colors hover:text-ink"
               >
-                Back
+                Kembali
               </button>
               <button
                 type="button"
@@ -123,7 +132,7 @@ const questions = [
                 hidden
                 class="text-[0.65rem] font-medium uppercase tracking-[0.1em] text-muted transition-colors hover:text-ink"
               >
-                Start again
+                Mulai lagi
               </button>
             </div>
           </div>
@@ -153,8 +162,13 @@ const questions = [
                         data-scores={JSON.stringify(option.scores)}
                         class="group flex items-center justify-between gap-6 border-t border-line py-5 text-left transition-colors duration-300 ease-luxe hover:text-accent"
                       >
-                        <span class="font-display text-[clamp(1.35rem,2vw,1.7rem)] font-light leading-tight">
-                          {option.label}
+                        <span class="flex flex-col gap-1.5 text-left">
+                          <span class="font-display text-[clamp(1.3rem,1.9vw,1.6rem)] font-light leading-tight">
+                            {option.label}
+                          </span>
+                          <span class="text-[0.7rem] leading-relaxed tracking-[0.01em] text-muted">
+                            {option.hint}
+                          </span>
                         </span>
                         <span
                           aria-hidden="true"
@@ -171,7 +185,7 @@ const questions = [
           </div>
 
           <div data-results hidden class="mt-8">
-            <p class="text-[0.65rem] font-medium uppercase tracking-[0.13em] text-muted">Your match</p>
+            <p class="text-[0.65rem] font-medium uppercase tracking-[0.13em] text-muted">Untuk Anda</p>
 
             {
               fragrances.map((fragrance) => (
@@ -208,9 +222,9 @@ const questions = [
                         <Button
                           href={`/collection/${fragrance.slug}/`}
                           size="small"
-                          ariaLabel={`Discover ${fragrance.name}`}
+                          ariaLabel={`Lihat parfum ${fragrance.name}`}
                         >
-                          Discover
+                          Lihat parfum
                         </Button>
                         <span class="text-[0.8rem] text-muted">{priceLabel(fragrance.price)}</span>
                       </div>
@@ -221,17 +235,17 @@ const questions = [
             }
 
             <p class="mt-8 border-t border-line pt-5 text-[0.8rem] leading-relaxed text-muted">
-              Not quite? The whole collection is on the
+              Belum tepat? Seluruh koleksi ada di
               <a class="underline underline-offset-4 transition-colors hover:text-ink" href="/collection/">
-                collection page
+                halaman koleksi
               </a>.
             </p>
           </div>
 
           <noscript>
             <p class="mt-6 border-t border-line pt-5 text-[0.85rem] leading-relaxed text-muted">
-              The finder needs JavaScript. You can still browse the
-              <a class="underline underline-offset-4" href="/collection/">full collection</a>.
+              Finder membutuhkan JavaScript. Anda tetap bisa menjelajahi
+              <a class="underline underline-offset-4" href="/collection/">seluruh koleksi</a>.
             </p>
           </noscript>
         </div>
@@ -239,8 +253,8 @@ const questions = [
     </div>
 
     <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-[0.7rem] uppercase tracking-[0.08em] text-muted">
-      <span>Prefer to read?</span>
-      <ArrowLink href="/collection/">View all fragrances</ArrowLink>
+      <span>Lebih suka membaca?</span>
+      <ArrowLink href="/collection/">Lihat semua parfum</ArrowLink>
     </div>
   </Section>
 
@@ -272,7 +286,7 @@ const questions = [
       image.classList.toggle('opacity-100', active);
       image.classList.toggle('opacity-0', !active);
     });
-    if (progress) progress.textContent = `Question ${next + 1} of 3`;
+    if (progress) progress.textContent = `Pertanyaan ${next + 1} dari 3`;
     if (back) back.hidden = next === 0;
     if (restart) restart.hidden = next === 0;
     if (focus) {
@@ -304,7 +318,7 @@ const questions = [
     resultCards.forEach((card) => {
       card.hidden = card.dataset.result !== winner;
     });
-    if (progress) progress.textContent = 'Your result';
+    if (progress) progress.textContent = 'Hasil Anda';
     if (back) back.hidden = true;
     if (restart) restart.hidden = false;
 

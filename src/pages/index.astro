@@ -11,6 +11,7 @@ import JournalCard from '../components/JournalCard.astro';
 import DiscoverySet from '../components/DiscoverySet.astro';
 import { featured, materials, priceLabel } from '../data/fragrances';
 import { journal } from '../data/journal';
+import { site } from '../data/site';
 import { images, alts } from '../data/images';
 
 const [lead, ...secondary] = featured;
@@ -23,19 +24,19 @@ const leadNotes = [
 const process = [
   {
     title: 'Compose',
-    copy: 'One material leads. Every other note is written around it, never over it.',
+    copy: 'Satu material memimpin. Catatan lain ditulis mengelilinginya, tidak pernah menutupinya.',
     image: images.atelier,
     alt: alts.atelier,
   },
   {
     title: 'Macerate',
-    copy: 'The concentrate rests in steel, then glass. Weeks pass and the edges soften.',
+    copy: 'Konsentrat beristirahat di baja, lalu kaca. Minggu-minggu berlalu dan tepinya melembut.',
     image: images.maceration,
     alt: alts.maceration,
   },
   {
     title: 'Bottle',
-    copy: 'Each flacon is filled, sealed, and numbered in the Paris atelier.',
+    copy: 'Setiap flacon diisi, disegel, dan diberi nomor di atelier Jakarta.',
     image: images.bottleOud,
     alt: alts.bottleOud,
   },
@@ -46,20 +47,29 @@ const schema = {
   '@type': 'Organization',
   name: 'Omoo',
   url: 'https://omoo.studio',
-  email: 'hello@omoo.studio',
+  email: site.email,
+  sameAs: site.socials.map((social) => social.href),
+  contactPoint: {
+    '@type': 'ContactPoint',
+    contactType: 'customer care',
+    email: site.email,
+    telephone: site.whatsapp.display,
+    availableLanguage: ['Indonesian', 'English', 'French'],
+  },
   address: {
     '@type': 'PostalAddress',
-    streetAddress: '14 rue de Poitou',
-    postalCode: '75003',
-    addressLocality: 'Paris',
-    addressCountry: 'FR',
+    streetAddress: site.address.street,
+    postalCode: '12190',
+    addressLocality: 'Jakarta Selatan',
+    addressRegion: 'DKI Jakarta',
+    addressCountry: 'ID',
   },
 };
 ---
 
 <BaseLayout
   title="Perfume, made slowly"
-  description="Omoo is a small perfume house between Grasse and Paris. Six extrait de parfum compositions, built one material at a time."
+  description="Omoo adalah rumah parfum kecil di Jakarta. Enam komposisi extrait de parfum, diracik dari material pilihan, dibuat perlahan."
   schema={schema}
 >
   <section class="relative overflow-hidden pb-[clamp(3rem,6vw,5rem)] pt-[clamp(1.5rem,4vw,3rem)]">
@@ -77,7 +87,7 @@ const schema = {
     <div class="relative mx-auto w-full max-w-page px-gutter">
       <div class="grid items-stretch gap-10 lg:grid-cols-[7fr_5fr] lg:gap-[clamp(2rem,5vw,5rem)]">
         <div class="flex flex-col justify-center py-[clamp(1rem,4vw,3.5rem)]">
-          <Eyebrow data-hero-fade style="--hero-delay: 0s">Maison de parfum, Paris</Eyebrow>
+          <Eyebrow data-hero-fade style="--hero-delay: 0s">Maison de parfum, Jakarta</Eyebrow>
 
           <h1
             class="mt-7 font-display text-[clamp(3.35rem,7.7vw,7.75rem)] font-light leading-[0.9] tracking-[-0.022em] text-balance"
@@ -97,8 +107,8 @@ const schema = {
             style="--hero-delay: 0.38s"
             class="mt-7 max-w-[38ch] text-[clamp(1rem,1.25vw,1.15rem)] leading-[1.65] text-muted"
           >
-            Six compositions built around rare materials. Made slowly in Paris, worn close to the
-            skin.
+            Enam komposisi dengan material pilihan, diracik perlahan di Jakarta. Tinggal di kulit,
+            lebih lama dari yang Anda kira.
           </p>
 
           <div
@@ -162,7 +172,7 @@ const schema = {
       linkLabel="View all fragrances"
       class="mb-[clamp(2.5rem,5vw,4.5rem)]"
     >
-      Six compositions.<br /><span class="italic">One material leads.</span>
+      Six compositions.<br /><span class="italic">Satu material, satu arah.</span>
     </SectionHeader>
 
     <div class="grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-gutter">
@@ -255,7 +265,8 @@ const schema = {
 
     <div class="mt-16 border-t border-line pt-6">
       <p class="max-w-[40ch] font-display text-[clamp(1.5rem,2.4vw,2.2rem)] font-light leading-[1.08]">
-        The collection stays at six. A new composition replaces an older one; it never joins it.
+        The collection stays at six. Komposisi baru menggantikan yang lama, tidak pernah menumpuk
+        di sampingnya.
       </p>
     </div>
   </Section>
@@ -263,11 +274,11 @@ const schema = {
   <Section tone="surface" id="materials" labelledby="materials-heading" class="relative overflow-hidden">
     <div class="relative max-w-[54ch]">
       <SectionHeader id="materials-heading">
-        Materials,<br /><span class="italic">one by one.</span>
+        Materials,<br /><span class="italic">satu per satu.</span>
       </SectionHeader>
       <p data-reveal class="mt-7 max-w-[42ch] text-[0.95rem] leading-[1.7] text-muted">
-        Each composition begins with a single material and the place it came from. Hover a name to
-        see it.
+        Setiap komposisi dimulai dari satu material dan tempat asalnya. Arahkan kursor ke nama
+        untuk melihatnya.
       </p>
     </div>
 
@@ -351,25 +362,25 @@ const schema = {
             data-reveal-title
             class="max-w-[13ch] pb-1 font-display text-[clamp(2.4rem,4.4vw,4.1rem)] font-light leading-[0.98] tracking-[-0.02em]"
           >
-            Three questions.<br /><span class="italic">One composition.</span>
+            Tiga pertanyaan.<br /><span class="italic">Satu parfum.</span>
           </h2>
           <p data-reveal class="mt-6 max-w-[44ch] text-[0.95rem] leading-[1.7] text-muted">
-            Answer three questions about the room you want to enter, the material you reach for, and
-            the trace you leave.
+            Tiga pertanyaan singkat tentang suasana, material favorit, dan seberapa kuat parfum
+            yang Anda inginkan.
           </p>
 
           <dl class="mt-8 grid border-t border-line">
             <div data-reveal class="flex items-baseline justify-between gap-4 border-b border-line py-3">
               <dt class="font-display text-xl">Room</dt>
-              <dd class="text-[0.7rem] uppercase tracking-[0.08em] text-muted">Where you want to be</dd>
+              <dd class="text-[0.7rem] uppercase tracking-[0.08em] text-muted">Suasana yang Anda cari</dd>
             </div>
             <div data-reveal class="flex items-baseline justify-between gap-4 border-b border-line py-3">
               <dt class="font-display text-xl">Material</dt>
-              <dd class="text-[0.7rem] uppercase tracking-[0.08em] text-muted">What you reach for</dd>
+              <dd class="text-[0.7rem] uppercase tracking-[0.08em] text-muted">Bahan yang Anda sukai</dd>
             </div>
             <div data-reveal class="flex items-baseline justify-between gap-4 border-b border-line py-3">
               <dt class="font-display text-xl">Trace</dt>
-              <dd class="text-[0.7rem] uppercase tracking-[0.08em] text-muted">How long it stays</dd>
+              <dd class="text-[0.7rem] uppercase tracking-[0.08em] text-muted">Kekuatan parfumnya</dd>
             </div>
           </dl>
 
@@ -397,8 +408,8 @@ const schema = {
       <div class="grid gap-8 py-[clamp(2.5rem,5vw,4.5rem)] lg:grid-cols-12">
         <blockquote class="lg:col-span-8" data-reveal>
           <p class="font-display text-[clamp(1.9rem,4vw,3.9rem)] font-light leading-[1.03] tracking-[-0.015em]">
-            &ldquo;The house is small on purpose. It is the only way I know to smell every batch
-            before it leaves.&rdquo;
+            &ldquo;The house is small on purpose. Hanya dengan begitu saya bisa mencium setiap batch
+            sebelum ia meninggalkan atelier.&rdquo;
           </p>
         </blockquote>
         <div class="flex flex-col justify-end gap-5 lg:col-span-3 lg:col-start-10">
@@ -422,7 +433,7 @@ const schema = {
           Slow is a material.
         </h2>
         <p data-reveal class="mt-6 max-w-[34ch] text-[0.95rem] leading-[1.7] text-muted">
-          Nothing here is finished by a schedule. The formula tells us when it is ready.
+          Tidak ada yang selesai karena jadwal. Formula yang menentukan kapan ia siap.
         </p>
       </div>
 
@@ -462,7 +473,7 @@ const schema = {
   </Section>
 
   <Section>
-    <SectionHeader linkHref="/journal/" linkLabel="All writing" class="mb-[clamp(2.25rem,5vw,4.25rem)]">
+    <SectionHeader linkHref="/journal/" linkLabel="Semua tulisan" class="mb-[clamp(2.25rem,5vw,4.25rem)]">
       From the atelier
     </SectionHeader>
 

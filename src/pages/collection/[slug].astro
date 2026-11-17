@@ -7,6 +7,7 @@ import Media from '../../components/ui/Media.astro';
 import Section from '../../components/ui/Section.astro';
 import FragranceCard from '../../components/FragranceCard.astro';
 import { bySlug, fragrances, priceLabel } from '../../data/fragrances';
+import { whatsappHref } from '../../data/site';
 
 export function getStaticPaths() {
   return fragrances.map((fragrance) => ({
@@ -17,7 +18,9 @@ export function getStaticPaths() {
 
 const { fragrance } = Astro.props;
 const related = fragrance.related.map((slug) => bySlug(slug)!).filter(Boolean);
-const sampleHref = `mailto:hello@omoo.studio?subject=${encodeURIComponent(`Sample request: ${fragrance.name}`)}`;
+const productWhatsapp = whatsappHref(
+  `Halo OMOO, saya ingin memesan ${fragrance.name} (${fragrance.volume}, ${priceLabel(fragrance.price)}). Mohon info ketersediaan dan pengiriman.`
+);
 const notes = [
   { label: 'Top', items: fragrance.notes.top },
   { label: 'Heart', items: fragrance.notes.heart },
@@ -40,7 +43,7 @@ const schema = {
   offers: {
     '@type': 'Offer',
     price: fragrance.price,
-    priceCurrency: 'EUR',
+    priceCurrency: 'IDR',
     availability: 'https://schema.org/InStock',
     url: `https://omoo.studio/collection/${fragrance.slug}/`,
   },
@@ -79,6 +82,7 @@ const schema = {
             reveal
           />
           <div class="flex flex-col justify-between border-t border-line pt-3">
+            <p class="text-[0.58rem] font-medium uppercase tracking-[0.12em] text-muted">Material</p>
             <p class="font-display text-[clamp(1.4rem,2vw,1.9rem)] font-light italic leading-[1.05]">
               {fragrance.material.phrase}
             </p>
@@ -124,13 +128,13 @@ const schema = {
           }
         </dl>
 
-        <div class="flex flex-col items-start gap-5">
-          <Button href={sampleHref} class="w-full">Request a sample</Button>
+        <div class="flex flex-col items-start gap-4">
+          <Button href={productWhatsapp} external class="w-full">Pesan via WhatsApp</Button>
           <ArrowLink href="/find/">Find your scent</ArrowLink>
         </div>
 
-        <p class="mt-5 max-w-[38ch] text-[0.72rem] leading-relaxed text-muted">
-          Samples are sent from the Paris atelier. Two vials per request.
+        <p class="mt-5 max-w-[40ch] text-[0.72rem] leading-relaxed text-muted">
+          Pemesanan, pembayaran, dan pengiriman diatur lewat WhatsApp. Kami mengirim ke seluruh Indonesia.
         </p>
       </div>
     </div>
@@ -228,7 +232,7 @@ const schema = {
           Wear it with
         </h2>
         <p data-reveal class="mt-5 max-w-[28ch] text-[0.9rem] leading-[1.65] text-muted">
-          Two compositions that sit close to this one.
+          Dua komposisi yang duduk dekat dengan yang ini.
         </p>
       </div>
 

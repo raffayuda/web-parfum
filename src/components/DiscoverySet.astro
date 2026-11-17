@@ -4,6 +4,8 @@ import Eyebrow from './ui/Eyebrow.astro';
 import Media from './ui/Media.astro';
 import Section from './ui/Section.astro';
 import { images, alts } from '../data/images';
+import { priceLabel } from '../data/fragrances';
+import { whatsappHref } from '../data/site';
 
 interface Props {
   class?: string;
@@ -41,25 +43,28 @@ const { class: className } = Astro.props;
         Six scents. One week.
       </h2>
       <p data-reveal class="max-w-[42ch] text-[0.95rem] leading-[1.7] text-muted">
-        The six compositions, in 2 ml vials. Wear one a day for six days, then choose the one you
-        miss.
+        Enam komposisi dalam vial 2 ml. Pakai satu setiap hari selama enam hari, lalu pilih aroma
+        yang paling Anda rindukan.
       </p>
       <p data-reveal class="flex items-baseline gap-3 font-display text-3xl">
-        &euro;38
+        {priceLabel(450000)}
         <span class="font-sans text-[0.7rem] uppercase tracking-[0.08em] text-muted">
-          Six 2 ml vials
+          Enam vial 2 ml
         </span>
       </p>
       <div data-reveal>
         <Button
-          href="mailto:hello@omoo.studio?subject=Reserve%20a%20discovery%20set"
+          href={whatsappHref(
+            `Halo OMOO, saya ingin memesan Discovery Set (${priceLabel(450000)}). Mohon info ketersediaan dan pengiriman.`
+          )}
+          external
           class="w-full sm:w-auto"
         >
-          Reserve a discovery set
+          Pesan via WhatsApp
         </Button>
       </div>
-      <p data-reveal class="text-[0.72rem] leading-relaxed text-muted">
-        Reserve by email. We ship within Europe.
+      <p data-reveal class="max-w-[42ch] text-[0.72rem] leading-relaxed text-muted">
+        Pemesanan dan pengiriman diatur lewat WhatsApp. Kami mengirim ke seluruh Indonesia.
       </p>
     </div>
   </div>

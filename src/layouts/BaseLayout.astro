@@ -7,6 +7,7 @@ import '@fontsource-variable/instrument-sans/wght.css';
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import SearchOverlay from '../components/SearchOverlay.astro';
+import WhatsAppFloat from '../components/WhatsAppFloat.astro';
 import Footer from '../components/Footer.astro';
 
 interface Props {
@@ -19,7 +20,7 @@ interface Props {
 
 const {
   title,
-  description = 'Omoo is a small perfume house working between Grasse and Paris. Six compositions, built one material at a time.',
+  description = 'Omoo adalah rumah parfum kecil di Jakarta. Enam komposisi extrait de parfum, diracik dari material pilihan, satu per satu.',
   ogType = 'website',
   noindex = false,
   schema,
@@ -90,6 +91,7 @@ const ogImage = new URL('/og.jpg', Astro.site);
     <div class="page">
       <Nav />
       <SearchOverlay />
+      {!Astro.url.pathname.startsWith('/contact') && <WhatsAppFloat />}
       <main id="main">
         <slot />
       </main>

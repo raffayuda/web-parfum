@@ -1,0 +1,99 @@
+---
+import { Icon } from 'astro-icon/components';
+
+interface FaqItem {
+  question: string;
+  answer: string;
+}
+
+interface Props {
+  items: FaqItem[];
+  class?: string;
+}
+
+const { items, class: className } = Astro.props;
+---
+
+<div class:list={['w-full', className]} data-faq>
+  {
+    items.map((item) => (
+      <details class="group border-t border-line" data-faq-item>
+        <summary class="flex cursor-pointer list-none items-center justify-between gap-6 py-5 [&::-webkit-details-marker]:hidden">
+          <span class="pr-4 text-[0.95rem] leading-snug">{item.question}</span>
+          <span
+            class="flex-none text-muted transition-transform duration-300 ease-luxe group-open:rotate-45"
+            aria-hidden="true"
+          >
+            <Icon name="ph:plus" size={18} />
+          </span>
+        </summary>
+        <div class="overflow-hidden" data-faq-body>
+          <div class="pb-5 pr-8" data-faq-inner>
+            <p class="max-w-[58ch] text-[0.88rem] leading-[1.7] text-muted">{item.answer}</p>
+          </div>
+        </div>
+      </details>
+    ))
+  }
+</div>
+
+<script>
+  import { animate } from 'motion';
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!reduceMotion) {
+    document.querySelectorAll<HTMLElement>('[data-faq-item]').forEach((item) => {
+      const summary = item.querySelector<HTMLElement>('summary');
+      const body = item.querySelector<HTMLElement>('[data-faq-body]');
+      const inner = item.querySelector<HTMLElement>('[data-faq-inner]');
+      if (!summary || !body || !inner) return;
+
+      let running = false;
+
+      summary.addEventListener('click', (event) => {
+        event.preventDefault();
+        if (running) return;
+        running = true;
+
+        if (item.open) {
+          const startHeight = body.offsetHeight;
+          animate(
+            body,
+            { height: [`${startHeight}px`, '0px'], opacity: [1, 0] },
+            {
+              duration: 0.3,
+              ease: [0.4, 0, 0.2, 1],
+              onComplete: () => {
+                item.open = false;
+                body.style.height = '';
+                body.style.opacity = '';
+                running = false;
+              },
+            }
+          );
+          return;
+        }
+
+        body.style.height = '0px';
+        body.style.opacity = '0';
+        item.open = true;
+        const targetHeight = inner.offsetHeight;
+
+        animate(
+          body,
+          { height: ['0px', `${targetHeight}px`], opacity: [0, 1] },
+          {
+            duration: 0.38,
+            ease: [0.16, 1, 0.3, 1],
+            onComplete: () => {
+              body.style.height = 'auto';
+              body.style.opacity = '';
+              running = false;
+            },
+          }
+        );
+      });
+    });
+  }
+</script>

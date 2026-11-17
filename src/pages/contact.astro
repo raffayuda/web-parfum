@@ -2,65 +2,81 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHeader from '../components/ui/PageHeader.astro';
 import Button from '../components/ui/Button.astro';
+import ArrowLink from '../components/ui/ArrowLink.astro';
 import Media from '../components/ui/Media.astro';
 import Section from '../components/ui/Section.astro';
+import SocialLinks from '../components/ui/SocialLinks.astro';
+import Faq from '../components/ui/Faq.astro';
+import { Icon } from 'astro-icon/components';
 import { images, alts } from '../data/images';
+import { site, whatsappHref } from '../data/site';
 
 const stockists = [
   {
-    city: 'Paris',
-    name: 'Le Comptoir',
-    address: '8 rue de Bretagne\n75003 Paris',
+    city: 'Jakarta',
+    name: 'Ruang Wangi',
+    address: 'Jl. Cipete Raya No. 8\nJakarta Selatan',
   },
   {
-    city: 'London',
-    name: 'Avery & Sons',
-    address: "22 Lamb's Conduit Street\nLondon WC1N 3LL",
+    city: 'Bandung',
+    name: 'Niskala',
+    address: 'Jl. Braga No. 18\nBandung',
   },
   {
-    city: 'Tokyo',
-    name: 'Hako',
-    address: '2-14-5 Jingumae\nShibuya, Tokyo',
+    city: 'Bali',
+    name: 'Hening',
+    address: 'Jl. Raya Seminyak No. 9\nBadung, Bali',
   },
 ];
 
 const faq = [
   {
-    question: 'Can I visit the atelier?',
+    question: 'Bisakah saya mengunjungi atelier?',
     answer:
-      'Yes. Visits are by appointment, Tuesday to Friday. Write to hello@omoo.studio with a day and time that suits you, and we will confirm.',
+      'Tentu. Kunjungan dilakukan dengan janji temu, Selasa sampai Jumat. Tulis ke hello@omoo.studio atau WhatsApp kami dengan hari dan waktu yang Anda inginkan, lalu kami akan mengonfirmasi.',
   },
   {
-    question: 'Do you ship outside Europe?',
+    question: 'Apakah Anda mengirim ke luar Indonesia?',
     answer:
-      'Not yet. The atelier ships within Europe. If you are further away, write to us and we will let you know when that changes.',
+      'Belum. Saat ini pengiriman hanya di dalam Indonesia. Jika Anda berada di luar negeri, hubungi kami untuk informasi lebih lanjut.',
   },
   {
-    question: 'Do you offer samples?',
+    question: 'Bagaimana cara memesan?',
     answer:
-      'Two 2 ml vials per request, sent from Paris. Tell us which compositions you would like to try, or ask us to choose.',
+      'Semua pemesanan diproses lewat WhatsApp. Buka halaman parfum atau discovery set, tekan Pesan via WhatsApp, lalu kirim pesan yang sudah terisi. Kami akan mengonfirmasi stok, pembayaran, dan pengiriman. Saat ini kami hanya mengirim di dalam Indonesia.',
   },
   {
-    question: 'How should I store a bottle?',
+    question: 'Bagaimana cara menyimpan botol?',
     answer:
-      'Upright, away from light and heat. A cupboard is better than a bathroom shelf. Extrait de parfum keeps for years when it is left alone.',
+      'Berdiri tegak, jauh dari cahaya dan panas. Lemari lebih baik daripada rak kamar mandi. Extrait de parfum tetap baik selama bertahun-tahun ketika dibiarkan tenang.',
   },
   {
-    question: 'Are the fragrances unisex?',
+    question: 'Apakah parfumnya unisex?',
     answer:
-      'Yes. We do not divide the collection by gender. The material is the only brief.',
+      'Ya. Kami tidak membagi koleksi berdasarkan gender. Materialnya adalah satu-satunya arahan.',
+  },
+  {
+    question: 'Bisa bertanya lewat WhatsApp?',
+    answer:
+      'Bisa. Untuk pertanyaan cepat, pemesanan, atau janji temu, WhatsApp adalah jalur tercepat. Kami membalas pada hari kerja.',
   },
 ];
 ---
 
 <BaseLayout
   title="Contact"
-  description="Visit the Omoo atelier in Paris, find a stockist, or write to us about samples and the collection."
+  description="Kunjungi atelier Omoo di Jakarta, temukan stockist di Indonesia, atau hubungi kami lewat WhatsApp dan email untuk koleksi serta pemesanan."
 >
   <PageHeader
-    deck="The atelier is open by appointment. For samples, stockist enquiries, or a conversation about a material, write to us."
+    deck="Atelier kami buka dengan janji temu. Untuk pertanyaan tentang koleksi, stockist, atau pemesanan, hubungi kami lewat WhatsApp atau email."
   >
     <Fragment slot="title">Visit, write,<br /><span class="italic">smell.</span></Fragment>
+    <div class="mt-8 flex flex-wrap items-center gap-4">
+      <p class="text-[0.62rem] font-medium uppercase tracking-[0.14em] text-muted">
+        Follow the house
+      </p>
+      <SocialLinks variant="icons" whatsapp />
+    </div>
   </PageHeader>
 
   <Section spacing="tight" class="pt-0">
@@ -77,41 +93,68 @@ const faq = [
       />
 
       <div data-reveal class="lg:col-span-6 lg:col-start-7 lg:pt-4">
-        <h2 data-reveal-title class="max-w-[10ch] pb-1 font-display text-[clamp(2.35rem,4.4vw,4.25rem)] font-light leading-[0.98] tracking-[-0.02em]">
+        <h2
+          data-reveal-title
+          class="max-w-[10ch] pb-1 font-display text-[clamp(2.35rem,4.4vw,4.25rem)] font-light leading-[0.98] tracking-[-0.02em]"
+        >
           The atelier
         </h2>
 
         <address class="mt-7 text-[1.05rem] leading-[1.8] not-italic">
-          14 rue de Poitou<br />
-          75003 Paris<br />
-          France
+          {site.address.street}<br />
+          {site.address.city}<br />
+          {site.address.country}
         </address>
 
         <dl class="mt-8 grid gap-0 border-t border-line">
           <div class="flex items-baseline justify-between gap-6 border-b border-line py-3">
-            <dt class="text-[0.65rem] uppercase tracking-[0.12em] text-muted">Hours</dt>
-            <dd class="text-right text-[0.9rem]">Tuesday to Friday, 10:00 to 18:00</dd>
+            <dt class="text-[0.65rem] uppercase tracking-[0.12em] text-muted">Jam</dt>
+            <dd class="text-right text-[0.9rem]">Selasa sampai Jumat, 10.00 sampai 18.00 WIB</dd>
           </div>
           <div class="flex items-baseline justify-between gap-6 border-b border-line py-3">
-            <dt class="text-[0.65rem] uppercase tracking-[0.12em] text-muted">Saturday</dt>
-            <dd class="text-right text-[0.9rem]">By appointment</dd>
+            <dt class="text-[0.65rem] uppercase tracking-[0.12em] text-muted">Sabtu</dt>
+            <dd class="text-right text-[0.9rem]">Dengan janji temu</dd>
           </div>
           <div class="flex items-baseline justify-between gap-6 border-b border-line py-3">
             <dt class="text-[0.65rem] uppercase tracking-[0.12em] text-muted">Email</dt>
             <dd class="text-right text-[0.9rem]">
-              <a class="underline underline-offset-4 transition-colors hover:text-accent" href="mailto:hello@omoo.studio">
-                hello@omoo.studio
+              <a class="underline underline-offset-4 transition-colors hover:text-accent" href={`mailto:${site.email}`}>
+                {site.email}
+              </a>
+            </dd>
+          </div>
+          <div class="flex items-baseline justify-between gap-6 border-b border-line py-3">
+            <dt class="text-[0.65rem] uppercase tracking-[0.12em] text-muted">WhatsApp</dt>
+            <dd class="text-right text-[0.9rem]">
+              <a
+                class="underline underline-offset-4 transition-colors hover:text-accent"
+                href={whatsappHref('Halo OMOO, saya ingin bertanya tentang atelier dan koleksi.')}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {site.whatsapp.display}
               </a>
             </dd>
           </div>
         </dl>
 
         <div class="mt-8 flex flex-col items-start gap-4">
-          <Button href="mailto:hello@omoo.studio" class="w-full sm:w-auto">Write to us</Button>
-          <p class="max-w-[38ch] text-[0.75rem] leading-relaxed text-muted">
-            Appointments are confirmed by email. Please allow two working days.
+          <Button
+            href={whatsappHref('Halo OMOO, saya ingin bertanya tentang atelier dan koleksi.')}
+            external
+            class="w-full sm:w-auto"
+          >
+            <span class="inline-flex items-center gap-2">
+              <Icon name="ph:whatsapp-logo" size={16} aria-hidden="true" />
+              WhatsApp the atelier
+            </span>
+          </Button>
+          <ArrowLink href={`mailto:${site.email}`}>Write to us</ArrowLink>
+          <p class="max-w-[40ch] text-[0.75rem] leading-relaxed text-muted">
+            Janji temu dikonfirmasi lewat email atau WhatsApp. Mohon tunggu dua hari kerja.
           </p>
         </div>
+
       </div>
     </div>
   </Section>
@@ -119,17 +162,26 @@ const faq = [
   <Section>
     <div class="grid gap-8 lg:grid-cols-12">
       <div class="lg:col-span-4">
-        <h2 data-reveal-title class="max-w-[10ch] pb-1 font-display text-[clamp(2.35rem,4.4vw,4.25rem)] font-light leading-[0.98] tracking-[-0.02em]">
+        <h2
+          data-reveal-title
+          class="max-w-[10ch] pb-1 font-display text-[clamp(2.35rem,4.4vw,4.25rem)] font-light leading-[0.98] tracking-[-0.02em]"
+        >
           Selected stockists
         </h2>
+        <p data-reveal class="mt-5 max-w-[30ch] text-[0.9rem] leading-[1.7] text-muted">
+          Beberapa tempat memilih koleksi untuk Anda cium langsung.
+        </p>
       </div>
       <div class="lg:col-span-7 lg:col-start-6">
         <div data-stagger class="grid border-t border-line sm:grid-cols-3">
           {
             stockists.map((stockist) => (
-              <div data-reveal class="border-b border-line py-6 sm:border-b-0 sm:border-r sm:px-6 sm:first:pl-0 sm:last:border-r-0">
+              <div
+                data-reveal
+                class="border-b border-line py-6 sm:border-b-0 sm:border-r sm:px-6 sm:first:pl-0 sm:last:border-r-0"
+              >
                 <p class="font-display text-2xl font-light">{stockist.city}</p>
-                <p class="mt-2 text-[0.85rem] leading-[1.6] text-muted whitespace-pre-line">
+                <p class="mt-2 whitespace-pre-line text-[0.85rem] leading-[1.6] text-muted">
                   {stockist.name}
                   {'\n'}
                   {stockist.address}
@@ -145,33 +197,19 @@ const faq = [
   <Section tone="surface" spacing="tight">
     <div class="grid gap-10 lg:grid-cols-12">
       <div class="lg:col-span-4">
-        <h2 data-reveal-title class="max-w-[9ch] pb-1 font-display text-[clamp(2.35rem,4.4vw,4.25rem)] font-light leading-[0.98] tracking-[-0.02em]">
+        <h2
+          data-reveal-title
+          class="max-w-[9ch] pb-1 font-display text-[clamp(2.35rem,4.4vw,4.25rem)] font-light leading-[0.98] tracking-[-0.02em]"
+        >
           Questions
         </h2>
         <p class="mt-5 max-w-[32ch] text-[0.9rem] leading-[1.7] text-muted">
-          The shortest answers to the things we are asked most often.
+          Jawaban singkat untuk hal-hal yang paling sering kami dengar.
         </p>
       </div>
 
       <div class="lg:col-span-7 lg:col-start-6">
-        {
-          faq.map((item) => (
-            <details class="group border-t border-line py-5">
-              <summary class="flex cursor-pointer list-none items-center justify-between gap-6 text-[0.95rem] [&::-webkit-details-marker]:hidden">
-                <span>{item.question}</span>
-                <span
-                  aria-hidden="true"
-                  class="flex-none text-lg text-muted transition-transform duration-300 ease-luxe group-open:rotate-45"
-                >
-                  +
-                </span>
-              </summary>
-              <p class="mt-3 max-w-[58ch] text-[0.88rem] leading-[1.7] text-muted">
-                {item.answer}
-              </p>
-            </details>
-          ))
-        }
+        <Faq items={faq} />
       </div>
     </div>
   </Section>

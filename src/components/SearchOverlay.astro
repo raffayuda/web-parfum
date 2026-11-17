@@ -50,7 +50,7 @@ const journalResults = journal.map((post) => ({
 <dialog
   id="site-search"
   class="search-dialog fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none overflow-hidden border-0 bg-bg p-0 text-ink open:block backdrop:bg-[#070906]/55 backdrop:backdrop-blur-md"
-  aria-label="Search the house"
+  aria-label="Cari di OMOO"
 >
   <div
     data-search-panel
@@ -75,7 +75,7 @@ const journalResults = journal.map((post) => ({
 
     <div class="relative mx-auto flex min-h-0 w-full max-w-[1220px] flex-1 flex-col overflow-y-auto">
       <div class="pt-[clamp(2rem,4.5vw,3.75rem)]">
-        <label for="site-search-input" class="sr-only">Search compositions and journal</label>
+        <label for="site-search-input" class="sr-only">Cari komposisi dan jurnal</label>
         <div class="flex items-center gap-4 border-b border-ink pb-4">
           <input
             id="site-search-input"
@@ -85,15 +85,15 @@ const journalResults = journal.map((post) => ({
             autocomplete="off"
             autocapitalize="off"
             spellcheck="false"
-            placeholder="A material, a mood, a name"
+            placeholder="Material, suasana, atau nama"
             class="w-full bg-transparent font-display text-[clamp(2rem,4.6vw,4rem)] font-light leading-[1.05] text-ink outline-none placeholder:text-muted/60"
           />
           <span class="hidden shrink-0 text-[0.62rem] font-medium uppercase tracking-[0.12em] text-muted sm:block">
-            Esc to close
+            Esc untuk menutup
           </span>
         </div>
         <p class="mt-3 text-[0.78rem] leading-relaxed text-muted">
-          Try vetiver, iris, fig, salt, oud or ambrette.
+          Coba vetiver, iris, fig, salt, oud, atau ambrette.
         </p>
       </div>
 
@@ -105,7 +105,7 @@ const journalResults = journal.map((post) => ({
           <div class="flex items-baseline justify-between gap-4 border-b border-line pb-3">
             <h2 class="font-display text-2xl font-light">Compositions</h2>
             <span class="text-[0.6rem] uppercase tracking-[0.12em] text-muted">
-              <span data-search-count="compositions">{fragranceResults.length}</span> found
+              <span data-search-count="compositions">{fragranceResults.length}</span> ditemukan
             </span>
           </div>
 
@@ -153,7 +153,7 @@ const journalResults = journal.map((post) => ({
           <div class="flex items-baseline justify-between gap-4 border-b border-line pb-3">
             <h2 class="font-display text-2xl font-light">Journal</h2>
             <span class="text-[0.6rem] uppercase tracking-[0.12em] text-muted">
-              <span data-search-count="journal">{journalResults.length}</span> found
+              <span data-search-count="journal">{journalResults.length}</span> ditemukan
             </span>
           </div>
 
@@ -196,11 +196,11 @@ const journalResults = journal.map((post) => ({
             No trace of that.
           </p>
           <p class="mt-3 max-w-[42ch] text-[0.9rem] leading-relaxed text-muted">
-            Try a material, a mood, or one of the six compositions. The collection is small on
-            purpose.
+            Coba material, suasana, atau salah satu dari enam komposisi. Koleksinya kecil dengan
+            sengaja.
           </p>
           <div class="mt-5">
-            <ArrowLink href="/collection/">View all fragrances</ArrowLink>
+            <ArrowLink href="/collection/">Lihat semua parfum</ArrowLink>
           </div>
         </div>
       </div>
@@ -209,10 +209,10 @@ const journalResults = journal.map((post) => ({
 
     <div class="relative mx-auto flex w-full max-w-[1220px] items-center justify-between border-t border-line py-3">
       <span class="text-[0.6rem] font-medium uppercase tracking-[0.12em] text-muted">
-        Enter opens the first result
+        Enter membuka hasil pertama
       </span>
       <span class="text-[0.6rem] font-medium uppercase tracking-[0.12em] text-muted">
-        Esc closes
+        Esc menutup
       </span>
     </div>
   </div>
@@ -270,7 +270,7 @@ const journalResults = journal.map((post) => ({
 
     if (empty) empty.hidden = total !== 0;
     if (status) {
-      status.textContent = total === 1 ? '1 result' : `${total} results`;
+      status.textContent = total === 1 ? '1 hasil' : `${total} hasil`;
     }
 
     if (results && !reduceMotion) {

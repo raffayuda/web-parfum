@@ -1,14 +1,16 @@
 ---
 import Wordmark from './ui/Wordmark.astro';
 import ThemeToggle from './ui/ThemeToggle.astro';
+import SocialLinks from './ui/SocialLinks.astro';
+import { site } from '../data/site';
 
 const path = Astro.url.pathname;
 const items = [
-  { href: '/collection', label: 'Collection', note: 'Six compositions' },
-  { href: '/find', label: 'Find your scent', note: 'Three questions' },
-  { href: '/maison', label: 'Maison', note: 'Grasse and Paris' },
-  { href: '/journal', label: 'Journal', note: 'Essays and material notes' },
-  { href: '/contact', label: 'Contact', note: 'Visit the atelier' },
+  { href: '/collection', label: 'Collection', note: 'Enam komposisi' },
+  { href: '/find', label: 'Find your scent', note: 'Tiga pertanyaan' },
+  { href: '/maison', label: 'Maison', note: 'Dari Grasse ke Jakarta' },
+  { href: '/journal', label: 'Journal', note: 'Esai dan catatan material' },
+  { href: '/contact', label: 'Contact', note: 'Kunjungi atelier' },
 ];
 const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`);
 
@@ -155,14 +157,15 @@ const actionLink =
       data-menu-footer
       class="relative mt-4 flex flex-wrap items-end justify-between gap-5 border-t border-line pt-5"
     >
-      <div class="grid gap-1">
+      <div class="grid gap-1.5">
         <a
-          href="mailto:hello@omoo.studio"
+          href={`mailto:${site.email}`}
           class="text-[0.88rem] text-muted transition-colors hover:text-ink"
         >
-          hello@omoo.studio
+          {site.email}
         </a>
-        <p class="text-[0.68rem] leading-relaxed text-muted">14 rue de Poitou, Paris</p>
+        <SocialLinks variant="icons" whatsapp class="mt-2" />
+        <p class="mt-1 text-[0.68rem] leading-relaxed text-muted">Jakarta, Indonesia</p>
       </div>
       <div class="flex items-center gap-5">
         <button

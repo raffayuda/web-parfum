@@ -1,6 +1,8 @@
 ---
 import Container from './ui/Container.astro';
 import Wordmark from './ui/Wordmark.astro';
+import SocialLinks from './ui/SocialLinks.astro';
+import { site } from '../data/site';
 
 const year = new Date().getFullYear();
 ---
@@ -10,8 +12,8 @@ const year = new Date().getFullYear();
     <div class="grid gap-12 py-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-24 lg:py-24">
       <div class="flex flex-col items-start gap-8">
         <p class="max-w-[20ch] font-display text-[clamp(1.9rem,3.2vw,3.1rem)] font-light leading-[1.03] tracking-[-0.015em]">
-          Perfume made in small batches,<br />
-          between Grasse and Paris.
+          Perfume made in small batches.<br />
+          Diracik perlahan di Jakarta, dari material pilihan.
         </p>
         <a
           class="group/link inline-flex items-center gap-2 border-b border-line pb-1.5 text-[0.7rem] font-medium uppercase leading-tight tracking-[0.14em] transition-colors duration-300 ease-luxe hover:border-accent hover:text-accent"
@@ -54,26 +56,36 @@ const year = new Date().getFullYear();
         <div>
           <p class="mb-4 text-[0.65rem] font-medium uppercase tracking-[0.15em] text-muted">Atelier</p>
           <address class="text-[0.9rem] leading-relaxed text-muted">
-            14 rue de Poitou<br />
-            75003 Paris<br />
-            France
+            {site.address.street}<br />
+            {site.address.city}<br />
+            {site.address.country}
           </address>
-          <p class="mt-3 text-[0.75rem] leading-relaxed text-muted">Visits by appointment</p>
+          <p class="mt-3 text-[0.75rem] leading-relaxed text-muted">Kunjungan dengan janji temu</p>
         </div>
 
         <div class="col-span-2 sm:col-span-1">
           <p class="mb-4 text-[0.65rem] font-medium uppercase tracking-[0.15em] text-muted">Correspondence</p>
           <a
-            href="mailto:hello@omoo.studio"
-            class="inline-block border-b border-line pb-0.5 text-[0.9rem] text-muted transition-colors hover:border-accent hover:text-ink"
+            href={`mailto:${site.email}`}
+            class="w-fit border-b border-line pb-0.5 text-[0.9rem] text-muted transition-colors hover:border-accent hover:text-ink"
           >
-            hello@omoo.studio
+            {site.email}
           </a>
-          <p class="mt-3 text-[0.75rem] leading-relaxed text-muted">
-            We answer within two working days.
+          <p class="mt-3 max-w-[28ch] text-[0.75rem] leading-relaxed text-muted">
+            Kami membalas dalam dua hari kerja.
           </p>
         </div>
       </div>
+    </div>
+
+    <div class="flex flex-col gap-6 border-t border-line py-8 md:flex-row md:items-center md:justify-between">
+      <div>
+        <p class="text-[0.62rem] font-medium uppercase tracking-[0.15em] text-muted">Follow the house</p>
+        <p class="mt-2 max-w-[28ch] font-display text-2xl font-light leading-tight">
+          Catatan harian dari atelier.
+        </p>
+      </div>
+      <SocialLinks variant="tiles" whatsapp showHandle />
     </div>
 
     <Wordmark
@@ -81,10 +93,10 @@ const year = new Date().getFullYear();
     />
 
     <div
-      class="flex flex-wrap justify-between gap-x-8 gap-y-3 border-t border-line py-6 text-[0.68rem] uppercase tracking-[0.08em] text-muted md:py-7"
+      class="flex flex-wrap justify-between gap-x-8 gap-y-3 border-t border-line pb-24 pt-6 text-[0.68rem] uppercase tracking-[0.08em] text-muted md:pb-24 md:pt-7"
     >
       <p>&copy; {year} Omoo Parfums</p>
-      <p>Paris, France</p>
+      <p>Jakarta, Indonesia</p>
       <p>All rights reserved</p>
     </div>
   </Container>

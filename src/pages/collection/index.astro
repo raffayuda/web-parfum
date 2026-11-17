@@ -13,10 +13,10 @@ const filterIdle = 'border-transparent text-muted hover:text-ink';
 
 <BaseLayout
   title="Collection"
-  description="Six extrait de parfum compositions from Omoo. Woody, floral, green, fresh, oriental and musk, each built around one material."
+  description="Enam extrait de parfum Omoo. Woody, floral, green, fresh, oriental, dan musk, masing-masing dibangun dari satu material."
 >
   <PageHeader
-    deck="Six extraits de parfum. Each built around a single material, with nothing added to fill space."
+    deck="Enam extrait de parfum. Masing-masing dibangun dari satu material, tanpa tambahan untuk mengisi ruang."
   >
     <Fragment slot="title">The <span class="italic">collection</span>.</Fragment>
   </PageHeader>
@@ -53,7 +53,7 @@ const filterIdle = 'border-transparent text-muted hover:text-ink';
               data-filter-status
               aria-live="polite"
             >
-              {fragrances.length} fragrances
+              {fragrances.length} parfum
             </p>
             <ArrowLink href="/find/" class="shrink-0 self-start md:self-auto">Find your scent</ArrowLink>
           </div>
@@ -62,7 +62,7 @@ const filterIdle = 'border-transparent text-muted hover:text-ink';
     </div>
 
     <Section spacing="tight">
-      <h2 class="sr-only">All fragrances</h2>
+      <h2 class="sr-only">Semua parfum</h2>
 
       <div data-stagger class="grid gap-x-gutter gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
         {
@@ -115,7 +115,7 @@ const filterIdle = 'border-transparent text-muted hover:text-ink';
     });
 
     if (status) {
-      status.textContent = `${count} ${count === 1 ? 'fragrance' : 'fragrances'}`;
+      status.textContent = `${count} parfum`;
     }
   };
 

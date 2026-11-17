@@ -1,0 +1,113 @@
+---
+import { Icon } from 'astro-icon/components';
+import { site, whatsappHref } from '../../data/site';
+
+interface Props {
+  class?: string;
+  variant?: 'tiles' | 'inline' | 'icons';
+  whatsapp?: boolean;
+  showHandle?: boolean;
+}
+
+const { class: className, variant = 'inline', whatsapp = false, showHandle = false } = Astro.props;
+
+const iconNames: Record<string, string> = {
+  Instagram: 'ph:instagram-logo',
+  TikTok: 'ph:tiktok-logo',
+  Pinterest: 'ph:pinterest-logo',
+  WhatsApp: 'ph:whatsapp-logo',
+};
+
+const channels = [
+  ...site.socials.map((social) => ({
+    ...social,
+    icon: iconNames[social.label],
+  })),
+  ...(whatsapp
+    ? [
+        {
+          label: 'WhatsApp',
+          handle: site.whatsapp.display,
+          href: whatsappHref('Halo OMOO, saya ingin bertanya tentang koleksi parfum Anda.'),
+          icon: iconNames.WhatsApp,
+        },
+      ]
+    : []),
+];
+---
+
+{
+  variant === 'icons' ? (
+    <ul class:list={['flex flex-wrap gap-2', className]}>
+      {channels.map((channel) => (
+        <li>
+          <a
+            href={channel.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${channel.label}: ${channel.handle}`}
+            title={channel.label}
+            class="flex h-11 w-11 items-center justify-center border border-line text-muted transition-colors duration-300 ease-luxe hover:border-accent hover:bg-accent-tint hover:text-ink"
+          >
+            <Icon name={channel.icon} size={19} aria-hidden="true" />
+          </a>
+        </li>
+      ))}
+    </ul>
+  ) : variant === 'tiles' ? (
+    <ul class:list={['flex flex-wrap gap-2', className]}>
+      {channels.map((channel) => (
+        <li>
+          <a
+            href={channel.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${channel.label}: ${channel.handle}`}
+            class="group/channel flex min-h-12 items-center gap-3 border border-line px-4 py-3 text-[0.66rem] font-medium uppercase leading-none tracking-[0.12em] text-muted transition-colors duration-300 ease-luxe hover:border-accent hover:bg-accent-tint hover:text-ink"
+          >
+            <Icon
+              name={channel.icon}
+              size={18}
+              class="shrink-0 transition-transform duration-300 ease-luxe group-hover/channel:-translate-y-0.5"
+              aria-hidden="true"
+            />
+            <span class="grid gap-0.5">
+              <span>{channel.label}</span>
+              {showHandle && (
+                <span class="normal-case tracking-normal text-[0.6rem] text-muted/70">
+                  {channel.handle}
+                </span>
+              )}
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <ul class:list={['flex flex-wrap items-center gap-x-5 gap-y-2', className]}>
+      {channels.map((channel) => (
+        <li>
+          <a
+            href={channel.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${channel.label}: ${channel.handle}`}
+            class="group/social inline-flex items-center gap-2 text-[0.68rem] font-medium uppercase leading-none tracking-[0.1em] text-muted transition-colors duration-300 ease-luxe hover:text-ink"
+          >
+            <Icon name={channel.icon} size={17} aria-hidden="true" />
+            <span>{channel.label}</span>
+            {showHandle && (
+              <span class="normal-case tracking-normal text-muted/70">{channel.handle}</span>
+            )}
+            <span
+              aria-hidden="true"
+              class="transition-transform duration-300 ease-luxe group-hover/social:-translate-y-0.5"
+            >
+              &#8599;
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  )
+}

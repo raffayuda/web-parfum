@@ -1,0 +1,20 @@
+---
+import { Icon } from 'astro-icon/components';
+import { whatsappHref } from '../data/site';
+---
+
+<a
+  href={whatsappHref('Halo OMOO, saya ingin bertanya atau memesan parfum.')}
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label="Chat with OMOO on WhatsApp"
+  title="Chat via WhatsApp"
+  class="group fixed bottom-5 right-5 z-[80] inline-flex h-[52px] min-w-[52px] items-center justify-center gap-0 border border-ink bg-ink px-0 text-bg shadow-[0_16px_45px_rgba(0,0,0,0.2)] transition-all duration-500 ease-luxe hover:gap-3 hover:bg-accent-fill hover:px-4 hover:text-ink focus-visible:gap-3 focus-visible:bg-accent-fill focus-visible:px-4 focus-visible:text-ink"
+>
+  <Icon name="ph:whatsapp-logo" size={23} class="shrink-0" aria-hidden="true" />
+  <span
+    class="max-w-0 overflow-hidden whitespace-nowrap text-[0.62rem] font-medium uppercase tracking-[0.12em] opacity-0 transition-all duration-500 ease-luxe group-hover:max-w-[7rem] group-hover:opacity-100 group-focus-visible:max-w-[7rem] group-focus-visible:opacity-100"
+  >
+    WhatsApp
+  </span>
+</a>

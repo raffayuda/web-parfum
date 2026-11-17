@@ -24,30 +24,30 @@ export const journal: JournalPost[] = [
   {
     slug: 'the-case-for-wearing-scent-alone',
     title: 'The case for wearing scent alone',
-    deck: 'A perfume does not need an audience to do its work.',
+    deck: 'Parfum tidak perlu penonton untuk melakukan pekerjaannya.',
     category: 'Essay',
     date: '2026-05-12',
-    displayDate: 'May 2026',
-    readingTime: '4 min read',
+    displayDate: 'Mei 2026',
+    readingTime: '4 menit baca',
     image: images.corridor,
     imageAlt: alts.corridor,
     body: [
       {
         type: 'p',
-        text: 'There is a particular pleasure in wearing perfume with no plan. No dinner, no meeting, no one to lean in. You spray it on a Tuesday morning, put on a sweater, and go about the day with a private atmosphere trailing behind you.',
+        text: 'Ada kesenangan tersendiri memakai parfum tanpa rencana. Tanpa makan malam, tanpa pertemuan, tanpa siapa-siapa yang akan mendekat. Anda menyemprotkannya pada Selasa pagi, mengenakan sweter, lalu menjalani hari dengan atmosfer privat yang mengikuti di belakang.',
       },
       {
         type: 'p',
-        text: 'Most fragrance advice assumes an audience. Wear this to work. Wear that in the evening. Choose something he will like. The logic is practical, and it quietly turns a scent into a costume. The perfume becomes a message sent to other people, with your skin as the envelope.',
+        text: 'Sebagian besar saran parfum mengandaikan penonton. Pakai ini untuk kerja. Pakai itu untuk malam. Pilih yang ia suka. Logikanya praktis, tetapi diam-diam mengubah aroma menjadi kostum. Parfum menjadi pesan untuk orang lain, dengan kulit sebagai amplop.',
       },
       { type: 'h2', text: 'A private architecture' },
       {
         type: 'p',
-        text: 'A perfume worn alone does something different. It becomes a room inside the day. You notice it when you turn your head, when you pull a sleeve over your wrist, when the air moves through an open window. The wearer is the only member of the audience, and the performance is allowed to be incomplete.',
+        text: 'Parfum yang dipakai sendirian melakukan hal yang berbeda. Ia menjadi ruangan di dalam hari. Anda menyadarinya saat menoleh, saat menarik lengan sweter ke pergelangan tangan, saat udara bergerak lewat jendela yang terbuka. Hanya pemakainya yang menjadi penonton, dan pertunjukannya boleh tidak selesai.',
       },
       {
         type: 'p',
-        text: 'This is why we make extraits rather than colognes. The concentration is higher, the opening is slower, and the drydown takes its time. None of that is useful in a photograph. All of it is useful in a life.',
+        text: 'Karena itu kami membuat extrait, bukan cologne. Konsentrasinya lebih tinggi, pembukaannya lebih lambat, dan drydown-nya mengambil waktu. Tidak ada yang berguna untuk sebuah foto. Semuanya berguna untuk sebuah hidup.',
       },
       {
         type: 'quote',
@@ -56,41 +56,41 @@ export const journal: JournalPost[] = [
       { type: 'h2', text: 'What changes' },
       {
         type: 'p',
-        text: 'When there is no one to impress, you choose differently. You stop reaching for the perfume that reads well from across a room and start reaching for the one that reads well at the collar. You may find that your taste is quieter than you thought, or stranger, or more specific.',
+        text: 'Saat tidak ada yang perlu dibuat terkesan, Anda memilih dengan cara yang berbeda. Anda berhenti meraih parfum yang terbaca dari seberang ruangan dan mulai memilih yang terbaca di kerah. Mungkin selera Anda lebih tenang dari yang Anda kira, lebih aneh, atau lebih spesifik.',
       },
       {
         type: 'p',
-        text: 'The next time you test a fragrance, try it on a day with nothing in it. Do not ask the person beside you what they think. Wait an hour. Then decide.',
+        text: 'Lain kali Anda mencoba parfum, coba di hari yang kosong. Jangan tanya orang di sebelah Anda. Tunggu satu jam. Baru putuskan.',
       },
     ],
   },
   {
     slug: 'inside-the-maceration-room',
     title: 'Inside the maceration room',
-    deck: 'Why a perfume is left to rest before it is bottled.',
+    deck: 'Mengapa sebuah parfum dibiarkan beristirahat sebelum dikemas.',
     category: 'Atelier',
     date: '2026-02-03',
-    displayDate: 'February 2026',
-    readingTime: '5 min read',
+    displayDate: 'Februari 2026',
+    readingTime: '5 menit baca',
     image: images.maceration,
     imageAlt: alts.maceration,
     body: [
       {
         type: 'p',
-        text: 'The maceration room is the least dramatic part of the atelier. There are no flowers on the table, no glass beakers catching the light. There are shelves, bottles, a thermometer, and a great deal of waiting.',
+        text: 'Ruang maceration adalah bagian paling tidak dramatis di atelier. Tidak ada bunga di atas meja, tidak ada gelas kimia yang menangkap cahaya. Yang ada hanya rak, botol, termometer, dan sebagian besar waktu yang dipakai untuk menunggu.',
       },
       {
         type: 'p',
-        text: 'After a formula is composed and diluted, it is not finished. The mixture needs time for the materials to settle into one another. Sharp edges round off. The alcohol stops announcing itself. What smelled like a list of ingredients begins to smell like a single thing.',
+        text: 'Setelah formula selesai diracik dan diencerkan, parfum belum jadi. Campurannya perlu waktu agar material-material saling mengenal. Tepi yang tajam melembut. Alkohol berhenti mengumumkan dirinya. Yang tadinya terasa seperti daftar bahan mulai berbau seperti satu benda.',
       },
       { type: 'h2', text: 'Steel, then glass' },
       {
         type: 'p',
-        text: 'The concentrate rests in stainless steel first, protected from light. After that it is transferred to glass, where it stays for several more weeks. We taste nothing and measure almost nothing. The only useful instrument is a blotter and a clean nose, preferably early in the morning.',
+        text: 'Konsentrat beristirahat di stainless steel lebih dulu, terlindung dari cahaya. Setelah itu ia dipindahkan ke kaca dan tinggal di sana beberapa minggu lagi. Kami tidak mencicipi apa pun dan hampir tidak mengukur apa pun. Instrumen yang berguna hanya blotter dan hidung yang bersih, sebaiknya pagi-pagi.',
       },
       {
         type: 'p',
-        text: 'Each composition asks for a different amount of time. A citrus-heavy formula can settle faster than a resinous one. An iris needs patience. Oud Intime rests for eight weeks, not because the calendar says so, but because at week six it is still arguing with itself.',
+        text: 'Setiap komposisi meminta waktu yang berbeda. Formula yang banyak citrus bisa lebih cepat tenang daripada yang penuh resin. Iris butuh kesabaran. Oud Intime beristirahat selama delapan minggu, bukan karena kalender, tetapi karena pada minggu keenam ia masih berdebat dengan dirinya sendiri.',
       },
       {
         type: 'quote',
@@ -100,37 +100,37 @@ export const journal: JournalPost[] = [
       { type: 'h2', text: 'The quiet part' },
       {
         type: 'p',
-        text: 'There is no way to photograph this work convincingly. A shelf of dark bottles in a cool room looks like a shelf of dark bottles in a cool room. The change happens at a scale too small to see, and all at once, and then the perfume is ready.',
+        text: 'Tidak ada cara memotret pekerjaan ini dengan meyakinkan. Rak berisi botol gelap di ruangan sejuk terlihat seperti rak berisi botol gelap di ruangan sejuk. Perubahannya terjadi dalam skala yang terlalu kecil untuk dilihat, lalu sekaligus, dan kemudian parfumnya siap.',
       },
       {
         type: 'p',
-        text: 'We bottle in small batches because the room only holds so much. It is not a marketing constraint. It is the size of the room.',
+        text: 'Kami mengemas dalam batch kecil karena ruangannya hanya menampung sebanyak itu. Itu bukan batasan pemasaran. Itu ukuran ruangannya.',
       },
     ],
   },
   {
     slug: 'iris-after-the-frost',
     title: 'Iris, after the frost',
-    deck: 'A root that asks for years, not weeks.',
+    deck: 'Akar yang meminta waktu bertahun-tahun, bukan berminggu-minggu.',
     category: 'Material',
     date: '2025-11-18',
     displayDate: 'November 2025',
-    readingTime: '3 min read',
+    readingTime: '3 menit baca',
     image: images.macroIris,
     imageAlt: alts.macroIris,
     body: [
       {
         type: 'p',
-        text: 'Iris is not expensive because it is rare. It is expensive because it is slow. The rhizomes are lifted from the ground, cleaned, and left to dry for years. During that time the starch inside them changes, and a molecule called iron develops. Only then can the material be distilled into something that smells like cold powder and clean skin.',
+        text: 'Iris tidak mahal karena langka. Ia mahal karena lambat. Rizomnya diangkat dari tanah, dibersihkan, lalu dibiarkan mengering selama bertahun-tahun. Selama waktu itu pati di dalamnya berubah, dan sebuah molekul bernama iron terbentuk. Hanya setelah itu material bisa disuling menjadi sesuatu yang berbau seperti bedak dingin dan kulit bersih.',
       },
       {
         type: 'p',
-        text: 'The flower itself is almost irrelevant. It is beautiful for a week, then gone. The root is where the perfume lives.',
+        text: 'Bunganya sendiri hampir tidak relevan. Ia indah selama seminggu, lalu pergi. Akarnya yang menjadi tempat parfum tinggal.',
       },
       { type: 'h2', text: 'A material of restraint' },
       {
         type: 'p',
-        text: 'Iris does not bloom on the skin the way jasmine or rose does. It sits close and stays quiet. In Iris Cendre we give it violet leaf for a green edge and suede for warmth, but the root remains the centre of the composition. Everything else is there to keep it from disappearing.',
+        text: 'Iris tidak mekar di kulit seperti jasmine atau rose. Ia duduk dekat dan tinggal tenang. Di Iris Cendre kami memberinya violet leaf untuk tepi hijau dan suede untuk kehangatan, tetapi akarnya tetap menjadi pusat komposisi. Semua yang lain ada untuk menjaganya agar tidak menghilang.',
       },
       {
         type: 'quote',
@@ -138,9 +138,8 @@ export const journal: JournalPost[] = [
       },
       {
         type: 'p',
-        text: 'Some materials reward attention. Iris rewards patience. On a warm wrist it takes twenty minutes before it begins to speak. After that it stays for hours, closer than most people expect.',
+        text: 'Sebagian material memberi hadiah pada perhatian. Iris memberi hadiah pada kesabaran. Di pergelangan tangan yang hangat, ia butuh dua puluh menit sebelum mulai berbicara. Setelah itu ia tinggal berjam-jam, lebih dekat daripada yang kebanyakan orang duga.',
       },
     ],
   },
 ];
-
