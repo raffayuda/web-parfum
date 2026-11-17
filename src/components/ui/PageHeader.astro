@@ -1,0 +1,23 @@
+---
+import Container from './Container.astro';
+
+interface Props {
+  deck?: string;
+  class?: string;
+}
+
+const { deck, class: className } = Astro.props;
+---
+
+<Container>
+  <header class:list={['pb-[clamp(2.5rem,5vw,4.5rem)] pt-[clamp(3rem,7vw,6.5rem)]', className]}>
+    <h1
+      data-page-title
+      class="max-w-[18ch] pb-1 font-display text-[clamp(3.25rem,7.6vw,7.25rem)] font-light leading-[0.92] tracking-[-0.022em] text-balance"
+    >
+      <slot name="title" />
+    </h1>
+    {deck && <p data-page-deck class="mt-[clamp(1.5rem,3vw,2.25rem)] max-w-[46ch] text-[clamp(1rem,1.25vw,1.15rem)] leading-[1.65] text-muted">{deck}</p>}
+    <slot />
+  </header>
+</Container>

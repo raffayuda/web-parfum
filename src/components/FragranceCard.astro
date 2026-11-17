@@ -1,0 +1,60 @@
+---
+import Media from './ui/Media.astro';
+import { priceLabel, type Fragrance } from '../data/fragrances';
+
+interface Props {
+  fragrance: Fragrance;
+  aspect?: string;
+  loading?: 'eager' | 'lazy';
+  class?: string;
+}
+
+const { fragrance, aspect = '4 / 5', loading = 'lazy', class: className } = Astro.props;
+---
+
+<a
+  class:list={['group flex flex-col gap-5 [perspective:1100px]', className]}
+  href={`/collection/${fragrance.slug}/`}
+  data-reveal
+  data-tilt
+>
+  <Media
+    src={fragrance.card}
+    alt={fragrance.cardAlt}
+    aspect={aspect}
+    widths={[360, 540, 720, 920]}
+    sizes="(max-width: 720px) 100vw, (max-width: 1080px) 50vw, 34vw"
+    priority={loading === 'eager'}
+    tiltTarget
+  />
+
+  <div class="grid gap-1.5">
+    <div
+      class="flex items-baseline justify-between gap-4 border-t border-line pt-3 text-[0.65rem] font-medium uppercase leading-none tracking-[0.13em] text-muted"
+    >
+      <span>{fragrance.edition}</span>
+      <span>{fragrance.family}</span>
+    </div>
+
+    <h3
+      class="flex items-baseline justify-between gap-4 font-display text-[clamp(1.55rem,2.3vw,2.2rem)] font-normal leading-[1.05] tracking-[-0.01em] transition-colors duration-300 ease-luxe group-hover:text-accent"
+    >
+      {fragrance.name}
+      <span
+        aria-hidden="true"
+        class="flex-none font-sans text-[0.9rem] text-muted transition-all duration-300 ease-luxe group-hover:translate-x-1 group-hover:text-accent"
+      >
+        &#8594;
+      </span>
+    </h3>
+
+    <p class="text-[0.88rem] leading-[1.5] text-muted">{fragrance.tagline}</p>
+
+    <div
+      class="mt-1 flex justify-between gap-4 text-[0.7rem] uppercase tracking-[0.06em] text-muted"
+    >
+      <span>{fragrance.volume} / Extrait</span>
+      <span>{priceLabel(fragrance.price)}</span>
+    </div>
+  </div>
+</a>

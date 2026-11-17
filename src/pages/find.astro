@@ -1,0 +1,347 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/ui/PageHeader.astro';
+import Media from '../components/ui/Media.astro';
+import Button from '../components/ui/Button.astro';
+import ArrowLink from '../components/ui/ArrowLink.astro';
+import Section from '../components/ui/Section.astro';
+import DiscoverySet from '../components/DiscoverySet.astro';
+import { fragrances, priceLabel } from '../data/fragrances';
+import { images, alts } from '../data/images';
+
+const questions = [
+  {
+    title: 'Where does the day begin?',
+    image: images.corridor,
+    alt: alts.corridor,
+    options: [
+      {
+        label: 'A library after closing.',
+        scores: { 'oud-intime': 3, 'vetiver-obscura': 2, 'ambrette-12': 1 },
+      },
+      {
+        label: 'A greenhouse at noon.',
+        scores: { 'fig-nocturne': 3, 'iris-cendre': 2, 'vetiver-obscura': 1 },
+      },
+      {
+        label: 'A stone beach in wind.',
+        scores: { 'sel-brut': 3, 'fig-nocturne': 1, 'ambrette-12': 1 },
+      },
+    ],
+  },
+  {
+    title: 'What do you reach for?',
+    image: images.atelier,
+    alt: alts.atelier,
+    options: [
+      {
+        label: 'Root and smoke.',
+        scores: { 'vetiver-obscura': 3, 'oud-intime': 2, 'fig-nocturne': 1 },
+      },
+      {
+        label: 'Petals and powder.',
+        scores: { 'iris-cendre': 3, 'ambrette-12': 2, 'oud-intime': 1 },
+      },
+      {
+        label: 'Salt and sap.',
+        scores: { 'sel-brut': 3, 'fig-nocturne': 2, 'ambrette-12': 1 },
+      },
+    ],
+  },
+  {
+    title: 'How much space should it take?',
+    image: images.macroOud,
+    alt: alts.macroOud,
+    options: [
+      {
+        label: "A hand's width.",
+        scores: { 'ambrette-12': 3, 'iris-cendre': 2, 'sel-brut': 1 },
+      },
+      {
+        label: 'Across the arm.',
+        scores: { 'fig-nocturne': 3, 'sel-brut': 2, 'vetiver-obscura': 1 },
+      },
+      {
+        label: 'Down the corridor.',
+        scores: { 'oud-intime': 3, 'vetiver-obscura': 2, 'iris-cendre': 1 },
+      },
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title="Find your scent"
+  description="Three questions about the room, the material and the trace. The Omoo scent finder points you to one composition."
+>
+  <PageHeader
+    deck="Three questions about the room you want to enter, the material you reach for, and the trace you leave. No account, no countdown."
+  >
+    <Fragment slot="title">Find your <span class="italic">scent</span>.</Fragment>
+  </PageHeader>
+
+  <Section spacing="tight" class="pt-0">
+    <div class="grid overflow-hidden border border-line lg:grid-cols-[5fr_7fr]">
+      <div class="relative aspect-[4/3] min-h-0 lg:aspect-auto lg:min-h-[400px] lg:h-full" aria-hidden="true">
+        {
+          questions.map((question, index) => (
+            <div
+              class:list={[
+                'absolute inset-0 transition-opacity duration-700 ease-luxe',
+                index === 0 ? 'opacity-100' : 'opacity-0',
+              ]}
+              data-quiz-image={index}
+            >
+              <Media src={question.image} alt="" fill class="h-full" sizes="40vw" />
+            </div>
+          ))
+        }
+      </div>
+
+      <div class="bg-bg-tint p-6 md:p-10 lg:p-[clamp(2rem,4vw,4rem)]">
+        <div data-quiz>
+          <div class="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-4">
+            <p
+              class="text-[0.65rem] font-medium uppercase tracking-[0.13em] text-muted"
+              data-quiz-progress
+              aria-live="polite"
+            >
+              Question 1 of 3
+            </p>
+            <div class="flex items-center gap-5">
+              <button
+                type="button"
+                data-back
+                hidden
+                class="text-[0.65rem] font-medium uppercase tracking-[0.1em] text-muted transition-colors hover:text-ink"
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                data-restart
+                hidden
+                class="text-[0.65rem] font-medium uppercase tracking-[0.1em] text-muted transition-colors hover:text-ink"
+              >
+                Start again
+              </button>
+            </div>
+          </div>
+
+          <div data-steps class="mt-8">
+            {
+              questions.map((question, index) => (
+                <section
+                  data-step
+                  data-index={index}
+                  hidden={index > 0}
+                  aria-labelledby={`question-${index}`}
+                >
+                  <h2
+                    id={`question-${index}`}
+                    tabindex="-1"
+                    class="max-w-[18ch] font-display text-[clamp(2rem,3.8vw,3.4rem)] font-light leading-[1] tracking-[-0.018em] outline-none"
+                  >
+                    {question.title}
+                  </h2>
+
+                  <div class="mt-8 grid" role="group" aria-labelledby={`question-${index}`}>
+                    {question.options.map((option) => (
+                      <button
+                        type="button"
+                        data-option
+                        data-scores={JSON.stringify(option.scores)}
+                        class="group flex items-center justify-between gap-6 border-t border-line py-5 text-left transition-colors duration-300 ease-luxe hover:text-accent"
+                      >
+                        <span class="font-display text-[clamp(1.35rem,2vw,1.7rem)] font-light leading-tight">
+                          {option.label}
+                        </span>
+                        <span
+                          aria-hidden="true"
+                          class="flex-none text-[0.9rem] text-muted transition-all duration-300 ease-luxe group-hover:translate-x-1 group-hover:text-accent"
+                        >
+                          &#8594;
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              ))
+            }
+          </div>
+
+          <div data-results hidden class="mt-8">
+            <p class="text-[0.65rem] font-medium uppercase tracking-[0.13em] text-muted">Your match</p>
+
+            {
+              fragrances.map((fragrance) => (
+                <article data-result={fragrance.slug} hidden class="mt-5">
+                  <div class="grid grid-cols-[6.5rem_1fr] gap-4 sm:grid-cols-[150px_1fr] sm:gap-7">
+                    <Media
+                      src={fragrance.bottle}
+                      alt={fragrance.bottleAlt}
+                      aspect="4 / 5"
+                      widths={[200, 300, 420]}
+                      sizes="(max-width: 640px) 104px, 150px"
+                    />
+
+                    <div>
+                      <p class="text-[0.62rem] font-medium uppercase tracking-[0.13em] text-muted">
+                        {fragrance.edition} / {fragrance.family}
+                      </p>
+                      <h2
+                        tabindex="-1"
+                        class="mt-1.5 font-display text-[1.6rem] font-light leading-[0.95] tracking-[-0.02em] outline-none sm:text-[clamp(2rem,3.4vw,3.2rem)]"
+                      >
+                        {fragrance.name}
+                      </h2>
+                      <p class="mt-2 font-display text-[1rem] font-light italic leading-snug sm:mt-3 sm:text-[1.25rem]">
+                        {fragrance.tagline}
+                      </p>
+                      <p class="mt-4 hidden max-w-[44ch] text-[0.9rem] leading-[1.65] text-muted sm:block">
+                        {fragrance.description}
+                      </p>
+                      <p class="mt-4 hidden text-[0.7rem] uppercase leading-[1.7] tracking-[0.06em] text-muted sm:block">
+                        {[...fragrance.notes.top, ...fragrance.notes.heart, ...fragrance.notes.base].join(' / ')}
+                      </p>
+                      <div class="mt-4 flex flex-wrap items-center gap-4 sm:mt-5">
+                        <Button
+                          href={`/collection/${fragrance.slug}/`}
+                          size="small"
+                          ariaLabel={`Discover ${fragrance.name}`}
+                        >
+                          Discover
+                        </Button>
+                        <span class="text-[0.8rem] text-muted">{priceLabel(fragrance.price)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              ))
+            }
+
+            <p class="mt-8 border-t border-line pt-5 text-[0.8rem] leading-relaxed text-muted">
+              Not quite? The whole collection is on the
+              <a class="underline underline-offset-4 transition-colors hover:text-ink" href="/collection/">
+                collection page
+              </a>.
+            </p>
+          </div>
+
+          <noscript>
+            <p class="mt-6 border-t border-line pt-5 text-[0.85rem] leading-relaxed text-muted">
+              The finder needs JavaScript. You can still browse the
+              <a class="underline underline-offset-4" href="/collection/">full collection</a>.
+            </p>
+          </noscript>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-[0.7rem] uppercase tracking-[0.08em] text-muted">
+      <span>Prefer to read?</span>
+      <ArrowLink href="/collection/">View all fragrances</ArrowLink>
+    </div>
+  </Section>
+
+  <DiscoverySet />
+</BaseLayout>
+
+<script>
+  const quiz = document.querySelector<HTMLElement>('[data-quiz]');
+  const steps = Array.from(document.querySelectorAll<HTMLElement>('[data-step]'));
+  const images = Array.from(document.querySelectorAll<HTMLElement>('[data-quiz-image]'));
+  const results = document.querySelector<HTMLElement>('[data-results]');
+  const resultCards = Array.from(document.querySelectorAll<HTMLElement>('[data-result]'));
+  const stepsWrap = document.querySelector<HTMLElement>('[data-steps]');
+  const progress = document.querySelector<HTMLElement>('[data-quiz-progress]');
+  const back = document.querySelector<HTMLButtonElement>('[data-back]');
+  const restart = document.querySelector<HTMLButtonElement>('[data-restart]');
+  const priority = ['vetiver-obscura', 'iris-cendre', 'fig-nocturne', 'sel-brut', 'oud-intime', 'ambrette-12'];
+
+  let index = 0;
+  const answers: Record<string, number>[] = [];
+
+  const showStep = (next: number, focus = false) => {
+    index = next;
+    steps.forEach((step, stepIndex) => {
+      step.hidden = stepIndex !== next;
+    });
+    images.forEach((image, imageIndex) => {
+      const active = imageIndex === next;
+      image.classList.toggle('opacity-100', active);
+      image.classList.toggle('opacity-0', !active);
+    });
+    if (progress) progress.textContent = `Question ${next + 1} of 3`;
+    if (back) back.hidden = next === 0;
+    if (restart) restart.hidden = next === 0;
+    if (focus) {
+      const heading = steps[next]?.querySelector<HTMLElement>('h2');
+      heading?.focus({ preventScroll: true });
+    }
+  };
+
+  const finish = () => {
+    const totals: Record<string, number> = {};
+    answers.forEach((answer) => {
+      Object.entries(answer).forEach(([slug, points]) => {
+        totals[slug] = (totals[slug] ?? 0) + points;
+      });
+    });
+
+    const highest = Math.max(...Object.values(totals));
+    let candidates = priority.filter((slug) => (totals[slug] ?? 0) === highest);
+
+    [...answers].reverse().forEach((answer) => {
+      if (candidates.length === 1) return;
+      const best = Math.max(...candidates.map((slug) => answer[slug] ?? 0));
+      candidates = candidates.filter((slug) => (answer[slug] ?? 0) === best);
+    });
+
+    const winner = candidates[0];
+    if (stepsWrap) stepsWrap.hidden = true;
+    if (results) results.hidden = false;
+    resultCards.forEach((card) => {
+      card.hidden = card.dataset.result !== winner;
+    });
+    if (progress) progress.textContent = 'Your result';
+    if (back) back.hidden = true;
+    if (restart) restart.hidden = false;
+
+    const heading = resultCards
+      .find((card) => card.dataset.result === winner)
+      ?.querySelector<HTMLElement>('h2');
+    heading?.focus({ preventScroll: true });
+  };
+
+  const reset = () => {
+    answers.length = 0;
+    if (stepsWrap) stepsWrap.hidden = false;
+    if (results) results.hidden = true;
+    resultCards.forEach((card) => {
+      card.hidden = true;
+    });
+    showStep(0, true);
+  };
+
+  quiz?.querySelectorAll<HTMLButtonElement>('[data-option]').forEach((option) => {
+    option.addEventListener('click', () => {
+      try {
+        answers[index] = JSON.parse(option.dataset.scores ?? '{}');
+      } catch {
+        answers[index] = {};
+      }
+      if (index < steps.length - 1) {
+        showStep(index + 1, true);
+      } else {
+        finish();
+      }
+    });
+  });
+
+  back?.addEventListener('click', () => {
+    if (index > 0) showStep(index - 1, true);
+  });
+
+  restart?.addEventListener('click', reset);
+</script>

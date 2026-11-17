@@ -1,0 +1,28 @@
+---
+interface Props {
+  tone?: 'default' | 'inverse';
+  class?: string;
+}
+
+const { tone = 'default', class: className } = Astro.props;
+
+const tones = {
+  default: 'text-muted hover:text-ink',
+  inverse: 'text-[#e9eae3]/55 hover:text-[#e9eae3]',
+};
+---
+
+<button
+  type="button"
+  data-theme-toggle
+  aria-label="Switch colour theme"
+  title="Switch colour theme"
+  class:list={[
+    'text-[0.7rem] font-medium uppercase leading-none tracking-[0.1em] transition-colors duration-300 ease-luxe',
+    tones[tone],
+    className,
+  ]}
+>
+  <span class="inline dark:hidden">Night</span>
+  <span class="hidden dark:inline">Day</span>
+</button>

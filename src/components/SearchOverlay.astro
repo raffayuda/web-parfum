@@ -1,0 +1,385 @@
+---
+import Media from './ui/Media.astro';
+import ArrowLink from './ui/ArrowLink.astro';
+import { fragrances, priceLabel } from '../data/fragrances';
+import { journal } from '../data/journal';
+
+const normalize = (parts: Array<string | string[]>) =>
+  parts
+    .flat()
+    .join(' ')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+
+const fragranceResults = fragrances.map((fragrance) => ({
+  slug: fragrance.slug,
+  href: `/collection/${fragrance.slug}/`,
+  title: fragrance.name,
+  meta: `${fragrance.edition} / ${fragrance.family}`,
+  detail: fragrance.tagline,
+  price: priceLabel(fragrance.price),
+  image: fragrance.bottle,
+  imageAlt: fragrance.bottleAlt,
+  search: normalize([
+    fragrance.name,
+    fragrance.family,
+    fragrance.edition,
+    fragrance.tagline,
+    fragrance.description,
+    fragrance.material.name,
+    fragrance.material.origin,
+    fragrance.notes.top,
+    fragrance.notes.heart,
+    fragrance.notes.base,
+  ]),
+}));
+
+const journalResults = journal.map((post) => ({
+  slug: post.slug,
+  href: `/journal/${post.slug}/`,
+  title: post.title,
+  meta: `${post.category} / ${post.displayDate}`,
+  detail: post.deck,
+  image: post.image,
+  imageAlt: post.imageAlt,
+  search: normalize([post.title, post.deck, post.category, post.displayDate, ...post.body.map((block) => block.text)]),
+}));
+---
+
+<dialog
+  id="site-search"
+  class="search-dialog fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none overflow-hidden border-0 bg-bg p-0 text-ink open:block backdrop:bg-[#070906]/55 backdrop:backdrop-blur-md"
+  aria-label="Search the house"
+>
+  <div
+    data-search-panel
+    class="relative flex h-full flex-col px-gutter pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-5"
+  >
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_0%,var(--color-accent-tint),transparent_48%)] opacity-70"
+    ></div>
+
+    <div class="relative mx-auto flex w-full max-w-[1220px] items-center justify-between border-b border-line pb-4">
+      <p class="text-[0.6875rem] font-medium uppercase tracking-[0.16em] text-muted">Search</p>
+      <button
+        type="button"
+        data-search-close
+        class="flex items-center gap-3 text-[0.68rem] font-medium uppercase tracking-[0.14em] text-muted transition-colors hover:text-ink"
+      >
+        Close
+        <span aria-hidden="true" class="text-base leading-none">&#215;</span>
+      </button>
+    </div>
+
+    <div class="relative mx-auto flex min-h-0 w-full max-w-[1220px] flex-1 flex-col overflow-y-auto">
+      <div class="pt-[clamp(2rem,4.5vw,3.75rem)]">
+        <label for="site-search-input" class="sr-only">Search compositions and journal</label>
+        <div class="flex items-center gap-4 border-b border-ink pb-4">
+          <input
+            id="site-search-input"
+            data-search-input
+            type="text"
+            inputmode="search"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            placeholder="A material, a mood, a name"
+            class="w-full bg-transparent font-display text-[clamp(2rem,4.6vw,4rem)] font-light leading-[1.05] text-ink outline-none placeholder:text-muted/60"
+          />
+          <span class="hidden shrink-0 text-[0.62rem] font-medium uppercase tracking-[0.12em] text-muted sm:block">
+            Esc to close
+          </span>
+        </div>
+        <p class="mt-3 text-[0.78rem] leading-relaxed text-muted">
+          Try vetiver, iris, fig, salt, oud or ambrette.
+        </p>
+      </div>
+
+      <div
+        data-search-results
+        class="mt-10 grid flex-1 content-start gap-10 pb-12 md:grid-cols-[1.05fr_1fr] md:gap-14"
+      >
+        <section data-search-group="compositions">
+          <div class="flex items-baseline justify-between gap-4 border-b border-line pb-3">
+            <h2 class="font-display text-2xl font-light">Compositions</h2>
+            <span class="text-[0.6rem] uppercase tracking-[0.12em] text-muted">
+              <span data-search-count="compositions">{fragranceResults.length}</span> found
+            </span>
+          </div>
+
+          <ul>
+            {
+              fragranceResults.map((result) => (
+                <li
+                  data-search-item
+                  data-search-group="compositions"
+                  data-search-text={result.search}
+                >
+                  <a href={result.href} class="group flex items-center gap-4 border-b border-line py-3">
+                    <Media
+                      src={result.image}
+                      alt={result.imageAlt}
+                      aspect="4 / 5"
+                      widths={[80, 120]}
+                      sizes="44px"
+                      class="w-11 shrink-0"
+                    />
+                    <span class="flex min-w-0 flex-col gap-1">
+                      <span class="font-display text-[1.35rem] font-light leading-none transition-colors group-hover:text-accent">
+                        {result.title}
+                      </span>
+                      <span class="truncate text-[0.62rem] font-medium uppercase tracking-[0.1em] text-muted">
+                        {result.meta}
+                      </span>
+                      <span class="truncate text-[0.78rem] text-muted">{result.detail}</span>
+                    </span>
+                    <span class="ml-auto hidden text-[0.7rem] text-muted sm:block">{result.price}</span>
+                    <span
+                      aria-hidden="true"
+                      class="flex-none text-[0.8rem] text-muted transition-transform duration-300 group-hover:translate-x-1 group-hover:text-accent"
+                    >
+                      &#8594;
+                    </span>
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+
+        <section data-search-group="journal">
+          <div class="flex items-baseline justify-between gap-4 border-b border-line pb-3">
+            <h2 class="font-display text-2xl font-light">Journal</h2>
+            <span class="text-[0.6rem] uppercase tracking-[0.12em] text-muted">
+              <span data-search-count="journal">{journalResults.length}</span> found
+            </span>
+          </div>
+
+          <ul>
+            {
+              journalResults.map((result) => (
+                <li data-search-item data-search-group="journal" data-search-text={result.search}>
+                  <a href={result.href} class="group flex items-center gap-4 border-b border-line py-3">
+                    <Media
+                      src={result.image}
+                      alt={result.imageAlt}
+                      aspect="4 / 3"
+                      widths={[120, 180]}
+                      sizes="64px"
+                      class="w-16 shrink-0"
+                    />
+                    <span class="flex min-w-0 flex-col gap-1">
+                      <span class="text-[0.6rem] font-medium uppercase tracking-[0.12em] text-muted">
+                        {result.meta}
+                      </span>
+                      <span class="font-display text-[1.2rem] font-light leading-tight transition-colors group-hover:text-accent">
+                        {result.title}
+                      </span>
+                    </span>
+                    <span
+                      aria-hidden="true"
+                      class="ml-auto flex-none text-[0.8rem] text-muted transition-transform duration-300 group-hover:translate-x-1 group-hover:text-accent"
+                    >
+                      &#8594;
+                    </span>
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+
+        <div data-search-empty hidden class="md:col-span-2">
+          <p class="font-display text-[clamp(2rem,4vw,3rem)] font-light leading-none">
+            No trace of that.
+          </p>
+          <p class="mt-3 max-w-[42ch] text-[0.9rem] leading-relaxed text-muted">
+            Try a material, a mood, or one of the six compositions. The collection is small on
+            purpose.
+          </p>
+          <div class="mt-5">
+            <ArrowLink href="/collection/">View all fragrances</ArrowLink>
+          </div>
+        </div>
+      </div>
+      <p class="sr-only" aria-live="polite" data-search-status></p>
+    </div>
+
+    <div class="relative mx-auto flex w-full max-w-[1220px] items-center justify-between border-t border-line py-3">
+      <span class="text-[0.6rem] font-medium uppercase tracking-[0.12em] text-muted">
+        Enter opens the first result
+      </span>
+      <span class="text-[0.6rem] font-medium uppercase tracking-[0.12em] text-muted">
+        Esc closes
+      </span>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  import { animate, stagger } from 'motion';
+
+  const dialog = document.querySelector<HTMLDialogElement>('#site-search');
+  const menu = document.querySelector<HTMLDialogElement>('#site-menu');
+  const input = document.querySelector<HTMLInputElement>('[data-search-input]');
+  const closeButton = document.querySelector<HTMLButtonElement>('[data-search-close]');
+  const items = Array.from(document.querySelectorAll<HTMLElement>('[data-search-item]'));
+  const groupSections = Array.from(document.querySelectorAll<HTMLElement>('[data-search-group]')).filter(
+    (element) => element.tagName === 'SECTION'
+  );
+  const empty = document.querySelector<HTMLElement>('[data-search-empty]');
+  const results = document.querySelector<HTMLElement>('[data-search-results]');
+  const panel = document.querySelector<HTMLElement>('[data-search-panel]');
+  const status = document.querySelector<HTMLElement>('[data-search-status]');
+  const counters = Array.from(document.querySelectorAll<HTMLElement>('[data-search-count]'));
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const openers = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-search-open]'));
+  const menuTrigger = document.querySelector<HTMLButtonElement>('[aria-controls="site-menu"]');
+  const headerTrigger = document.querySelector<HTMLButtonElement>('header [data-search-open]');
+
+  let closing = false;
+
+  const filterResults = () => {
+    const raw = input?.value.trim().toLowerCase() ?? '';
+    const tokens = raw.split(/\s+/).filter(Boolean);
+    let total = 0;
+    const counts = { compositions: 0, journal: 0 };
+
+    items.forEach((item) => {
+      const haystack = item.dataset.searchText ?? '';
+      const visible = tokens.every((token) => haystack.includes(token));
+      item.hidden = !visible;
+      if (visible) {
+        total += 1;
+        const group = item.dataset.searchGroup as 'compositions' | 'journal' | undefined;
+        if (group) counts[group] += 1;
+      }
+    });
+
+    groupSections.forEach((section) => {
+      const group = section.dataset.searchGroup as 'compositions' | 'journal' | undefined;
+      section.hidden = !group || counts[group] === 0;
+    });
+
+    counters.forEach((counter) => {
+      const group = counter.dataset.searchCount as 'compositions' | 'journal' | undefined;
+      counter.textContent = String(group ? counts[group] : 0);
+    });
+
+    if (empty) empty.hidden = total !== 0;
+    if (status) {
+      status.textContent = total === 1 ? '1 result' : `${total} results`;
+    }
+
+    if (results && !reduceMotion) {
+      animate(results, { opacity: [0.55, 1], y: [4, 0] }, { duration: 0.22, ease: 'easeOut' });
+    }
+  };
+
+  const openSearch = (trigger?: HTMLButtonElement) => {
+    if (!dialog) return;
+    if (dialog.open) return;
+
+    if (menu?.open) menu.close();
+    closing = false;
+
+    if (input) input.value = '';
+
+    if (!reduceMotion && panel) {
+      panel.style.opacity = '0';
+      panel.style.transform = 'translateY(18px)';
+    }
+
+    dialog.showModal();
+    document.documentElement.classList.add('search-open');
+    filterResults();
+
+    if (!reduceMotion && panel) {
+      animate(panel, { opacity: [0, 1], y: [18, 0] }, {
+        duration: 0.45,
+        ease: [0.16, 1, 0.3, 1],
+        onComplete: () => {
+          panel.style.opacity = '';
+          panel.style.transform = '';
+        },
+      });
+      animate(items.filter((item) => !item.hidden), { opacity: [0, 1], y: [10, 0] }, {
+        duration: 0.4,
+        delay: stagger(0.018, { start: 0.1 }),
+        ease: [0.16, 1, 0.3, 1],
+      });
+    }
+
+    window.setTimeout(() => input?.focus({ preventScroll: true }), 60);
+    trigger?.setAttribute('aria-expanded', 'true');
+  };
+
+  const closeSearch = (immediate = false) => {
+    if (!dialog || !dialog.open || closing) return;
+
+    if (immediate || reduceMotion || !panel) {
+      dialog.close();
+      return;
+    }
+
+    closing = true;
+    animate(panel, { opacity: [1, 0], y: [0, 12] }, {
+      duration: 0.24,
+      ease: 'easeIn',
+      onComplete: () => {
+        dialog.close();
+        closing = false;
+      },
+    });
+  };
+
+  openers.forEach((opener) => {
+    opener.addEventListener('click', () => openSearch(opener));
+  });
+
+  closeButton?.addEventListener('click', () => closeSearch());
+
+  dialog?.addEventListener('cancel', (event) => {
+    event.preventDefault();
+    closeSearch();
+  });
+
+  dialog?.addEventListener('close', () => {
+    document.documentElement.classList.remove('search-open');
+    openers.forEach((opener) => opener.setAttribute('aria-expanded', 'false'));
+    if (input) input.value = '';
+    filterResults();
+
+    const target =
+      headerTrigger && headerTrigger.offsetParent !== null ? headerTrigger : menuTrigger;
+    target?.focus({ preventScroll: true });
+  });
+
+  dialog?.querySelectorAll<HTMLAnchorElement>('a[href^="/"]').forEach((link) => {
+    link.addEventListener('click', (event) => {
+      if (event.defaultPrevented || event.button !== 0) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      closeSearch(true);
+    });
+  });
+
+  input?.addEventListener('input', filterResults);
+
+  input?.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter') return;
+    const first = items.find((item) => !item.hidden)?.querySelector<HTMLAnchorElement>('a');
+    if (first) {
+      event.preventDefault();
+      first.click();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault();
+      openSearch();
+    }
+  });
+</script>

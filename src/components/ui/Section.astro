@@ -1,0 +1,43 @@
+---
+import Container from './Container.astro';
+
+interface Props {
+  tone?: 'base' | 'surface' | 'tint';
+  spacing?: 'default' | 'tight' | 'none';
+  class?: string;
+  innerClass?: string;
+  id?: string;
+  labelledby?: string;
+}
+
+const {
+  tone = 'base',
+  spacing = 'default',
+  class: className,
+  innerClass,
+  id,
+  labelledby,
+} = Astro.props;
+
+const tones = {
+  base: '',
+  surface: 'bg-surface',
+  tint: 'bg-accent-tint',
+};
+
+const spacings = {
+  default: 'py-section',
+  tight: 'py-section-tight',
+  none: '',
+};
+---
+
+<section
+  id={id}
+  aria-labelledby={labelledby}
+  class:list={[tones[tone], spacings[spacing], className]}
+>
+  <Container class={innerClass}>
+    <slot />
+  </Container>
+</section>

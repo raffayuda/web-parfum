@@ -1,0 +1,307 @@
+---
+import Wordmark from './ui/Wordmark.astro';
+import ThemeToggle from './ui/ThemeToggle.astro';
+
+const path = Astro.url.pathname;
+const items = [
+  { href: '/collection', label: 'Collection', note: 'Six compositions' },
+  { href: '/find', label: 'Find your scent', note: 'Three questions' },
+  { href: '/maison', label: 'Maison', note: 'Grasse and Paris' },
+  { href: '/journal', label: 'Journal', note: 'Essays and material notes' },
+  { href: '/contact', label: 'Contact', note: 'Visit the atelier' },
+];
+const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`);
+
+const navLink =
+  'relative inline-block py-1.5 text-[0.7rem] font-medium uppercase leading-none tracking-[0.1em] text-muted transition-colors duration-300 ease-luxe hover:text-ink after:absolute after:inset-x-0 after:bottom-0 after:h-px after:origin-left after:scale-x-0 after:bg-accent after:transition-transform after:duration-300 after:ease-luxe hover:after:scale-x-100';
+
+const actionLink =
+  'text-[0.7rem] font-medium uppercase leading-none tracking-[0.1em] text-muted transition-colors duration-300 ease-luxe hover:text-ink';
+---
+
+<header
+  class="sticky top-0 z-50 border-b border-line bg-bg/90 backdrop-blur-md backdrop-saturate-150"
+>
+  <div class="mx-auto flex min-h-[72px] w-full max-w-page items-center justify-between gap-8 px-gutter">
+    <Wordmark class="text-[1.55rem] -translate-x-[0.1em]" />
+
+    <nav class="hidden nav:flex" aria-label="Primary">
+      <ul class="flex items-center gap-[clamp(1.35rem,2.4vw,2.75rem)]">
+        {
+          items.slice(0, 4).map((item) => (
+            <li>
+              <a
+                href={item.href}
+                class:list={[navLink, isCurrent(item.href) && 'text-ink after:scale-x-100']}
+                aria-current={isCurrent(item.href) ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="flex items-center gap-5 nav:gap-6">
+      <button
+        type="button"
+        data-search-open
+        aria-haspopup="dialog"
+        class:list={[actionLink, 'hidden nav:inline-block']}
+      >
+        Search
+      </button>
+      <ThemeToggle />
+      <a
+        href="/contact/"
+        class:list={[
+          navLink,
+          'max-nav:hidden nav:inline-block',
+          isCurrent('/contact') && 'text-ink after:scale-x-100',
+        ]}
+        aria-current={isCurrent('/contact') ? 'page' : undefined}
+      >
+        Contact
+      </a>
+      <button
+        class="text-[0.7rem] font-medium uppercase leading-none tracking-[0.1em] text-muted transition-colors duration-300 ease-luxe hover:text-ink nav:hidden"
+        type="button"
+        aria-haspopup="dialog"
+        aria-controls="site-menu"
+        aria-expanded="false"
+        aria-label="Open site menu"
+      >
+        Menu
+      </button>
+    </div>
+  </div>
+</header>
+
+<dialog
+  id="site-menu"
+  class="menu-dialog site-menu fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none overflow-hidden border-0 bg-bg p-0 text-ink open:block backdrop:bg-[#070906]/50 backdrop:backdrop-blur-md"
+  aria-label="Site menu"
+>
+  <div
+    data-menu-panel
+    class="relative flex h-full flex-col px-gutter pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-5"
+  >
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_0%,var(--color-accent-tint),transparent_52%)] opacity-70"
+    ></div>
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_90%_80%,var(--color-surface),transparent_45%)] opacity-60"
+    ></div>
+
+    <div class="relative flex items-center justify-between border-b border-line pb-5">
+      <Wordmark class="text-[1.55rem]" />
+      <button
+        type="button"
+        data-menu-close
+        class="flex items-center gap-3 text-[0.68rem] font-medium uppercase tracking-[0.14em] text-muted transition-colors hover:text-ink"
+      >
+        Close
+        <span aria-hidden="true" class="text-base leading-none">&#215;</span>
+      </button>
+    </div>
+
+    <div class="relative flex min-h-0 flex-1 flex-col justify-center overflow-x-hidden overflow-y-auto [scrollbar-gutter:stable] [overscroll-behavior:contain]">
+      <nav class="pt-2" aria-label="Mobile">
+        <ul>
+          {
+            items.map((item) => (
+              <li class="border-b border-line">
+                <a
+                  href={item.href}
+                  data-menu-link
+                  aria-current={isCurrent(item.href) ? 'page' : undefined}
+                  class="group flex items-baseline justify-between gap-5 py-4"
+                >
+                  <span class="flex flex-col gap-1">
+                    <span
+                      class:list={[
+                        'font-display text-[clamp(2.3rem,8.5vw,3.2rem)] font-light leading-[1.02] tracking-[-0.018em] transition-colors duration-300',
+                        isCurrent(item.href)
+                          ? 'italic text-accent'
+                          : 'text-ink group-hover:text-accent',
+                      ]}
+                    >
+                      {item.label}
+                    </span>
+                    <span class="text-[0.6rem] font-medium uppercase tracking-[0.16em] text-muted">
+                      {item.note}
+                    </span>
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    class="flex-none text-xl text-muted transition-all duration-300 ease-luxe group-hover:translate-x-1 group-hover:text-accent"
+                  >
+                    &#8594;
+                  </span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+
+    </div>
+
+    <div
+      data-menu-footer
+      class="relative mt-4 flex flex-wrap items-end justify-between gap-5 border-t border-line pt-5"
+    >
+      <div class="grid gap-1">
+        <a
+          href="mailto:hello@omoo.studio"
+          class="text-[0.88rem] text-muted transition-colors hover:text-ink"
+        >
+          hello@omoo.studio
+        </a>
+        <p class="text-[0.68rem] leading-relaxed text-muted">14 rue de Poitou, Paris</p>
+      </div>
+      <div class="flex items-center gap-5">
+        <button
+          type="button"
+          data-search-open
+          aria-haspopup="dialog"
+          class="text-[0.7rem] font-medium uppercase tracking-[0.1em] text-muted transition-colors hover:text-ink"
+        >
+          Search
+        </button>
+        <ThemeToggle />
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  import { animate, stagger } from 'motion';
+
+  const root = document.documentElement;
+  const dialog = document.querySelector<HTMLDialogElement>('#site-menu');
+  const openers = document.querySelectorAll<HTMLButtonElement>('[aria-controls="site-menu"]');
+  const trigger = openers[0];
+  const closeButton = document.querySelector<HTMLButtonElement>('[data-menu-close]');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let closing = false;
+
+  const menuParts = () => ({
+    panel: dialog?.querySelector<HTMLElement>('[data-menu-panel]'),
+    links: dialog ? Array.from(dialog.querySelectorAll<HTMLElement>('[data-menu-link]')) : [],
+    footer: dialog?.querySelector<HTMLElement>('[data-menu-footer]'),
+  });
+
+  const openMenu = () => {
+    if (!dialog || dialog.open) return;
+    closing = false;
+
+    const { panel, links, footer } = menuParts();
+    if (panel) panel.style.transformOrigin = 'center bottom';
+
+    if (!reduceMotion) {
+      dialog.style.clipPath = 'inset(100% 0 0 0)';
+      links.forEach((link) => {
+        link.style.opacity = '0';
+        link.style.transform = 'translateY(22px)';
+      });
+      if (footer) footer.style.opacity = '0';
+    }
+
+    dialog.showModal();
+    root.classList.add('menu-open');
+    openers.forEach((opener) => opener.setAttribute('aria-expanded', 'true'));
+
+    if (!reduceMotion) {
+      animate(dialog, { clipPath: ['inset(100% 0 0 0)', 'inset(0% 0 0 0)'] }, {
+        duration: 0.55,
+        ease: [0.16, 1, 0.3, 1],
+        onComplete: () => {
+          dialog.style.clipPath = '';
+        },
+      });
+      animate(links, { opacity: [0, 1], y: [22, 0] }, {
+        duration: 0.55,
+        delay: stagger(0.055, { start: 0.1 }),
+        ease: [0.16, 1, 0.3, 1],
+        onComplete: () => {
+          links.forEach((link) => {
+            link.style.opacity = '';
+            link.style.transform = '';
+          });
+        },
+      });
+      if (footer) {
+        animate(footer, { opacity: [0, 1], y: [14, 0] }, {
+          duration: 0.5,
+          delay: 0.32,
+          ease: [0.16, 1, 0.3, 1],
+          onComplete: () => {
+            footer.style.opacity = '';
+            footer.style.transform = '';
+          },
+        });
+      }
+    }
+
+    window.setTimeout(() => closeButton?.focus({ preventScroll: true }), 80);
+  };
+
+  const closeMenu = (immediate = false) => {
+    if (!dialog || !dialog.open || closing) return;
+
+    if (immediate || reduceMotion) {
+      dialog.close();
+      return;
+    }
+
+    closing = true;
+    const { links } = menuParts();
+
+    animate(links, { opacity: [1, 0], y: [0, 10] }, {
+      duration: 0.2,
+      delay: stagger(0.02, { from: 'last' }),
+      ease: 'easeIn',
+    });
+    animate(dialog, { clipPath: ['inset(0% 0 0 0)', 'inset(0 0 100% 0)'] }, {
+      duration: 0.38,
+      ease: [0.7, 0, 0.84, 0],
+      onComplete: () => {
+        dialog.style.clipPath = '';
+        dialog.close();
+        closing = false;
+      },
+    });
+  };
+
+  openers.forEach((button) => {
+    button.addEventListener('click', openMenu);
+  });
+
+  closeButton?.addEventListener('click', () => closeMenu());
+  dialog?.addEventListener('cancel', (event) => {
+    event.preventDefault();
+    closeMenu();
+  });
+
+  dialog?.querySelectorAll<HTMLAnchorElement>('a').forEach((link) => {
+    link.addEventListener('click', (event) => {
+      if (event.defaultPrevented || event.button !== 0) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      dialog.close();
+      root.classList.remove('menu-open');
+      openers.forEach((opener) => opener.setAttribute('aria-expanded', 'false'));
+    });
+  });
+
+  dialog?.addEventListener('close', () => {
+    root.classList.remove('menu-open');
+    openers.forEach((opener) => opener.setAttribute('aria-expanded', 'false'));
+    trigger?.focus();
+  });
+</script>

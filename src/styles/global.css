@@ -1,0 +1,422 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+@theme {
+  --color-bg: #e9eae3;
+  --color-bg-tint: #e2e4da;
+  --color-surface: #dfe1d6;
+  --color-ink: #141710;
+  --color-muted: #5d6356;
+  --color-line: #c4c7b9;
+  --color-accent: #4e5f1c;
+  --color-accent-fill: #cbe17b;
+  --color-accent-tint: #dde5c2;
+
+  --font-display: 'Cormorant Garamond', 'Iowan Old Style', 'Times New Roman', serif;
+  --font-sans: 'Instrument Sans Variable', 'Instrument Sans', system-ui, -apple-system, sans-serif;
+
+  --breakpoint-nav: 68rem;
+  --container-page: 1440px;
+  --spacing-gutter: clamp(20px, 4vw, 56px);
+  --spacing-section: clamp(5rem, 10vw, 9.5rem);
+  --spacing-section-tight: clamp(3.5rem, 7vw, 6rem);
+  --ease-luxe: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-bg: #0f120b;
+  --color-bg-tint: #12160d;
+  --color-surface: #171b11;
+  --color-ink: #ebece1;
+  --color-muted: #9da38f;
+  --color-line: #2c3223;
+  --color-accent: #cbe17b;
+  --color-accent-fill: #cbe17b;
+  --color-accent-tint: #1b2212;
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-height: 100dvh;
+    margin: 0;
+    overflow-x: clip;
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    margin: 0;
+    font-weight: 400;
+  }
+
+  p,
+  figure,
+  blockquote {
+    margin: 0;
+  }
+
+  img,
+  picture,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button {
+    border: 0;
+    padding: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  ul,
+  ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  address {
+    font-style: normal;
+  }
+
+  ::selection {
+    background: var(--color-accent-fill);
+    color: #141710;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+  }
+}
+
+/* Fixed grain layer. Never attached to a scrolling container. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.86' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+}
+
+html.menu-open,
+html.search-open {
+  overflow: hidden;
+}
+
+.page {
+  overflow-x: clip;
+}
+
+/* Slim, brand-coloured scrollbars. Square enough for the sharp layout. */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent) transparent;
+  scrollbar-color: color-mix(in srgb, var(--color-accent) 70%, transparent) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 70%, transparent);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.site-menu {
+  transition:
+    background-color 0.7s var(--ease-luxe),
+    color 0.7s var(--ease-luxe),
+    border-color 0.7s var(--ease-luxe);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html.theme-transition::view-transition-old(root) {
+    animation: omoo-theme-old 1.15s cubic-bezier(0.45, 0, 0.15, 1) both;
+  }
+
+  html.theme-transition::view-transition-new(root) {
+    animation: omoo-theme-reveal 1.15s cubic-bezier(0.45, 0, 0.15, 1) both;
+  }
+
+  html.theme-transition .site-menu,
+  html.theme-transition .site-menu * {
+    transition-property: color, background-color, border-color;
+    transition-duration: 1.05s;
+    transition-timing-function: cubic-bezier(0.45, 0, 0.15, 1);
+  }
+}
+
+@keyframes omoo-theme-reveal {
+  from {
+    clip-path: circle(0vmax at var(--theme-x, 50%) var(--theme-y, 50%));
+  }
+  to {
+    clip-path: circle(150vmax at var(--theme-x, 50%) var(--theme-y, 50%));
+  }
+}
+
+@keyframes omoo-theme-old {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0.8;
+    transform: scale(1.012);
+  }
+}
+
+.menu-dialog[open]::backdrop,
+.search-dialog[open]::backdrop {
+  animation: omoo-backdrop-in 0.35s ease both;
+}
+
+@keyframes omoo-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 500;
+  transform: translateY(-160%);
+  background: var(--color-ink);
+  color: var(--color-bg);
+  padding: 0.8rem 1.1rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: transform 0.25s var(--ease-luxe);
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+}
+
+@layer base {
+  [hidden] {
+    display: none !important;
+  }
+}
+
+
+/* ------------------------------------------------------------------
+   Hero entrance
+------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-hero-line] {
+    transform: translateY(115%);
+    animation: omoo-line-up 1.05s var(--ease-luxe) forwards;
+    animation-delay: var(--line-delay, 0s);
+  }
+
+  .js [data-hero-fade] {
+    opacity: 0;
+    transform: translateY(18px);
+    animation: omoo-fade-up 0.9s var(--ease-luxe) forwards;
+    animation-delay: var(--hero-delay, 0s);
+  }
+
+  .js [data-hero-media] {
+    clip-path: inset(0 0 100% 0);
+    animation: omoo-image-in 1.25s var(--ease-luxe) forwards;
+    animation-delay: 0.12s;
+  }
+
+  .js [data-float] {
+    opacity: 0;
+    animation: omoo-float-in 1s var(--ease-luxe) 0.85s forwards;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-hero-line],
+  [data-hero-fade],
+  [data-hero-media],
+  [data-float] {
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+  }
+}
+
+@keyframes omoo-line-up {
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes omoo-fade-up {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes omoo-image-in {
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes omoo-float-in {
+  from {
+    opacity: 0;
+    transform: translateY(22px) rotate(-7deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(-3deg);
+  }
+}
+
+/* ------------------------------------------------------------------
+   Page title entrance
+------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-page-title] {
+    opacity: 0;
+    transform: translateY(24px);
+    animation: omoo-fade-up 0.9s var(--ease-luxe) 0.05s forwards;
+  }
+
+  .js [data-page-deck] {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: omoo-fade-up 0.8s var(--ease-luxe) 0.18s forwards;
+  }
+
+  .page-enter [data-page-title],
+  .page-enter [data-page-deck] {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-page-title],
+  [data-page-deck] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Route transition and filter layout animations
+------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .page-enter main {
+    animation: omoo-page-in 0.55s var(--ease-luxe) both;
+  }
+}
+
+@keyframes omoo-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+::view-transition-group(*) {
+  animation-duration: 0.55s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.3s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}

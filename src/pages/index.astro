@@ -1,0 +1,521 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/ui/Button.astro';
+import ArrowLink from '../components/ui/ArrowLink.astro';
+import Eyebrow from '../components/ui/Eyebrow.astro';
+import Media from '../components/ui/Media.astro';
+import Section from '../components/ui/Section.astro';
+import SectionHeader from '../components/ui/SectionHeader.astro';
+import FragranceCard from '../components/FragranceCard.astro';
+import JournalCard from '../components/JournalCard.astro';
+import DiscoverySet from '../components/DiscoverySet.astro';
+import { featured, materials, priceLabel } from '../data/fragrances';
+import { journal } from '../data/journal';
+import { images, alts } from '../data/images';
+
+const [lead, ...secondary] = featured;
+const leadNotes = [
+  { label: 'Top', notes: lead.notes.top },
+  { label: 'Heart', notes: lead.notes.heart },
+  { label: 'Base', notes: lead.notes.base },
+];
+
+const process = [
+  {
+    title: 'Compose',
+    copy: 'One material leads. Every other note is written around it, never over it.',
+    image: images.atelier,
+    alt: alts.atelier,
+  },
+  {
+    title: 'Macerate',
+    copy: 'The concentrate rests in steel, then glass. Weeks pass and the edges soften.',
+    image: images.maceration,
+    alt: alts.maceration,
+  },
+  {
+    title: 'Bottle',
+    copy: 'Each flacon is filled, sealed, and numbered in the Paris atelier.',
+    image: images.bottleOud,
+    alt: alts.bottleOud,
+  },
+];
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Omoo',
+  url: 'https://omoo.studio',
+  email: 'hello@omoo.studio',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: '14 rue de Poitou',
+    postalCode: '75003',
+    addressLocality: 'Paris',
+    addressCountry: 'FR',
+  },
+};
+---
+
+<BaseLayout
+  title="Perfume, made slowly"
+  description="Omoo is a small perfume house between Grasse and Paris. Six extrait de parfum compositions, built one material at a time."
+  schema={schema}
+>
+  <section class="relative overflow-hidden pb-[clamp(3rem,6vw,5rem)] pt-[clamp(1.5rem,4vw,3rem)]">
+    <div aria-hidden="true" class="pointer-events-none absolute inset-0 overflow-hidden">
+      <div
+        data-mist
+        class="absolute -left-40 top-0 h-[30rem] w-[30rem] rounded-full bg-accent-fill/25 blur-[90px]"
+      ></div>
+      <div
+        data-mist
+        class="absolute right-[-12%] top-[18%] h-[26rem] w-[26rem] rounded-full bg-line/50 blur-[110px]"
+      ></div>
+    </div>
+
+    <div class="relative mx-auto w-full max-w-page px-gutter">
+      <div class="grid items-stretch gap-10 lg:grid-cols-[7fr_5fr] lg:gap-[clamp(2rem,5vw,5rem)]">
+        <div class="flex flex-col justify-center py-[clamp(1rem,4vw,3.5rem)]">
+          <Eyebrow data-hero-fade style="--hero-delay: 0s">Maison de parfum, Paris</Eyebrow>
+
+          <h1
+            class="mt-7 font-display text-[clamp(3.35rem,7.7vw,7.75rem)] font-light leading-[0.9] tracking-[-0.022em] text-balance"
+          >
+            <span class="block overflow-hidden pb-[0.08em]">
+              <span data-hero-line style="--line-delay: 0.06s" class="block">Wear what</span>
+            </span>
+            <span class="block overflow-hidden pb-[0.08em]">
+              <span data-hero-line style="--line-delay: 0.17s" class="block">
+                cannot be <em class="italic">seen</em>.
+              </span>
+            </span>
+          </h1>
+
+          <p
+            data-hero-fade
+            style="--hero-delay: 0.38s"
+            class="mt-7 max-w-[38ch] text-[clamp(1rem,1.25vw,1.15rem)] leading-[1.65] text-muted"
+          >
+            Six compositions built around rare materials. Made slowly in Paris, worn close to the
+            skin.
+          </p>
+
+          <div
+            data-hero-fade
+            style="--hero-delay: 0.48s"
+            class="mt-9 flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:gap-8"
+          >
+            <Button href="/collection/" class="w-full sm:w-auto">Explore the collection</Button>
+            <ArrowLink href="/find/">Find your scent</ArrowLink>
+          </div>
+        </div>
+
+        <div class="relative">
+          <div class="relative z-10" data-parallax>
+            <span
+              aria-hidden="true"
+              class="pointer-events-none absolute -left-4 -top-4 bottom-8 right-8 border border-line/70"
+            ></span>
+
+            <a
+              href="/collection/"
+              data-hero-media
+              class="group relative z-10 block overflow-hidden"
+              aria-label="View the OMOO collection"
+            >
+              <Media
+                src={images.bottleSel}
+                alt={alts.bottleSel}
+                aspect="4 / 5"
+                widths={[420, 600, 686]}
+                sizes="(max-width: 1024px) 100vw, 42vw"
+                priority
+                quality={86}
+                parallax
+              />
+            </a>
+
+            <div
+              data-float
+              class="absolute -bottom-6 -left-4 z-20 w-24 rotate-[-3deg] border-[6px] border-bg bg-bg shadow-[0_24px_60px_rgba(0,0,0,0.22)] sm:w-32 lg:w-40"
+            >
+              <div data-float-loop>
+                <Media
+                  src={images.macroOud}
+                  alt={alts.macroOud}
+                  aspect="1 / 1"
+                  widths={[160, 240, 360]}
+                  sizes="(max-width: 640px) 96px, 160px"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Section>
+    <SectionHeader
+      linkHref="/collection/"
+      linkLabel="View all fragrances"
+      class="mb-[clamp(2.5rem,5vw,4.5rem)]"
+    >
+      Six compositions.<br /><span class="italic">One material leads.</span>
+    </SectionHeader>
+
+    <div class="grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-gutter">
+      <a
+        href={`/collection/${lead.slug}/`}
+        class="group relative block [perspective:1200px] lg:col-span-6"
+        data-tilt
+      >
+        <Media
+          src={lead.bottle}
+          alt={lead.bottleAlt}
+          aspect="4 / 5"
+          widths={[420, 620, 840, 1040]}
+          sizes="(max-width: 1024px) 100vw, 48vw"
+          tiltTarget
+          reveal
+          quality={85}
+        />
+
+        <div
+          class="absolute -bottom-6 -right-4 z-10 hidden w-32 border-[6px] border-bg bg-bg shadow-[0_24px_60px_rgba(0,0,0,0.18)] sm:block lg:w-40"
+        >
+          <Media
+            src={lead.macro}
+            alt={lead.macroAlt}
+            aspect="1 / 1"
+            widths={[160, 240, 360]}
+            sizes="160px"
+          />
+        </div>
+      </a>
+
+      <div class="lg:col-span-5 lg:col-start-8">
+        <div class="relative">
+          <span
+            aria-hidden="true"
+            class="pointer-events-none absolute -top-20 right-0 hidden select-none font-display text-[clamp(8rem,13vw,13rem)] font-light leading-[0.7] text-transparent [-webkit-text-stroke:1px_var(--color-line)] lg:block"
+          >
+            {lead.edition.split('-')[1]}
+          </span>
+
+          <p class="relative text-[0.65rem] font-medium uppercase tracking-[0.13em] text-muted">
+            {lead.edition} / {lead.family}
+          </p>
+          <h3
+            class="relative mt-4 font-display text-[clamp(2.6rem,4.4vw,4.6rem)] font-light leading-[0.94] tracking-[-0.022em]"
+          >
+            {lead.name}
+          </h3>
+          <p class="relative mt-4 font-display text-[clamp(1.3rem,1.8vw,1.65rem)] font-light italic leading-snug">
+            {lead.tagline}
+          </p>
+          <p class="relative mt-5 max-w-[44ch] text-[0.95rem] leading-[1.7] text-muted">
+            {lead.description}
+          </p>
+
+          <dl class="relative mt-7 grid grid-cols-3 gap-4 border-t border-line pt-4">
+            {
+              leadNotes.map((group) => (
+                <div>
+                  <dt class="text-[0.58rem] font-medium uppercase tracking-[0.12em] text-muted">
+                    {group.label}
+                  </dt>
+                  <dd class="mt-2 text-[0.78rem] leading-[1.5]">{group.notes.join(', ')}</dd>
+                </div>
+              ))
+            }
+          </dl>
+
+          <div class="relative mt-8 flex flex-wrap items-end justify-between gap-5 border-t border-line pt-4">
+            <p class="flex items-baseline gap-3">
+              <span class="font-display text-3xl">{priceLabel(lead.price)}</span>
+              <span class="text-[0.68rem] uppercase tracking-[0.08em] text-muted">
+                {lead.volume} / Extrait
+              </span>
+            </p>
+            <ArrowLink href={`/collection/${lead.slug}/`}>Discover</ArrowLink>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div data-stagger class="mt-20 grid gap-12 sm:grid-cols-2 lg:mt-28 lg:grid-cols-3">
+      {
+        secondary.map((fragrance) => (
+          <FragranceCard fragrance={fragrance} aspect="4 / 5" />
+        ))
+      }
+    </div>
+
+    <div class="mt-16 border-t border-line pt-6">
+      <p class="max-w-[40ch] font-display text-[clamp(1.5rem,2.4vw,2.2rem)] font-light leading-[1.08]">
+        The collection stays at six. A new composition replaces an older one; it never joins it.
+      </p>
+    </div>
+  </Section>
+
+  <Section tone="surface" id="materials" labelledby="materials-heading" class="relative overflow-hidden">
+    <div class="relative max-w-[54ch]">
+      <SectionHeader id="materials-heading">
+        Materials,<br /><span class="italic">one by one.</span>
+      </SectionHeader>
+      <p data-reveal class="mt-7 max-w-[42ch] text-[0.95rem] leading-[1.7] text-muted">
+        Each composition begins with a single material and the place it came from. Hover a name to
+        see it.
+      </p>
+    </div>
+
+    <div class="relative mt-12 grid gap-12 lg:mt-16 lg:grid-cols-12 lg:gap-gutter">
+      <div class="hidden lg:col-span-5 lg:block" data-reveal-image>
+        <div class="relative aspect-[4/5] overflow-hidden bg-bg" data-atlas>
+          {
+            materials.map((material, index) => (
+              <div
+                class:list={[
+                  'absolute inset-0 transition-opacity duration-700 ease-luxe',
+                  index === 0 ? 'opacity-100' : 'opacity-0',
+                ]}
+                data-atlas-frame={material.slug}
+                aria-hidden={index === 0 ? 'false' : 'true'}
+              >
+                <Media src={material.image} alt="" fill class="h-full" sizes="40vw" />
+              </div>
+            ))
+          }
+        </div>
+
+        <div class="mt-4 flex justify-between gap-6 text-[0.65rem] font-medium uppercase tracking-[0.13em] text-muted">
+          <span data-atlas-caption-name>{materials[0].name}</span>
+          <span data-atlas-caption-origin>{materials[0].origin}</span>
+        </div>
+      </div>
+
+      <ul data-stagger class="lg:col-span-6 lg:col-start-7">
+        {
+          materials.map((material) => (
+            <li class="border-b border-line" data-reveal>
+              <a
+                href={`/collection/${material.slug}/`}
+                data-atlas-item={material.slug}
+                data-atlas-name={material.name}
+                data-atlas-origin={material.origin}
+                class="group grid grid-cols-[1fr_auto] items-baseline gap-x-6 gap-y-1 py-6 md:py-7"
+              >
+                <span class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                  <span class="font-display text-[clamp(1.9rem,3.4vw,3rem)] font-light leading-none tracking-[-0.015em] transition-colors duration-300 ease-luxe group-hover:text-accent">
+                    {material.name}
+                  </span>
+                  <span class="text-[0.65rem] font-medium uppercase tracking-[0.13em] text-muted">
+                    {material.origin}
+                  </span>
+                </span>
+                <span class="hidden text-right text-[0.7rem] uppercase tracking-[0.08em] text-muted md:block">
+                  {material.phrase}
+                </span>
+                <span class="text-[0.8rem] text-muted md:hidden">{material.phrase}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </Section>
+
+  <section class="relative overflow-hidden border-y border-line">
+    <div class="grid lg:grid-cols-2">
+      <div class="relative min-h-[320px] overflow-hidden lg:min-h-[680px]">
+        <div class="absolute inset-0">
+          <Media
+            src={images.atelier}
+            alt={alts.atelier}
+            fill
+            class="h-full"
+            widths={[640, 960, 1280]}
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            parallax
+            reveal
+          />
+        </div>
+        <div class="absolute inset-0 bg-gradient-to-t from-[#0b0e08]/35 via-transparent to-transparent"></div>
+      </div>
+
+      <div class="relative flex flex-col justify-center bg-bg-tint px-gutter py-[clamp(3.5rem,7vw,6rem)] lg:py-24 lg:pl-[clamp(2rem,4vw,5rem)] lg:pr-[max(2.5rem,8vw)]">
+        <div class="max-w-[37rem]">
+          <h2
+            data-reveal-title
+            class="max-w-[13ch] pb-1 font-display text-[clamp(2.4rem,4.4vw,4.1rem)] font-light leading-[0.98] tracking-[-0.02em]"
+          >
+            Three questions.<br /><span class="italic">One composition.</span>
+          </h2>
+          <p data-reveal class="mt-6 max-w-[44ch] text-[0.95rem] leading-[1.7] text-muted">
+            Answer three questions about the room you want to enter, the material you reach for, and
+            the trace you leave.
+          </p>
+
+          <dl class="mt-8 grid border-t border-line">
+            <div data-reveal class="flex items-baseline justify-between gap-4 border-b border-line py-3">
+              <dt class="font-display text-xl">Room</dt>
+              <dd class="text-[0.7rem] uppercase tracking-[0.08em] text-muted">Where you want to be</dd>
+            </div>
+            <div data-reveal class="flex items-baseline justify-between gap-4 border-b border-line py-3">
+              <dt class="font-display text-xl">Material</dt>
+              <dd class="text-[0.7rem] uppercase tracking-[0.08em] text-muted">What you reach for</dd>
+            </div>
+            <div data-reveal class="flex items-baseline justify-between gap-4 border-b border-line py-3">
+              <dt class="font-display text-xl">Trace</dt>
+              <dd class="text-[0.7rem] uppercase tracking-[0.08em] text-muted">How long it stays</dd>
+            </div>
+          </dl>
+
+          <div data-reveal class="mt-8">
+            <Button href="/find/">Find your scent</Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pt-section">
+    <Media
+      src={images.atelierDoor}
+      alt={alts.atelierDoor}
+      fill
+      class="h-[clamp(320px,52vw,640px)] w-full"
+      widths={[720, 1080, 1600]}
+      sizes="100vw"
+      parallax
+      reveal
+    />
+
+    <div class="mx-auto w-full max-w-page px-gutter">
+      <div class="grid gap-8 py-[clamp(2.5rem,5vw,4.5rem)] lg:grid-cols-12">
+        <blockquote class="lg:col-span-8" data-reveal>
+          <p class="font-display text-[clamp(1.9rem,4vw,3.9rem)] font-light leading-[1.03] tracking-[-0.015em]">
+            &ldquo;The house is small on purpose. It is the only way I know to smell every batch
+            before it leaves.&rdquo;
+          </p>
+        </blockquote>
+        <div class="flex flex-col justify-end gap-5 lg:col-span-3 lg:col-start-10">
+          <p class="text-[0.68rem] font-medium uppercase leading-[1.6] tracking-[0.13em] text-muted">
+            Camille Aumont<br />
+            Founder and perfumer
+          </p>
+          <ArrowLink href="/maison/" class="self-start">Inside the maison</ArrowLink>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Section spacing="tight">
+    <div class="grid gap-12 lg:grid-cols-12">
+      <div class="lg:col-span-4 lg:sticky lg:top-28 lg:self-start">
+        <h2
+          data-reveal-title
+          class="max-w-[10ch] pb-1 font-display text-[clamp(2.35rem,4.8vw,4.75rem)] font-light leading-[0.98] tracking-[-0.02em]"
+        >
+          Slow is a material.
+        </h2>
+        <p data-reveal class="mt-6 max-w-[34ch] text-[0.95rem] leading-[1.7] text-muted">
+          Nothing here is finished by a schedule. The formula tells us when it is ready.
+        </p>
+      </div>
+
+      <div class="relative lg:col-span-7 lg:col-start-6 lg:pl-10" data-scroll-line-target>
+        <span aria-hidden="true" class="absolute left-0 top-0 hidden h-full w-px bg-line lg:block"></span>
+        <span
+          aria-hidden="true"
+          data-scroll-line
+          class="absolute left-0 top-0 hidden h-full w-px origin-top scale-y-0 bg-accent lg:block"
+        ></span>
+
+        {
+          process.map((step) => (
+            <article
+              data-reveal
+              class="grid gap-6 border-t border-line py-10 first:pt-0 md:grid-cols-[5fr_6fr] md:items-center md:gap-10 md:py-12"
+            >
+              <Media
+                src={step.image}
+                alt={step.alt}
+                aspect="4 / 3"
+                widths={[360, 520, 720]}
+                sizes="(max-width: 768px) 100vw, 30vw"
+                parallax
+              />
+              <div>
+                <h3 class="font-display text-[clamp(1.8rem,2.8vw,2.5rem)] font-light leading-none">
+                  {step.title}
+                </h3>
+                <p class="mt-3 max-w-[34ch] text-[0.92rem] leading-[1.65] text-muted">{step.copy}</p>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </Section>
+
+  <Section>
+    <SectionHeader linkHref="/journal/" linkLabel="All writing" class="mb-[clamp(2.25rem,5vw,4.25rem)]">
+      From the atelier
+    </SectionHeader>
+
+    <div class="grid gap-12 lg:grid-cols-12">
+      <JournalCard post={journal[0]} aspect="16 / 10" class="lg:col-span-7" />
+      <JournalCard
+        post={journal[1]}
+        aspect="3 / 4"
+        class="lg:col-span-4 lg:col-start-9"
+      />
+    </div>
+  </Section>
+
+  <DiscoverySet />
+</BaseLayout>
+
+<script>
+  import { animate } from 'motion';
+
+  const atlas = document.querySelector<HTMLElement>('[data-atlas]');
+  const items = document.querySelectorAll<HTMLElement>('[data-atlas-item]');
+  const captionName = document.querySelector<HTMLElement>('[data-atlas-caption-name]');
+  const captionOrigin = document.querySelector<HTMLElement>('[data-atlas-caption-origin]');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (atlas) {
+    const frames = Array.from(atlas.querySelectorAll<HTMLElement>('[data-atlas-frame]'));
+
+    const activate = (item: HTMLElement) => {
+      const slug = item.dataset.atlasItem;
+
+      frames.forEach((frame) => {
+        const active = frame.dataset.atlasFrame === slug;
+        frame.setAttribute('aria-hidden', active ? 'false' : 'true');
+        frame.classList.toggle('opacity-100', active);
+        frame.classList.toggle('opacity-0', !active);
+
+        if (!reduceMotion) {
+          animate(
+            frame,
+            { opacity: active ? 1 : 0, scale: active ? 1 : 1.035 },
+            { duration: 0.65, ease: [0.16, 1, 0.3, 1] }
+          );
+        }
+      });
+
+      if (captionName) captionName.textContent = item.dataset.atlasName ?? '';
+      if (captionOrigin) captionOrigin.textContent = item.dataset.atlasOrigin ?? '';
+    };
+
+    items.forEach((item) => {
+      item.addEventListener('mouseenter', () => activate(item));
+      item.addEventListener('focus', () => activate(item));
+    });
+  }
+</script>

@@ -1,0 +1,66 @@
+---
+import Button from './ui/Button.astro';
+import Eyebrow from './ui/Eyebrow.astro';
+import Media from './ui/Media.astro';
+import Section from './ui/Section.astro';
+import { images, alts } from '../data/images';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<Section tone="tint" spacing="tight" class:list={['relative overflow-hidden', className]}>
+  <div
+    data-mist
+    aria-hidden="true"
+    class="pointer-events-none absolute -right-28 -top-24 h-[26rem] w-[26rem] rounded-full bg-accent-fill/30 blur-[90px]"
+  ></div>
+
+  <div class="relative grid min-w-0 items-stretch lg:grid-cols-2">
+    <Media
+      src={images.discoverySet}
+      alt={alts.discoverySet}
+      aspect="4 / 3"
+      widths={[480, 720, 980]}
+      sizes="(max-width: 1024px) 100vw, 50vw"
+      parallax
+      reveal
+    />
+
+    <div class="flex min-w-0 flex-col justify-center gap-6 p-7 md:p-10 lg:p-[clamp(2rem,4vw,4.5rem)]">
+      <div data-reveal>
+        <Eyebrow>Discovery set</Eyebrow>
+      </div>
+      <h2
+        data-reveal-title
+        class="max-w-[11ch] pb-1 font-display text-[clamp(2.4rem,4.4vw,4.1rem)] font-light leading-[0.96] tracking-[-0.02em]"
+      >
+        Six scents. One week.
+      </h2>
+      <p data-reveal class="max-w-[42ch] text-[0.95rem] leading-[1.7] text-muted">
+        The six compositions, in 2 ml vials. Wear one a day for six days, then choose the one you
+        miss.
+      </p>
+      <p data-reveal class="flex items-baseline gap-3 font-display text-3xl">
+        &euro;38
+        <span class="font-sans text-[0.7rem] uppercase tracking-[0.08em] text-muted">
+          Six 2 ml vials
+        </span>
+      </p>
+      <div data-reveal>
+        <Button
+          href="mailto:hello@omoo.studio?subject=Reserve%20a%20discovery%20set"
+          class="w-full sm:w-auto"
+        >
+          Reserve a discovery set
+        </Button>
+      </div>
+      <p data-reveal class="text-[0.72rem] leading-relaxed text-muted">
+        Reserve by email. We ship within Europe.
+      </p>
+    </div>
+  </div>
+</Section>

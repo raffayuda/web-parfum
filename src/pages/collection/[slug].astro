@@ -1,0 +1,246 @@
+---
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Button from '../../components/ui/Button.astro';
+import ArrowLink from '../../components/ui/ArrowLink.astro';
+import Media from '../../components/ui/Media.astro';
+import Section from '../../components/ui/Section.astro';
+import FragranceCard from '../../components/FragranceCard.astro';
+import { bySlug, fragrances, priceLabel } from '../../data/fragrances';
+
+export function getStaticPaths() {
+  return fragrances.map((fragrance) => ({
+    params: { slug: fragrance.slug },
+    props: { fragrance },
+  }));
+}
+
+const { fragrance } = Astro.props;
+const related = fragrance.related.map((slug) => bySlug(slug)!).filter(Boolean);
+const sampleHref = `mailto:hello@omoo.studio?subject=${encodeURIComponent(`Sample request: ${fragrance.name}`)}`;
+const notes = [
+  { label: 'Top', items: fragrance.notes.top },
+  { label: 'Heart', items: fragrance.notes.heart },
+  { label: 'Base', items: fragrance.notes.base },
+];
+const details = [
+  { label: 'Material', value: fragrance.material.name },
+  { label: 'Origin', value: fragrance.material.origin },
+  { label: 'Family', value: fragrance.family },
+  { label: 'Concentration', value: fragrance.performance.concentration },
+];
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: fragrance.name,
+  description: fragrance.description,
+  brand: { '@type': 'Brand', name: 'Omoo' },
+  sku: fragrance.edition,
+  offers: {
+    '@type': 'Offer',
+    price: fragrance.price,
+    priceCurrency: 'EUR',
+    availability: 'https://schema.org/InStock',
+    url: `https://omoo.studio/collection/${fragrance.slug}/`,
+  },
+};
+---
+
+<BaseLayout title={fragrance.name} description={fragrance.description} ogType="product" schema={schema}>
+  <div class="mx-auto w-full max-w-page px-gutter pt-6">
+    <nav aria-label="Breadcrumb" class="flex flex-wrap items-center gap-2 text-[0.65rem] uppercase tracking-[0.1em] text-muted">
+      <a href="/collection/" class="transition-colors hover:text-ink">Collection</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{fragrance.name}</span>
+    </nav>
+  </div>
+
+  <section class="pb-section-tight pt-8 md:pt-10">
+    <div class="mx-auto grid w-full max-w-page gap-10 px-gutter md:grid-cols-12 md:gap-gutter">
+      <div class="group relative md:col-span-6">
+        <Media
+          src={fragrance.bottle}
+          alt={fragrance.bottleAlt}
+          aspect="4 / 5"
+          widths={[400, 600, 820, 1000]}
+          sizes="(max-width: 1024px) 100vw, 48vw"
+          priority
+          quality={86}
+        />
+
+        <div class="mt-4 hidden grid-cols-2 gap-4 lg:grid">
+          <Media
+            src={fragrance.macro}
+            alt={fragrance.macroAlt}
+            aspect="1 / 1"
+            widths={[240, 360, 520]}
+            sizes="(max-width: 1024px) 50vw, 24vw"
+            reveal
+          />
+          <div class="flex flex-col justify-between border-t border-line pt-3">
+            <p class="font-display text-[clamp(1.4rem,2vw,1.9rem)] font-light italic leading-[1.05]">
+              {fragrance.material.phrase}
+            </p>
+            <p class="text-[0.65rem] uppercase tracking-[0.1em] text-muted">
+              {fragrance.material.name}, {fragrance.material.origin}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="md:col-span-5 md:col-start-8 md:pt-4">
+        <p class="text-[0.65rem] font-medium uppercase tracking-[0.13em] text-muted">
+          {fragrance.edition} / {fragrance.family}
+        </p>
+
+        <h1 data-page-title class="mt-4 font-display text-[clamp(3rem,5.8vw,5.6rem)] font-light leading-[0.92] tracking-[-0.022em] text-balance">
+          {fragrance.name}
+        </h1>
+
+        <p data-page-deck class="mt-5 font-display text-[clamp(1.4rem,2vw,1.8rem)] font-light italic leading-snug">
+          {fragrance.tagline}
+        </p>
+
+        <p class="mt-6 max-w-[44ch] text-[0.95rem] leading-[1.7] text-muted">
+          {fragrance.description}
+        </p>
+
+        <div class="mt-8 flex items-baseline justify-between gap-6 border-y border-line py-4">
+          <span class="font-display text-3xl">{priceLabel(fragrance.price)}</span>
+          <span class="text-[0.7rem] uppercase tracking-[0.08em] text-muted">
+            {fragrance.volume} / Extrait
+          </span>
+        </div>
+
+        <dl class="grid grid-cols-2 gap-x-6 gap-y-5 py-6">
+          {
+            details.map((detail) => (
+              <div class="grid gap-1">
+                <dt class="text-[0.62rem] uppercase tracking-[0.12em] text-muted">{detail.label}</dt>
+                <dd class="text-[0.9rem] leading-snug">{detail.value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+
+        <div class="flex flex-col items-start gap-5">
+          <Button href={sampleHref} class="w-full">Request a sample</Button>
+          <ArrowLink href="/find/">Find your scent</ArrowLink>
+        </div>
+
+        <p class="mt-5 max-w-[38ch] text-[0.72rem] leading-relaxed text-muted">
+          Samples are sent from the Paris atelier. Two vials per request.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <Section tone="surface">
+    <div class="grid gap-12 lg:grid-cols-12">
+      <div class="lg:col-span-5">
+        <h2 data-reveal-title class="max-w-[12ch] pb-1 font-display text-[clamp(2.35rem,4.2vw,4rem)] font-light leading-[0.98] tracking-[-0.02em]">
+          Built around {fragrance.material.name.toLowerCase()}.
+        </h2>
+        <div class="mt-7 grid gap-5">
+          {
+            fragrance.story.map((paragraph) => (
+              <p data-reveal class="max-w-[52ch] text-[0.95rem] leading-[1.75] text-muted">{paragraph}</p>
+            ))
+          }
+        </div>
+      </div>
+
+      <div class="lg:col-span-6 lg:col-start-7">
+        <p class="text-[0.62rem] font-medium uppercase tracking-[0.14em] text-muted">Composition</p>
+        <div class="mt-6 grid gap-8 sm:grid-cols-3">
+          {
+            notes.map((group) => (
+              <div data-reveal class="border-t border-line pt-4">
+                <h3 class="text-[0.62rem] font-medium uppercase tracking-[0.14em] text-muted">
+                  {group.label}
+                </h3>
+                <ul class="mt-4 grid gap-2">
+                  {group.items.map((note) => (
+                    <li class="font-display text-[clamp(1.25rem,1.8vw,1.55rem)] font-light leading-tight">
+                      {note}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </Section>
+
+  <section class="py-section-tight">
+    <div class="mx-auto w-full max-w-page px-gutter">
+      <figure data-reveal class="grid gap-6 border-t border-line pt-8 lg:grid-cols-12">
+        <blockquote class="lg:col-span-8">
+          <p class="font-display text-[clamp(1.9rem,3.6vw,3.4rem)] font-light leading-[1.04] tracking-[-0.015em]">
+            &ldquo;{fragrance.quote.text}&rdquo;
+          </p>
+        </blockquote>
+        <figcaption class="self-end text-[0.65rem] font-medium uppercase leading-[1.6] tracking-[0.12em] text-muted lg:col-span-3 lg:col-start-10">
+          {fragrance.quote.attribution}
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <Section spacing="tight">
+    <div class="grid gap-10 lg:grid-cols-12">
+      <div class="lg:col-span-3">
+        <h2 data-reveal-title class="pb-1 font-display text-[clamp(2.35rem,4.2vw,4rem)] font-light leading-[0.98] tracking-[-0.02em]">
+          On skin.
+        </h2>
+      </div>
+
+      <dl class="grid grid-cols-2 gap-x-8 lg:col-span-8 lg:col-start-5">
+        {
+          [
+            ['Concentration', fragrance.performance.concentration],
+            ['Maceration', fragrance.performance.maceration],
+            ['Longevity', fragrance.performance.longevity],
+            ['Sillage', fragrance.performance.sillage],
+          ].map(([label, value]) => (
+            <div data-reveal class="border-t border-line py-6 md:py-8">
+              <dt class="text-[0.62rem] uppercase tracking-[0.12em] text-muted">{label}</dt>
+              <dd class="mt-3 font-display text-[clamp(1.65rem,2.4vw,2.5rem)] font-light leading-[1.05]">
+                {value}
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </Section>
+
+  <Section>
+    <div class="grid gap-12 lg:grid-cols-12 lg:items-start">
+      <div class="lg:col-span-3">
+        <h2
+          data-reveal-title
+          class="max-w-[8ch] pb-1 font-display text-[clamp(2.35rem,4.2vw,4rem)] font-light leading-[0.98] tracking-[-0.02em]"
+        >
+          Wear it with
+        </h2>
+        <p data-reveal class="mt-5 max-w-[28ch] text-[0.9rem] leading-[1.65] text-muted">
+          Two compositions that sit close to this one.
+        </p>
+      </div>
+
+      <div class="grid gap-10 sm:grid-cols-2 lg:col-span-8 lg:col-start-5">
+        {
+          related.map((item) => (
+            <div data-reveal>
+              <FragranceCard fragrance={item} aspect="4 / 5" />
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </Section>
+</BaseLayout>

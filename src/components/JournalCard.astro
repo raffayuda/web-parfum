@@ -1,0 +1,50 @@
+---
+import Media from './ui/Media.astro';
+import type { JournalPost } from '../data/journal';
+
+interface Props {
+  post: JournalPost;
+  aspect?: string;
+  class?: string;
+  loading?: 'eager' | 'lazy';
+}
+
+const { post, aspect = '3 / 2', class: className, loading = 'lazy' } = Astro.props;
+---
+
+<a class:list={['group flex flex-col gap-5', className]} href={`/journal/${post.slug}/`} data-reveal>
+  <Media
+    src={post.image}
+    alt={post.imageAlt}
+    aspect={aspect}
+    widths={[400, 640, 900, 1200]}
+    sizes="(max-width: 780px) 100vw, 55vw"
+    priority={loading === 'eager'}
+  />
+
+  <div class="grid gap-2">
+    <div
+      class="flex justify-between gap-4 border-t border-line pt-3 text-[0.65rem] font-medium uppercase leading-none tracking-[0.13em] text-muted"
+    >
+      <span>{post.category}</span>
+      <span>{post.displayDate}</span>
+    </div>
+
+    <h3
+      class="max-w-[22ch] font-display text-[clamp(1.8rem,3vw,2.9rem)] font-light leading-none tracking-[-0.015em] transition-colors duration-300 ease-luxe group-hover:text-accent"
+    >
+      {post.title}
+    </h3>
+
+    <p class="max-w-[46ch] text-[0.92rem] leading-[1.6] text-muted">{post.deck}</p>
+
+    <span
+      class="mt-1 inline-flex items-center gap-1.5 text-[0.68rem] font-medium uppercase tracking-[0.13em]"
+    >
+      Read
+      <span aria-hidden="true" class="transition-transform duration-300 ease-luxe group-hover:translate-x-1">
+        &#8594;
+      </span>
+    </span>
+  </div>
+</a>

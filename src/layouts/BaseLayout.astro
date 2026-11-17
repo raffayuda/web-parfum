@@ -1,0 +1,126 @@
+---
+import '@fontsource/cormorant-garamond/latin-300.css';
+import '@fontsource/cormorant-garamond/latin-400.css';
+import '@fontsource/cormorant-garamond/latin-300-italic.css';
+import '@fontsource/cormorant-garamond/latin-400-italic.css';
+import '@fontsource-variable/instrument-sans/wght.css';
+import '../styles/global.css';
+import Nav from '../components/Nav.astro';
+import SearchOverlay from '../components/SearchOverlay.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogType?: 'website' | 'article' | 'product';
+  noindex?: boolean;
+  schema?: Record<string, unknown>;
+}
+
+const {
+  title,
+  description = 'Omoo is a small perfume house working between Grasse and Paris. Six compositions, built one material at a time.',
+  ogType = 'website',
+  noindex = false,
+  schema,
+} = Astro.props;
+
+const siteName = 'OMOO';
+const pageTitle = title ? `${title} | ${siteName}` : `${siteName} | Perfume, made slowly`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL('/og.jpg', Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:alt" content="Glass vessels and green bottles in the Omoo atelier." />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <meta name="theme-color" content="#e9eae3" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f120b" media="(prefers-color-scheme: dark)" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+
+    <script is:inline>
+      document.documentElement.classList.add('js');
+      try {
+        const stored = localStorage.getItem('omoo-theme');
+        const preferred = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme =
+          stored === 'light' || stored === 'dark' ? stored : preferred;
+
+        if (sessionStorage.getItem('omoo-page-transition') === '1') {
+          document.documentElement.classList.add('page-enter');
+          sessionStorage.removeItem('omoo-page-transition');
+        }
+      } catch {
+        document.documentElement.dataset.theme = 'light';
+      }
+    </script>
+
+    {schema && <script type="application/ld+json" set:html={JSON.stringify(schema)} />}
+    <slot name="head" />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="pointer-events-none fixed inset-x-0 top-0 z-[70] h-[2px]">
+      <div data-scroll-progress class="h-full w-full origin-left scale-x-0 bg-accent"></div>
+    </div>
+    <div class="page">
+      <Nav />
+      <SearchOverlay />
+      <main id="main">
+        <slot />
+      </main>
+      <Footer />
+    </div>
+
+    <div
+      data-page-veil
+      aria-hidden="true"
+      class="pointer-events-none fixed inset-0 z-[400] flex flex-col items-center justify-center gap-6 bg-[#0b0e08] text-[#e9eae3]"
+      style="visibility: hidden; opacity: 0;"
+    >
+      <div class="overflow-hidden pb-2">
+        <span data-veil-mark class="block font-display text-[clamp(3.2rem,8vw,7rem)] leading-none tracking-[0.18em]">
+          OMOO
+        </span>
+      </div>
+      <span data-veil-rule class="h-px w-24 origin-center scale-x-0 bg-[#cbe17b]"></span>
+    </div>
+
+    <noscript>
+      <style>
+        [data-page-veil] {
+          display: none !important;
+        }
+      </style>
+    </noscript>
+
+    <script>
+      import '../scripts/motion.ts';
+      import '../scripts/theme.ts';
+    </script>
+  </body>
+</html>

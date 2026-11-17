@@ -1,0 +1,159 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/ui/PageHeader.astro';
+import ArrowLink from '../../components/ui/ArrowLink.astro';
+import Section from '../../components/ui/Section.astro';
+import FragranceCard from '../../components/FragranceCard.astro';
+import DiscoverySet from '../../components/DiscoverySet.astro';
+import { families, fragrances } from '../../data/fragrances';
+
+const filterActive = 'border-accent text-ink';
+const filterIdle = 'border-transparent text-muted hover:text-ink';
+---
+
+<BaseLayout
+  title="Collection"
+  description="Six extrait de parfum compositions from Omoo. Woody, floral, green, fresh, oriental and musk, each built around one material."
+>
+  <PageHeader
+    deck="Six extraits de parfum. Each built around a single material, with nothing added to fill space."
+  >
+    <Fragment slot="title">The <span class="italic">collection</span>.</Fragment>
+  </PageHeader>
+
+  <div>
+    <div class="static top-[72px] z-30 border-y border-line bg-bg md:sticky">
+      <div class="mx-auto w-full max-w-page px-gutter">
+        <div class="flex flex-col gap-4 py-4 md:flex-row md:items-center md:justify-between md:gap-8">
+          <div
+            class="flex flex-wrap gap-x-6 gap-y-3"
+            role="group"
+            aria-label="Filter by fragrance family"
+          >
+            {
+              families.map((family, index) => (
+                <button
+                  type="button"
+                  data-filter={family}
+                  aria-pressed={index === 0 ? 'true' : 'false'}
+                  class:list={[
+                    'whitespace-nowrap border-b py-1.5 text-[0.7rem] font-medium uppercase leading-none tracking-[0.1em] transition-colors duration-300 ease-luxe',
+                    index === 0 ? filterActive : filterIdle,
+                  ]}
+                >
+                  {family}
+                </button>
+              ))
+            }
+          </div>
+
+          <div class="flex flex-wrap items-center gap-x-5 gap-y-3">
+            <p
+              class="text-[0.62rem] uppercase tracking-[0.1em] text-muted"
+              data-filter-status
+              aria-live="polite"
+            >
+              {fragrances.length} fragrances
+            </p>
+            <ArrowLink href="/find/" class="shrink-0 self-start md:self-auto">Find your scent</ArrowLink>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <Section spacing="tight">
+      <h2 class="sr-only">All fragrances</h2>
+
+      <div data-stagger class="grid gap-x-gutter gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          fragrances.map((fragrance, index) => (
+            <div
+              data-card
+              data-family={fragrance.family}
+              style={`view-transition-name: fragrance-${fragrance.slug}`}
+            >
+              <FragranceCard
+                fragrance={fragrance}
+                aspect="4 / 5"
+                loading={index < 3 ? 'eager' : 'lazy'}
+              />
+            </div>
+          ))
+        }
+      </div>
+    </Section>
+  </div>
+
+  <DiscoverySet />
+</BaseLayout>
+
+<script>
+  import { animate } from 'motion';
+
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
+  const cards = document.querySelectorAll<HTMLElement>('[data-card]');
+  const status = document.querySelector<HTMLElement>('[data-filter-status]');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const activeClasses = ['border-accent', 'text-ink'];
+  const idleClasses = ['border-transparent', 'text-muted'];
+
+  const applyFilter = (family: string) => {
+    let count = 0;
+
+    cards.forEach((card) => {
+      const visible = family === 'All' || card.dataset.family === family;
+      card.hidden = !visible;
+      if (visible) count += 1;
+    });
+
+    buttons.forEach((button) => {
+      const active = button.dataset.filter === family;
+      button.setAttribute('aria-pressed', String(active));
+      activeClasses.forEach((name) => button.classList.toggle(name, active));
+      idleClasses.forEach((name) => button.classList.toggle(name, !active));
+    });
+
+    if (status) {
+      status.textContent = `${count} ${count === 1 ? 'fragrance' : 'fragrances'}`;
+    }
+  };
+
+  const bringResultsIntoView = () => {
+    const first = Array.from(cards).find((card) => !card.hidden);
+    if (!first) return;
+
+    const rect = first.getBoundingClientRect();
+    if (rect.top < 80 || rect.top > window.innerHeight - 160) {
+      first.scrollIntoView({
+        behavior: reduceMotion ? 'auto' : 'smooth',
+        block: 'center',
+      });
+    }
+  };
+
+  buttons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const family = button.dataset.filter ?? 'All';
+
+      if (document.startViewTransition && !reduceMotion) {
+        document.startViewTransition(() => applyFilter(family));
+        window.setTimeout(bringResultsIntoView, 80);
+        return;
+      }
+
+      applyFilter(family);
+      bringResultsIntoView();
+
+      cards.forEach((card) => {
+        if (!card.hidden) {
+          animate(
+            card,
+            { opacity: [0, 1], y: [12, 0] },
+            { duration: 0.45, ease: [0.16, 1, 0.3, 1] }
+          );
+        }
+      });
+    });
+  });
+</script>

@@ -1,0 +1,58 @@
+---
+interface Props {
+  href?: string;
+  type?: 'button' | 'submit';
+  variant?: 'primary' | 'ghost';
+  size?: 'default' | 'small';
+  arrow?: boolean;
+  class?: string;
+  ariaLabel?: string;
+}
+
+const {
+  href,
+  type = 'button',
+  variant = 'primary',
+  size = 'default',
+  arrow = true,
+  class: className,
+  ariaLabel,
+} = Astro.props;
+
+const sizes = {
+  default: 'min-h-12 px-6 py-3.5',
+  small: 'min-h-10 px-4 py-2.5 text-[0.65rem]',
+};
+
+const variants = {
+  primary: 'border-ink bg-ink text-bg hover:bg-transparent hover:text-ink',
+  ghost: 'border-ink bg-transparent text-ink hover:bg-ink hover:text-bg',
+};
+
+const Tag = href ? 'a' : 'button';
+const attrs = href ? { href } : { type };
+---
+
+<Tag
+  class:list={[
+    'group/button inline-flex items-center justify-center gap-3 border text-[0.7rem] font-medium uppercase leading-none tracking-[0.14em] whitespace-nowrap transition-colors duration-300 ease-luxe active:translate-y-px',
+    sizes[size],
+    variants[variant],
+    className,
+  ]}
+  {...attrs}
+  data-magnetic
+  aria-label={ariaLabel}
+>
+  <span><slot /></span>
+  {
+    arrow && (
+      <span
+        aria-hidden="true"
+        class="transition-transform duration-300 ease-luxe group-hover/button:translate-x-1"
+      >
+        &#8594;
+      </span>
+    )
+  }
+</Tag>
