@@ -7,16 +7,14 @@ export const auth = betterAuth({
     provider: 'postgresql',
   }),
   secret: process.env.BETTER_AUTH_SECRET || 'omoo-dev-secret-key-at-least-32-characters-long-2026',
-  baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3001',
+  baseURL: process.env.BETTER_AUTH_URL || process.env.PUBLIC_SITE_URL || 'https://omoo.web.id',
   trustedOrigins: [
     'http://localhost:4321',
     'http://127.0.0.1:4321',
     'http://localhost:3000',
     'http://localhost:3001',
     'https://omoo.web.id',
-    'https://api.omoo.web.id',
     ...(process.env.PUBLIC_SITE_URL ? [process.env.PUBLIC_SITE_URL] : []),
-    ...(process.env.PUBLIC_API_URL ? [process.env.PUBLIC_API_URL] : []),
   ],
   emailAndPassword: {
     enabled: true,

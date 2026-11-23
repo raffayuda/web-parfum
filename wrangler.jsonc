@@ -6,10 +6,10 @@
     "nodejs_compat"
   ],
   "vars": {
-    "BETTER_AUTH_URL": "https://api.omoo.web.id",
+    "BETTER_AUTH_URL": "https://omoo.web.id",
     "NODE_ENV": "production",
     "PORT": "3001",
-    "PUBLIC_API_URL": "https://api.omoo.web.id",
+    "PUBLIC_API_URL": "https://omoo.web.id",
     "PUBLIC_SITE_URL": "https://omoo.web.id",
     "QRIS_MERCHANT_NAME": "OMOO PERFUME",
     "UPLOAD_DIR": "./uploads",

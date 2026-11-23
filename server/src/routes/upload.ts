@@ -25,7 +25,7 @@ export const uploadRoute = new Elysia({ prefix: '/upload' })
       const arrayBuffer = await file.arrayBuffer();
       await writeFile(filePath, Buffer.from(arrayBuffer));
 
-      const publicUrl = `http://localhost:3001/uploads/${safeCategory}/${filename}`;
+      const publicUrl = `/uploads/${safeCategory}/${filename}`;
 
       return {
         success: true,

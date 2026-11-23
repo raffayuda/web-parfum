@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "astro dev",
     "dev:server": "bun server/src/index.ts",
+    "dev:server:watch": "bun --watch server/src/index.ts",
+    "start:server": "bun server/src/index.ts",
     "db:push": "bunx prisma db push",
     "db:seed": "bun prisma/seed.ts",
     "db:studio": "bunx prisma studio",
