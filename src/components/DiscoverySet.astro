@@ -9,9 +9,21 @@ import { whatsappHref } from '../data/site';
 
 interface Props {
   class?: string;
+  eyebrow?: string;
+  title?: string;
+  subtitle?: string;
+  price?: number;
+  ctaText?: string;
 }
 
-const { class: className } = Astro.props;
+const {
+  class: className,
+  eyebrow = 'Discovery set',
+  title = 'Six scents. One week.',
+  subtitle = 'Enam komposisi dalam vial 2 ml. Pakai satu setiap hari selama enam hari, lalu pilih aroma yang paling Anda rindukan.',
+  price = 450000,
+  ctaText = 'Pesan Discovery Set',
+} = Astro.props;
 ---
 
 <Section tone="tint" spacing="tight" class:list={['relative overflow-hidden', className]}>
@@ -34,20 +46,19 @@ const { class: className } = Astro.props;
 
     <div class="flex min-w-0 flex-col justify-center gap-6 p-7 md:p-10 lg:p-[clamp(2rem,4vw,4.5rem)]">
       <div data-reveal>
-        <Eyebrow>Discovery set</Eyebrow>
+        <Eyebrow><span data-editable-id="discovery-eyebrow">{eyebrow}</span></Eyebrow>
       </div>
       <h2
         data-reveal-title
         class="max-w-[11ch] pb-1 font-display text-[clamp(2.4rem,4.4vw,4.1rem)] font-light leading-[0.96] tracking-[-0.02em]"
       >
-        Six scents. One week.
+        <span data-editable-id="discovery-title">{title}</span>
       </h2>
-      <p data-reveal class="max-w-[42ch] text-[0.95rem] leading-[1.7] text-muted">
-        Enam komposisi dalam vial 2 ml. Pakai satu setiap hari selama enam hari, lalu pilih aroma
-        yang paling Anda rindukan.
+      <p data-reveal class="max-w-[42ch] text-[0.95rem] leading-[1.7] text-muted" data-editable-id="discovery-subtitle">
+        {subtitle}
       </p>
       <p data-reveal class="flex items-baseline gap-3 font-display text-3xl">
-        {priceLabel(450000)}
+        <span data-editable-id="discovery-price">{priceLabel(price)}</span>
         <span class="font-sans text-[0.7rem] uppercase tracking-[0.08em] text-muted">
           Enam vial 2 ml
         </span>
@@ -55,12 +66,12 @@ const { class: className } = Astro.props;
       <div data-reveal>
         <Button
           href={whatsappHref(
-            `Halo OMOO, saya ingin memesan Discovery Set (${priceLabel(450000)}). Mohon info ketersediaan dan pengiriman.`
+            `Halo OMOO, saya ingin memesan Discovery Set (${priceLabel(price)}). Mohon info ketersediaan dan pengiriman.`
           )}
           external
           class="w-full sm:w-auto"
         >
-          Pesan via WhatsApp
+          <span data-editable-id="discovery-cta">{ctaText}</span>
         </Button>
       </div>
       <p data-reveal class="max-w-[42ch] text-[0.72rem] leading-relaxed text-muted">

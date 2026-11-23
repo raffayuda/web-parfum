@@ -250,6 +250,28 @@ function initPageTransitions() {
 
   let leaving = false;
 
+  const hideVeil = () => {
+    leaving = false;
+    if (!veil) return;
+    veil.style.setProperty('visibility', 'hidden', 'important');
+    veil.style.setProperty('opacity', '0', 'important');
+    veil.style.setProperty('pointer-events', 'none', 'important');
+    veil.style.setProperty('clip-path', 'none', 'important');
+    if (mark) {
+      mark.style.opacity = '0';
+      mark.style.transform = 'translateY(110%)';
+    }
+    if (rule) {
+      rule.style.transform = 'scaleX(0)';
+    }
+  };
+
+  // Always reset veil when entering page, restored from bfcache, or browser history back/forward
+  window.addEventListener('pageshow', () => hideVeil());
+  window.addEventListener('popstate', () => hideVeil());
+  window.addEventListener('focus', () => hideVeil());
+  hideVeil();
+
   document.addEventListener('click', (event) => {
     if (event.defaultPrevented || event.button !== 0) return;
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -276,12 +298,18 @@ function initPageTransitions() {
       /* storage can be unavailable */
     }
 
+    veil.style.removeProperty('visibility');
+    veil.style.removeProperty('opacity');
+    veil.style.removeProperty('pointer-events');
+    veil.style.removeProperty('clip-path');
     veil.style.visibility = 'visible';
     veil.style.pointerEvents = 'auto';
 
     window.setTimeout(() => {
       window.location.href = url.href;
-    }, 560);
+      // Failsafe in case browser bfcache / cancel
+      setTimeout(hideVeil, 1000);
+    }, 450);
 
     try {
       animate(veil, { opacity: [0, 1] }, { duration: 0.42, ease: EASE });

@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/ui/PageHeader.astro';
+import { MyOrdersPage } from '../../components/tracker/MyOrdersPage';
+---
+
+<BaseLayout
+  title="Pesanan Saya — OMOO Atelier"
+  description="Pantau perkembangan peracikan botol, rute GPS pengantaran kurir, serta unduh invoice faktur resmi pesanan wewangian OMOO Anda."
+>
+  <PageHeader
+    deck="Pantau perjalanan wewangian Anda dari peracikan dan maserasi di atelier Jakarta hingga tiba di tangan Anda."
+  >
+    <Fragment slot="title">Pesanan <span class="italic">Saya</span>.</Fragment>
+  </PageHeader>
+
+  <section class="py-12 px-gutter">
+    <div class="mx-auto max-w-page">
+      <MyOrdersPage client:load />
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,21 @@
+---
+import { AdminDashboard } from '../../admin/AdminDashboard';
+import '@fontsource/cormorant-garamond';
+import '@fontsource-variable/instrument-sans';
+import '../../styles/global.css';
+
+export const prerender = false;
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OMOO Atelier &mdash; Admin Management Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body class="bg-bg text-ink antialiased">
+    <AdminDashboard client:load />
+  </body>
+</html>

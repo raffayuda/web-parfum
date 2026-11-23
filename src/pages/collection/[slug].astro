@@ -8,16 +8,69 @@ import Section from '../../components/ui/Section.astro';
 import FragranceCard from '../../components/FragranceCard.astro';
 import { bySlug, fragrances, priceLabel } from '../../data/fragrances';
 import { whatsappHref } from '../../data/site';
+import { prisma } from '../../../server/src/db';
+import { ProductOrderActions } from '../../components/checkout/ProductOrderActions';
 
-export function getStaticPaths() {
-  return fragrances.map((fragrance) => ({
-    params: { slug: fragrance.slug },
-    props: { fragrance },
-  }));
+export const prerender = false;
+
+const { slug } = Astro.params;
+
+let dbFrag: any = null;
+const normalizedSlug = (slug as string).replace(/_/g, '-');
+try {
+  dbFrag = await prisma.fragrance.findFirst({
+    where: {
+      OR: [
+        { slug: slug as string },
+        { slug: normalizedSlug },
+        { id: slug as string },
+      ],
+    },
+  });
+} catch (e) {}
+
+const staticFrag = bySlug(slug as string) || bySlug(normalizedSlug);
+if (!dbFrag && !staticFrag) {
+  return Astro.redirect('/collection');
 }
 
-const { fragrance } = Astro.props;
-const related = fragrance.related.map((slug) => bySlug(slug)!).filter(Boolean);
+const rawQuote = dbFrag?.quote || staticFrag?.quote;
+const quote = (typeof rawQuote === 'object' && rawQuote?.text)
+  ? rawQuote
+  : {
+      text: 'Wewangian murni yang menyatu harmonis dengan karakter pemakainya.',
+      attribution: 'Camille Aumont, Perfumer',
+    };
+
+const rawPerf = dbFrag?.performance || staticFrag?.performance;
+const performance = (typeof rawPerf === 'object' && rawPerf?.concentration)
+  ? rawPerf
+  : {
+      concentration: 'Extrait de parfum, 20%',
+      maceration: 'Enam minggu',
+      longevity: '8 sampai 10 jam',
+      sillage: 'Sejauh lengan',
+    };
+
+const fragrance = {
+  ...(staticFrag || {}),
+  ...(dbFrag || {}),
+  price: dbFrag ? Number(dbFrag.price) : staticFrag?.price,
+  bottle: dbFrag?.bottleImage || staticFrag?.bottle || '/src/assets/images/bottle-vetiver.jpg',
+  card: dbFrag?.bottleImage || staticFrag?.card || '/src/assets/images/bottle-vetiver.jpg',
+  macro: dbFrag?.macroImage || staticFrag?.macro || '/src/assets/images/macro-vetiver.jpg',
+  notes: dbFrag?.notes ? (dbFrag.notes as any) : (staticFrag?.notes || { top: [], heart: [], base: [] }),
+  material: dbFrag?.material ? (dbFrag.material as any) : (staticFrag?.material || { name: 'Raw Material', origin: 'Grasse', phrase: 'Murni dari alam' }),
+  story: dbFrag?.story
+    ? (Array.isArray(dbFrag.story) ? dbFrag.story : [String(dbFrag.story)])
+    : (staticFrag?.story || []),
+  quote,
+  performance,
+  isAvailable: dbFrag ? dbFrag.isAvailable : (staticFrag?.isAvailable ?? true),
+  related: dbFrag?.relatedSlugs?.length ? dbFrag.relatedSlugs : (staticFrag?.related || []),
+};
+const isAvailable = fragrance.isAvailable;
+const related = fragrance.related.map((slug: string) => bySlug(slug) || (fragrances.find(f => f.slug === slug))).filter(Boolean);
 const productWhatsapp = whatsappHref(
   `Halo OMOO, saya ingin memesan ${fragrance.name} (${fragrance.volume}, ${priceLabel(fragrance.price)}). Mohon info ketersediaan dan pengiriman.`
 );
@@ -129,7 +182,19 @@ const schema = {
         </dl>
 
         <div class="flex flex-col items-start gap-4">
-          <Button href={productWhatsapp} external class="w-full">Pesan via WhatsApp</Button>
+          <ProductOrderActions
+            client:load
+            product={{
+              id: fragrance.id,
+              slug: fragrance.slug,
+              name: fragrance.name,
+              volume: fragrance.volume,
+              price: fragrance.price,
+              edition: fragrance.edition,
+              isAvailable,
+            }}
+            whatsappUrl={productWhatsapp}
+          />
           <ArrowLink href="/find/">Find your scent</ArrowLink>
         </div>
 
@@ -141,23 +206,18 @@ const schema = {
   </section>
 
   <Section tone="surface">
-    <div class="grid gap-12 lg:grid-cols-12">
-      <div class="lg:col-span-5">
-        <h2 data-reveal-title class="max-w-[12ch] pb-1 font-display text-[clamp(2.35rem,4.2vw,4rem)] font-light leading-[0.98] tracking-[-0.02em]">
-          Built around {fragrance.material.name.toLowerCase()}.
+    <div class="grid gap-10 lg:grid-cols-12">
+      <div class="lg:col-span-3">
+        <h2 data-reveal-title class="pb-1 font-display text-[clamp(2.35rem,4.2vw,4rem)] font-light leading-[0.98] tracking-[-0.02em]">
+          Composition.
         </h2>
-        <div class="mt-7 grid gap-5">
-          {
-            fragrance.story.map((paragraph) => (
-              <p data-reveal class="max-w-[52ch] text-[0.95rem] leading-[1.75] text-muted">{paragraph}</p>
-            ))
-          }
-        </div>
+        <p class="mt-2 text-[0.65rem] uppercase tracking-[0.14em] text-muted">
+          Piramida Struktur Aroma
+        </p>
       </div>
 
-      <div class="lg:col-span-6 lg:col-start-7">
-        <p class="text-[0.62rem] font-medium uppercase tracking-[0.14em] text-muted">Composition</p>
-        <div class="mt-6 grid gap-8 sm:grid-cols-3">
+      <div class="lg:col-span-8 lg:col-start-5">
+        <div class="grid gap-8 sm:grid-cols-3">
           {
             notes.map((group) => (
               <div data-reveal class="border-t border-line pt-4">
@@ -179,20 +239,24 @@ const schema = {
     </div>
   </Section>
 
-  <section class="py-section-tight">
-    <div class="mx-auto w-full max-w-page px-gutter">
-      <figure data-reveal class="grid gap-6 border-t border-line pt-8 lg:grid-cols-12">
-        <blockquote class="lg:col-span-8">
-          <p class="font-display text-[clamp(1.9rem,3.6vw,3.4rem)] font-light leading-[1.04] tracking-[-0.015em]">
-            &ldquo;{fragrance.quote.text}&rdquo;
-          </p>
-        </blockquote>
-        <figcaption class="self-end text-[0.65rem] font-medium uppercase leading-[1.6] tracking-[0.12em] text-muted lg:col-span-3 lg:col-start-10">
-          {fragrance.quote.attribution}
-        </figcaption>
-      </figure>
-    </div>
-  </section>
+  {fragrance.quote?.text && (
+    <section class="py-section-tight">
+      <div class="mx-auto w-full max-w-page px-gutter">
+        <figure data-reveal class="grid gap-6 border-t border-line pt-8 lg:grid-cols-12">
+          <blockquote class="lg:col-span-8">
+            <p class="font-display text-[clamp(1.9rem,3.6vw,3.4rem)] font-light leading-[1.04] tracking-[-0.015em]">
+              &ldquo;{fragrance.quote.text}&rdquo;
+            </p>
+          </blockquote>
+          {fragrance.quote.attribution && (
+            <figcaption class="self-end text-[0.65rem] font-medium uppercase leading-[1.6] tracking-[0.12em] text-muted lg:col-span-3 lg:col-start-10">
+              {fragrance.quote.attribution}
+            </figcaption>
+          )}
+        </figure>
+      </div>
+    </section>
+  )}
 
   <Section spacing="tight">
     <div class="grid gap-10 lg:grid-cols-12">

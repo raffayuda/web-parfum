@@ -6,6 +6,8 @@ import Section from '../../components/ui/Section.astro';
 import JournalCard from '../../components/JournalCard.astro';
 import { journal } from '../../data/journal';
 
+export const prerender = true;
+
 export function getStaticPaths() {
   return journal.map((post) => ({
     params: { slug: post.slug },
@@ -13,7 +15,11 @@ export function getStaticPaths() {
   }));
 }
 
-const { post } = Astro.props;
+const { slug } = Astro.params;
+const post = Astro.props.post || journal.find((item) => item.slug === slug);
+if (!post) {
+  return Astro.redirect('/journal');
+}
 const currentIndex = journal.findIndex((item) => item.slug === post.slug);
 const next = journal[(currentIndex + 1) % journal.length];
 const related = journal.filter((item) => item.slug !== post.slug).slice(0, 2);

@@ -1,0 +1,304 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -----------------------------------------------------------------------------
+// Better Auth Core Tables & User Management
+// -----------------------------------------------------------------------------
+
+enum UserRole {
+  ADMIN
+  MEMBER
+  CUSTOMER
+}
+
+enum MemberStatus {
+  NONE
+  PENDING
+  ACTIVE
+  REJECTED
+}
+
+model User {
+  id            String        @id @default(cuid())
+  name          String
+  email         String        @unique
+  emailVerified Boolean       @default(false)
+  image         String?
+  phone         String?
+  role          UserRole      @default(CUSTOMER)
+  memberStatus  MemberStatus  @default(NONE)
+  memberTier    String?       // e.g. "Cercle Prive"
+  memberSince   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  sessions      Session[]
+  accounts      Account[]
+  orders        Order[]
+  createdOrders Order[]       @relation("AdminCreatedOrders")
+  memberApps    MemberApplication[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("accounts")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verifications")
+}
+
+// -----------------------------------------------------------------------------
+// Perfume Catalogue & Availability
+// -----------------------------------------------------------------------------
+
+model Fragrance {
+  id            String        @id @default(cuid())
+  slug          String        @unique
+  edition       String        // e.g. "OM-01"
+  name          String
+  family        String        // "Woody", "Floral", "Green", etc.
+  tagline       String
+  description   String        @db.Text
+  price         Int           // in IDR (e.g. 2450000)
+  volume        String        @default("50 ml")
+  concentration String        @default("Extrait de parfum, 20%")
+  isAvailable   Boolean       @default(true) // Admin toggle: Available / Unavailable
+  stockCount    Int           @default(50)
+  
+  bottleImage   String
+  bottleAlt     String
+  macroImage    String?
+  macroAlt      String?
+  
+  // Stored as JSON for flexible aromatic notes & stories
+  notes         Json          // { top: [], heart: [], base: [] }
+  material      Json          // { name, origin, phrase }
+  story         Json          // string[]
+  quote         Json?         // { text, attribution }
+  performance   Json?         // { concentration, maceration, longevity, sillage }
+  relatedSlugs  String[]      @default([])
+
+  orderItems    OrderItem[]
+  certifications Certification[]
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@map("fragrances")
+}
+
+// -----------------------------------------------------------------------------
+// Dynamic Pages & Section Layout Engine (CMS)
+// -----------------------------------------------------------------------------
+
+enum SectionTemplate {
+  HERO_EDITORIAL      // Full/split typography hero with atmosphere background
+  HERO_SPLIT          // Text + full-height photography
+  FRAGRANCE_GRID      // Live catalog grid with family filter & availability tag
+  MATERIAL_STORY      // Origin, raw ingredients showcase (Haiti Vetiver, etc.)
+  PROCESS_STEPS       // Atelier craft sequence (Compose, Macerate, Bottle)
+  DISCOVERY_BANNER    // Discovery set luxury CTA banner
+  JOURNAL_FEED        // Editorial journal cards list
+  FAQ_ACCORDION       // Interactive expandable Q&A
+  HALAL_BPOM_BADGE    // Official trust badge with QR verification scanner
+  RICH_TEXT_MEDIA     // Custom narrative, multi-column text with imagery
+  CUSTOM_CODE         // Embeddable visual block
+}
+
+model Page {
+  id          String        @id @default(cuid())
+  slug        String        @unique // "home", "maison", "collection", "contact", "find"
+  title       String
+  description String?
+  isActive    Boolean       @default(true)
+  sections    PageSection[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("pages")
+}
+
+model PageSection {
+  id           String          @id @default(cuid())
+  pageId       String
+  template     SectionTemplate
+  name         String          // Human-readable section name in dashboard
+  order        Int             @default(0)
+  isActive     Boolean         @default(true)
+  title        String?
+  eyebrow      String?
+  subtitle     String?
+  contentData  Json            // Flexible JSON specific to the selected template
+  page         Page            @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@index([pageId, order])
+  @@map("page_sections")
+}
+
+// -----------------------------------------------------------------------------
+// Orders, QRIS Payments & Tracking
+// -----------------------------------------------------------------------------
+
+enum OrderStatus {
+  PENDING_PAYMENT       // Menunggu Pembayaran (QRIS ditampilkan)
+  AWAITING_VALIDATION   // Bukti transfer sudah diunggah oleh customer
+  PROCESSING            // Pembayaran divalidasi oleh admin, proses maceration/packaging
+  SHIPPED               // Sedang dikirim (nomor resi diterbitkan)
+  COMPLETED             // Pesanan diterima customer
+  CANCELLED             // Dibatalkan
+}
+
+enum PaymentMethod {
+  QRIS
+  WHATSAPP_MANUAL
+}
+
+model Order {
+  id               String        @id @default(cuid())
+  orderNumber      String        @unique // e.g. "OM-20261122-0042"
+  userId           String?       // Optional: linked if customer has account
+  createdByAdminId String?       // Set if admin created the order on behalf of customer
+  
+  customerName     String
+  customerEmail    String
+  customerPhone    String
+  shippingAddress  String        @db.Text
+  shippingCity     String
+  shippingPostal   String
+  shippingCourier  String?
+  trackingNumber   String?       // Resi pengiriman
+  
+  totalAmount      Int           // in IDR
+  paymentMethod    PaymentMethod @default(QRIS)
+  status           OrderStatus   @default(PENDING_PAYMENT)
+  
+  qrisPayload      String?       // QRIS raw payload / static image reference
+  paymentProofUrl  String?       // URL of uploaded receipt image
+  paymentProofNote String?
+  validatedAt      DateTime?
+  validatedBy      String?
+  adminNotes       String?       @db.Text
+
+  items            OrderItem[]
+  user             User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdByAdmin   User?         @relation("AdminCreatedOrders", fields: [createdByAdminId], references: [id], onDelete: SetNull)
+
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String    @id @default(cuid())
+  orderId     String
+  fragranceId String?
+  name        String    // Stored name in case product changes
+  volume      String
+  quantity    Int       @default(1)
+  unitPrice   Int
+  subtotal    Int
+
+  order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fragrance   Fragrance? @relation(fields: [fragranceId], references: [id], onDelete: SetNull)
+
+  @@map("order_items")
+}
+
+// -----------------------------------------------------------------------------
+// Membership Applications & Validation
+// -----------------------------------------------------------------------------
+
+model MemberApplication {
+  id          String       @id @default(cuid())
+  userId      String
+  fullName    String
+  email       String
+  phone       String
+  reason      String?      @db.Text
+  status      MemberStatus @default(PENDING)
+  adminNotes  String?
+  reviewedAt  DateTime?
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@map("member_applications")
+}
+
+// -----------------------------------------------------------------------------
+// Halal & BPOM Certifications & QR Verification
+// -----------------------------------------------------------------------------
+
+enum CertType {
+  BPOM
+  HALAL
+}
+
+model Certification {
+  id           String     @id @default(cuid())
+  certType     CertType
+  certNumber   String     // e.g. "NA18230601234" or "ID31110001234560124"
+  productSlug  String?    // Associated perfume or atelier general cert
+  productName  String
+  authority    String     // e.g. "Badan Pengawas Obat dan Makanan RI" or "BPJPH Kemenag"
+  issueDate    DateTime
+  validUntil   DateTime
+  verifyCode   String     @unique // Unique shortcode for URL e.g. "BPOM-VETIVER-01"
+  qrCodeUrl    String?    // Generated QR code image data
+  status       String     @default("VERIFIED") // VERIFIED, ACTIVE, RENEWAL
+  details      Json?      // Additional laboratory batch info, test parameters
+  
+  fragrance    Fragrance? @relation(fields: [productSlug], references: [slug], onDelete: SetNull)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@map("certifications")
+}

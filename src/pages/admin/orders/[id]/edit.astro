@@ -1,0 +1,24 @@
+---
+import { OrderEditPage } from '../../../../admin/components/OrderEditPage';
+import '@fontsource/cormorant-garamond';
+import '@fontsource-variable/instrument-sans';
+import '../../../../styles/global.css';
+
+export const prerender = false;
+const { id } = Astro.params;
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Edit Pesanan #{id} — OMOO Admin</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body class="bg-bg text-ink antialiased">
+    <div id="root">
+      <OrderEditPage orderId={id || ''} client:load />
+    </div>
+  </body>
+</html>

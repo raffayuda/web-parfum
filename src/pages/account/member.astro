@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/ui/PageHeader.astro';
+import { QueryProvider } from '../../components/QueryProvider';
+import { MemberPortal } from '../../components/member/MemberPortal';
+---
+
+<BaseLayout
+  title="Cercle Privé Membership"
+  description="Bergabung dengan keanggotaan eksklusif OMOO Cercle Privé untuk akses batch khusus dan undangan pribadi di atelier."
+>
+  <PageHeader
+    deck="Lingkaran keanggotaan istimewa bagi para pencinta wewangian lambat. Akses batch terbatas dan layanan concierge."
+  >
+    <Fragment slot="title">Cercle <span class="italic">Privé</span>.</Fragment>
+  </PageHeader>
+
+  <section class="py-12 px-gutter">
+    <div class="mx-auto max-w-page">
+      <MemberPortal client:load />
+    </div>
+  </section>
+</BaseLayout>

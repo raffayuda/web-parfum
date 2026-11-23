@@ -420,3 +420,82 @@ html {
     animation: none !important;
   }
 }
+
+/* ------------------------------------------------------------------
+   Print Stylesheet for 1-Page Official Invoices & Receipts
+------------------------------------------------------------------- */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm 12mm;
+  }
+
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 11px !important;
+    line-height: 1.4 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Isolasi cetak: sembunyikan seluruh elemen situs web saat cetak faktur */
+  body * {
+    visibility: hidden !important;
+  }
+
+  .official-invoice-sheet,
+  .official-invoice-sheet * {
+    visibility: visible !important;
+  }
+
+  .official-invoice-sheet {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: none !important;
+    box-shadow: none !important;
+    page-break-inside: avoid !important;
+    page-break-after: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .official-invoice-sheet * {
+    color: #000000 !important;
+    border-color: #d1d5db !important;
+    box-shadow: none !important;
+  }
+
+  .official-invoice-sheet table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  .official-invoice-sheet th,
+  .official-invoice-sheet td {
+    padding: 5px 8px !important;
+  }
+
+  /* Sembunyikan semua elemen navigasi, header website, footer, dialog, dan widget saat cetak */
+  header,
+  footer,
+  nav,
+  .skip-link,
+  dialog,
+  [data-page-veil],
+  [data-tilt-media],
+  .print-hidden,
+  .no-print,
+  [data-floating-dock],
+  button {
+    display: none !important;
+  }
+}

@@ -11,6 +11,7 @@ export interface Fragrance {
   price: number;
   volume: string;
   concentration: string;
+  isAvailable?: boolean;
   bottle: ImageMetadata;
   bottleAlt: string;
   macro: ImageMetadata;

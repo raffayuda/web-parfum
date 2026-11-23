@@ -1,0 +1,13 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { CheckoutPage } from '../../components/checkout/CheckoutPage';
+
+export const prerender = false;
+---
+
+<BaseLayout
+  title="Checkout & Pembayaran Flacon"
+  description="Pemesanan resmi wewangian extrait de parfum Atelier OMOO dengan pembayaran QRIS dan pengiriman ke seluruh Indonesia."
+>
+  <CheckoutPage client:load />
+</BaseLayout>

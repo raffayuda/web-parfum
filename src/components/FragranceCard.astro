@@ -19,8 +19,8 @@ const { fragrance, aspect = '4 / 5', loading = 'lazy', class: className } = Astr
   data-tilt
 >
   <Media
-    src={fragrance.card}
-    alt={fragrance.cardAlt}
+    src={fragrance.bottleImage || fragrance.card || fragrance.bottle}
+    alt={fragrance.cardAlt || fragrance.name}
     aspect={aspect}
     widths={[360, 540, 720, 920]}
     sizes="(max-width: 720px) 100vw, (max-width: 1080px) 50vw, 34vw"
@@ -33,7 +33,14 @@ const { fragrance, aspect = '4 / 5', loading = 'lazy', class: className } = Astr
       class="flex items-baseline justify-between gap-4 border-t border-line pt-3 text-[0.65rem] font-medium uppercase leading-none tracking-[0.13em] text-muted"
     >
       <span>{fragrance.edition}</span>
-      <span>{fragrance.family}</span>
+      <div class="flex items-center gap-2">
+        <span>{fragrance.family}</span>
+        {fragrance.isAvailable === false && (
+          <span class="text-[0.55rem] px-1.5 py-0.5 bg-muted/20 border border-muted/30 text-muted line-through tracking-normal">
+            Stok Habis
+          </span>
+        )}
+      </div>
     </div>
 
     <h3

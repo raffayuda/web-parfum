@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/ui/PageHeader.astro';
+import { QueryProvider } from '../../components/QueryProvider';
+import { PublicLegalityVerify } from '../../components/legal/PublicLegalityVerify';
+
+export const prerender = false;
+
+const { code } = Astro.params;
+---
+
+<BaseLayout
+  title={`Verifikasi Sertifikasi BPOM & Halal - ${code}`}
+  description="Hasil pemindaian resmi Google Lens untuk verifikasi legalitas, izin edar BPOM RI, dan ketetapan Halal wewangian OMOO."
+>
+  <PageHeader
+    deck="Portal verifikasi keabsahan izin edar BPOM dan sertifikat Halal resmi yang dipindai melalui Google Lens atau QR Code produk."
+  >
+    <Fragment slot="title">Legalitas <span class="italic">Resmi</span>.</Fragment>
+  </PageHeader>
+
+  <section class="py-8 px-gutter">
+    <div class="mx-auto max-w-page">
+      <PublicLegalityVerify client:load code={code || ''} />
+    </div>
+  </section>
+</BaseLayout>

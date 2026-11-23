@@ -8,70 +8,105 @@ import Section from '../components/ui/Section.astro';
 import DiscoverySet from '../components/DiscoverySet.astro';
 import { fragrances, priceLabel } from '../data/fragrances';
 import { images, alts } from '../data/images';
+import { prisma } from '../../server/src/db';
+
+export const prerender = false;
+
+let dbElements: Record<string, string> = {};
+let dbImages: Record<string, string> = {};
+
+try {
+  const page = await prisma.page.findFirst({
+    where: { slug: 'find' },
+    include: { sections: true },
+  });
+  if (page) {
+    for (const sec of page.sections) {
+      const c = (sec.contentData as any) || {};
+      if (c.elements) dbElements = { ...dbElements, ...c.elements };
+      if (c.images) dbImages = { ...dbImages, ...c.images };
+    }
+  }
+} catch (e) {}
+
+const getTxt = (id: string, fallback: string) => dbElements[id] || fallback;
+const getImg = (id: string, fallback: string) => dbImages[id] || fallback;
 
 const questions = [
   {
-    title: 'Suasana apa yang Anda cari?',
-    image: images.corridor,
+    id: 'q1',
+    title: getTxt('find-q1-title', 'Suasana apa yang Anda cari?'),
+    image: getImg('quiz-img-0', images.corridor),
     alt: alts.corridor,
     options: [
       {
-        label: 'Hangat dan tenang',
-        hint: 'Seperti perpustakaan setelah tutup.',
+        id: 'q1-opt1',
+        label: getTxt('find-q1-opt1-label', 'Hangat dan tenang'),
+        hint: getTxt('find-q1-opt1-hint', 'Seperti perpustakaan setelah tutup.'),
         scores: { 'oud-intime': 3, 'vetiver-obscura': 2, 'ambrette-12': 1 },
       },
       {
-        label: 'Segar dan hijau',
-        hint: 'Seperti rumah kaca saat tengah hari.',
+        id: 'q1-opt2',
+        label: getTxt('find-q1-opt2-label', 'Segar dan hijau'),
+        hint: getTxt('find-q1-opt2-hint', 'Seperti rumah kaca saat tengah hari.'),
         scores: { 'fig-nocturne': 3, 'iris-cendre': 2, 'vetiver-obscura': 1 },
       },
       {
-        label: 'Bersih dan asin',
-        hint: 'Seperti pantai berbatu dan angin.',
+        id: 'q1-opt3',
+        label: getTxt('find-q1-opt3-label', 'Bersih dan asin'),
+        hint: getTxt('find-q1-opt3-hint', 'Seperti pantai berbatu dan angin.'),
         scores: { 'sel-brut': 3, 'fig-nocturne': 1, 'ambrette-12': 1 },
       },
     ],
   },
   {
-    title: 'Material apa yang paling Anda sukai?',
-    image: images.atelier,
+    id: 'q2',
+    title: getTxt('find-q2-title', 'Material apa yang paling Anda sukai?'),
+    image: getImg('quiz-img-1', images.atelier),
     alt: alts.atelier,
     options: [
       {
-        label: 'Akar dan asap',
-        hint: 'Vetiver, oud, kayu.',
+        id: 'q2-opt1',
+        label: getTxt('find-q2-opt1-label', 'Akar dan asap'),
+        hint: getTxt('find-q2-opt1-hint', 'Vetiver, oud, kayu.'),
         scores: { 'vetiver-obscura': 3, 'oud-intime': 2, 'fig-nocturne': 1 },
       },
       {
-        label: 'Bunga dan bedak',
-        hint: 'Iris, violet, suede.',
+        id: 'q2-opt2',
+        label: getTxt('find-q2-opt2-label', 'Bunga dan bedak'),
+        hint: getTxt('find-q2-opt2-hint', 'Iris, violet, suede.'),
         scores: { 'iris-cendre': 3, 'ambrette-12': 2, 'oud-intime': 1 },
       },
       {
-        label: 'Garam dan getah',
-        hint: 'Fig, citrus, udara laut.',
+        id: 'q2-opt3',
+        label: getTxt('find-q2-opt3-label', 'Garam dan getah'),
+        hint: getTxt('find-q2-opt3-hint', 'Fig, citrus, udara laut.'),
         scores: { 'sel-brut': 3, 'fig-nocturne': 2, 'ambrette-12': 1 },
       },
     ],
   },
   {
-    title: 'Seberapa kuat jejak yang Anda inginkan?',
-    image: images.macroOud,
+    id: 'q3',
+    title: getTxt('find-q3-title', 'Seberapa kuat jejak yang Anda inginkan?'),
+    image: getImg('quiz-img-2', images.macroOud),
     alt: alts.macroOud,
     options: [
       {
-        label: 'Dekat di kulit',
-        hint: 'Hanya tercium oleh Anda.',
+        id: 'q3-opt1',
+        label: getTxt('find-q3-opt1-label', 'Dekat di kulit'),
+        hint: getTxt('find-q3-opt1-hint', 'Hanya tercium oleh Anda.'),
         scores: { 'ambrette-12': 3, 'iris-cendre': 2, 'sel-brut': 1 },
       },
       {
-        label: 'Sepanjang lengan',
-        hint: 'Terasa saat orang mendekat.',
+        id: 'q3-opt2',
+        label: getTxt('find-q3-opt2-label', 'Sepanjang lengan'),
+        hint: getTxt('find-q3-opt2-hint', 'Terasa saat orang mendekat.'),
         scores: { 'fig-nocturne': 3, 'sel-brut': 2, 'vetiver-obscura': 1 },
       },
       {
-        label: 'Memenuhi ruangan',
-        hint: 'Jejak yang panjang dan berani.',
+        id: 'q3-opt3',
+        label: getTxt('find-q3-opt3-label', 'Memenuhi ruangan'),
+        hint: getTxt('find-q3-opt3-hint', 'Jejak yang panjang dan berani.'),
         scores: { 'oud-intime': 3, 'vetiver-obscura': 2, 'iris-cendre': 1 },
       },
     ],
@@ -84,9 +119,11 @@ const questions = [
   description="Jawab tiga pertanyaan singkat dan temukan parfum Omoo yang paling sesuai dengan selera Anda."
 >
   <PageHeader
-    deck="Tiga pertanyaan singkat tentang suasana, material, dan seberapa kuat parfum yang Anda inginkan. Kami akan menunjukkan satu komposisi yang paling dekat."
+    deck={getTxt('find-deck', 'Tiga pertanyaan singkat tentang suasana, material, dan seberapa kuat parfum yang Anda inginkan. Kami akan menunjukkan satu komposisi yang paling dekat.')}
   >
-    <Fragment slot="title">Find your <span class="italic">scent</span>.</Fragment>
+    <Fragment slot="title">
+      <span data-editable-id="find-title">{getTxt('find-title', 'Find your scent.')}</span>
+    </Fragment>
   </PageHeader>
 
   <Section spacing="tight" class="pt-0">
@@ -100,6 +137,7 @@ const questions = [
                 index === 0 ? 'opacity-100' : 'opacity-0',
               ]}
               data-quiz-image={index}
+              data-editable-img={`quiz-img-${index}`}
             >
               <Media src={question.image} alt="" fill class="h-full" sizes="40vw" />
             </div>
@@ -150,6 +188,7 @@ const questions = [
                     id={`question-${index}`}
                     tabindex="-1"
                     class="max-w-[18ch] font-display text-[clamp(2rem,3.8vw,3.4rem)] font-light leading-[1] tracking-[-0.018em] outline-none"
+                    data-editable-id={`find-q${index + 1}-title`}
                   >
                     {question.title}
                   </h2>
@@ -163,10 +202,16 @@ const questions = [
                         class="group flex items-center justify-between gap-6 border-t border-line py-5 text-left transition-colors duration-300 ease-luxe hover:text-accent"
                       >
                         <span class="flex flex-col gap-1.5 text-left">
-                          <span class="font-display text-[clamp(1.3rem,1.9vw,1.6rem)] font-light leading-tight">
+                          <span
+                            class="font-display text-[clamp(1.3rem,1.9vw,1.6rem)] font-light leading-tight"
+                            data-editable-id={`find-${option.id}-label`}
+                          >
                             {option.label}
                           </span>
-                          <span class="text-[0.7rem] leading-relaxed tracking-[0.01em] text-muted">
+                          <span
+                            class="text-[0.7rem] leading-relaxed tracking-[0.01em] text-muted"
+                            data-editable-id={`find-${option.id}-hint`}
+                          >
                             {option.hint}
                           </span>
                         </span>

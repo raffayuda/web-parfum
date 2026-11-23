@@ -2,15 +2,17 @@
 import Wordmark from './ui/Wordmark.astro';
 import ThemeToggle from './ui/ThemeToggle.astro';
 import SocialLinks from './ui/SocialLinks.astro';
+import { AccountDropdown } from './account/AccountDropdown';
 import { site } from '../data/site';
 
 const path = Astro.url.pathname;
 const items = [
   { href: '/collection', label: 'Collection', note: 'Enam komposisi' },
-  { href: '/find', label: 'Find your scent', note: 'Tiga pertanyaan' },
-  { href: '/maison', label: 'Maison', note: 'Dari Grasse ke Jakarta' },
-  { href: '/journal', label: 'Journal', note: 'Esai dan catatan material' },
-  { href: '/contact', label: 'Contact', note: 'Kunjungi atelier' },
+  { href: '/about', label: 'About Us', note: 'Dari Grasse ke Jakarta' },
+  { href: '/journey', label: 'Journey', note: 'Arsip & Galeri OMOO' },
+  { href: '/account/orders', label: 'Pesanan Saya', note: 'Status pesanan & riwayat transaksi' },
+  { href: '/member', label: 'Membership', note: 'Member Eksklusif OMOO' },
+  { href: '/contact', label: 'Contact', note: 'Hubungi Kami & Lokasi Toko' },
 ];
 const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`);
 
@@ -24,13 +26,13 @@ const actionLink =
 <header
   class="sticky top-0 z-50 border-b border-line bg-bg/90 backdrop-blur-md backdrop-saturate-150"
 >
-  <div class="mx-auto flex min-h-[72px] w-full max-w-page items-center justify-between gap-8 px-gutter">
+  <div class="mx-auto flex min-h-[72px] w-full max-w-page items-center justify-between gap-6 px-gutter">
     <Wordmark class="text-[1.55rem] -translate-x-[0.1em]" />
 
     <nav class="hidden nav:flex" aria-label="Primary">
-      <ul class="flex items-center gap-[clamp(1.35rem,2.4vw,2.75rem)]">
+      <ul class="flex items-center gap-[clamp(1.1rem,1.8vw,2.2rem)]">
         {
-          items.slice(0, 4).map((item) => (
+          items.map((item) => (
             <li>
               <a
                 href={item.href}
@@ -45,36 +47,22 @@ const actionLink =
       </ul>
     </nav>
 
-    <div class="flex items-center gap-5 nav:gap-6">
-      <button
-        type="button"
-        data-search-open
-        aria-haspopup="dialog"
-        class:list={[actionLink, 'hidden nav:inline-block']}
-      >
-        Search
-      </button>
+    <div class="flex items-center gap-3.5 nav:gap-5">
       <ThemeToggle />
-      <a
-        href="/contact/"
-        class:list={[
-          navLink,
-          'max-nav:hidden nav:inline-block',
-          isCurrent('/contact') && 'text-ink after:scale-x-100',
-        ]}
-        aria-current={isCurrent('/contact') ? 'page' : undefined}
-      >
-        Contact
-      </a>
+      <AccountDropdown client:load />
       <button
-        class="text-[0.7rem] font-medium uppercase leading-none tracking-[0.1em] text-muted transition-colors duration-300 ease-luxe hover:text-ink nav:hidden"
+        class="flex items-center justify-center p-1.5 text-muted hover:text-ink transition-colors nav:hidden cursor-pointer"
         type="button"
         aria-haspopup="dialog"
         aria-controls="site-menu"
         aria-expanded="false"
-        aria-label="Open site menu"
+        aria-label="Buka menu"
       >
-        Menu
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" x2="20" y1="12" y2="12"></line>
+          <line x1="4" x2="20" y1="6" y2="6"></line>
+          <line x1="4" x2="20" y1="18" y2="18"></line>
+        </svg>
       </button>
     </div>
   </div>
@@ -177,6 +165,13 @@ const actionLink =
           Search
         </button>
         <ThemeToggle />
+        <button
+          type="button"
+          onclick="document.querySelector('#site-menu')?.close(); window.dispatchEvent(new CustomEvent('omoo:open-account-modal'));"
+          class="text-[0.7rem] font-medium uppercase tracking-[0.1em] text-muted transition-colors hover:text-ink cursor-pointer"
+        >
+          Account
+        </button>
       </div>
     </div>
   </div>

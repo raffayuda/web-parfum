@@ -9,6 +9,8 @@ import Nav from '../components/Nav.astro';
 import SearchOverlay from '../components/SearchOverlay.astro';
 import WhatsAppFloat from '../components/WhatsAppFloat.astro';
 import Footer from '../components/Footer.astro';
+import { GlobalToaster } from '../components/ui/react/GlobalToaster';
+import { InlineVisualEditor } from '../components/admin/InlineVisualEditor';
 
 interface Props {
   title?: string;
@@ -77,6 +79,21 @@ const ogImage = new URL('/og.jpg', Astro.site);
       } catch {
         document.documentElement.dataset.theme = 'light';
       }
+
+      // Pastikan veil transition tertutup saat navigasi undo/redo (bfcache popstate)
+      function resetVeil() {
+        var veil = document.querySelector('[data-page-veil]');
+        if (veil) {
+          veil.style.setProperty('visibility', 'hidden', 'important');
+          veil.style.setProperty('opacity', '0', 'important');
+          veil.style.setProperty('pointer-events', 'none', 'important');
+          veil.style.setProperty('clip-path', 'none', 'important');
+        }
+      }
+      window.addEventListener('pageshow', resetVeil);
+      window.addEventListener('popstate', resetVeil);
+      window.addEventListener('focus', resetVeil);
+      document.addEventListener('DOMContentLoaded', resetVeil);
     </script>
 
     {schema && <script type="application/ld+json" set:html={JSON.stringify(schema)} />}
@@ -89,8 +106,9 @@ const ogImage = new URL('/og.jpg', Astro.site);
       <div data-scroll-progress class="h-full w-full origin-left scale-x-0 bg-accent"></div>
     </div>
     <div class="page">
+      <GlobalToaster client:load />
+      <InlineVisualEditor client:load />
       <Nav />
-      <SearchOverlay />
       {!Astro.url.pathname.startsWith('/contact') && <WhatsAppFloat />}
       <main id="main">
         <slot />

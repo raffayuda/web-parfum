@@ -6,6 +6,56 @@ import Section from '../../components/ui/Section.astro';
 import FragranceCard from '../../components/FragranceCard.astro';
 import DiscoverySet from '../../components/DiscoverySet.astro';
 import { families, fragrances } from '../../data/fragrances';
+import { prisma } from '../../../server/src/db';
+
+export const prerender = false;
+
+let dbPerfumes: any[] = [];
+let dbElements: Record<string, string> = {};
+let dbImages: Record<string, string> = {};
+
+try {
+  dbPerfumes = await prisma.fragrance.findMany({ orderBy: { edition: 'asc' } });
+  const page = await prisma.page.findFirst({
+    where: { slug: 'collection' },
+    include: { sections: true },
+  });
+  if (page) {
+    for (const sec of page.sections) {
+      const c = (sec.contentData as any) || {};
+      if (c.elements) dbElements = { ...dbElements, ...c.elements };
+      if (c.images) dbImages = { ...dbImages, ...c.images };
+    }
+  }
+} catch (e) {}
+
+const getTxt = (id: string, fallback: string) => dbElements[id] || fallback;
+
+// 100% Dynamic Perfume Catalogue from PostgreSQL
+const enrichedFragrances = (dbPerfumes.length > 0 ? dbPerfumes : fragrances).map((item: any) => {
+  const staticFrag = fragrances.find((f) => f.slug === item.slug);
+  return {
+    slug: item.slug,
+    edition: item.edition,
+    name: item.name,
+    family: item.family,
+    tagline: item.tagline,
+    description: item.description,
+    price: Number(item.price),
+    volume: item.volume || '50 ml',
+    concentration: item.concentration || 'Extrait de parfum, 20%',
+    isAvailable: item.isAvailable !== undefined ? item.isAvailable : true,
+    bottle: item.bottleImage || item.bottle || staticFrag?.bottle || '/src/assets/images/bottle-vetiver.jpg',
+    bottleAlt: item.bottleAlt || `${item.name} Bottle`,
+    card: item.bottleImage || item.card || staticFrag?.card || '/src/assets/images/bottle-vetiver.jpg',
+    cardAlt: item.cardAlt || `${item.name} Card`,
+    macro: item.macroImage || item.macro || staticFrag?.macro || '/src/assets/images/macro-vetiver.jpg',
+    macroAlt: item.macroAlt || `${item.name} Macro`,
+    notes: (item.notes as any) || staticFrag?.notes || { top: [], heart: [], base: [] },
+    material: (item.material as any) || staticFrag?.material || { name: '', origin: '', phrase: '' },
+    story: item.story || staticFrag?.story || [],
+  };
+});
 
 const filterActive = 'border-accent text-ink';
 const filterIdle = 'border-transparent text-muted hover:text-ink';
@@ -16,9 +66,11 @@ const filterIdle = 'border-transparent text-muted hover:text-ink';
   description="Enam extrait de parfum Omoo. Woody, floral, green, fresh, oriental, dan musk, masing-masing dibangun dari satu material."
 >
   <PageHeader
-    deck="Enam extrait de parfum. Masing-masing dibangun dari satu material, tanpa tambahan untuk mengisi ruang."
+    deck={getTxt('collection-deck', 'Enam extrait de parfum. Masing-masing dibangun dari satu material, tanpa tambahan untuk mengisi ruang.')}
   >
-    <Fragment slot="title">The <span class="italic">collection</span>.</Fragment>
+    <Fragment slot="title">
+      <span data-editable-id="collection-title">{getTxt('collection-title', 'The collection.')}</span>
+    </Fragment>
   </PageHeader>
 
   <div>
@@ -66,7 +118,7 @@ const filterIdle = 'border-transparent text-muted hover:text-ink';
 
       <div data-stagger class="grid gap-x-gutter gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
         {
-          fragrances.map((fragrance, index) => (
+          enrichedFragrances.map((fragrance, index) => (
             <div
               data-card
               data-family={fragrance.family}

@@ -13,34 +13,190 @@ import { featured, materials, priceLabel } from '../data/fragrances';
 import { journal } from '../data/journal';
 import { site } from '../data/site';
 import { images, alts } from '../data/images';
+import { prisma } from '../../server/src/db';
+import { InlineVisualEditor } from '../components/admin/InlineVisualEditor';
 
-const [lead, ...secondary] = featured;
+let dbSections: any[] = [];
+let pageId: string | undefined = undefined;
+let dbPerfumes: any[] = [];
+let hiddenSections: string[] = [];
+
+try {
+  const page = await prisma.page.findUnique({
+    where: { slug: 'home' },
+    include: {
+      sections: {
+        orderBy: { order: 'asc' },
+      },
+    },
+  });
+  if (page) {
+    dbSections = page.sections;
+    pageId = page.id;
+    for (const s of page.sections) {
+      const c = (s.contentData as any) || {};
+      if (Array.isArray(c.hiddenSections)) {
+        hiddenSections = [...hiddenSections, ...c.hiddenSections];
+      }
+    }
+  }
+
+  dbPerfumes = await prisma.fragrance.findMany({ orderBy: { edition: 'asc' } });
+} catch (e) {
+  // Graceful fallback to static if db is temporarily offline
+}
+
+// Find dynamic sections:
+const heroSec = dbSections.find((s) => s.template === 'HERO_EDITORIAL');
+const showcaseSec = dbSections.find((s) => s.template === 'FRAGRANCE_GRID');
+const materialSec = dbSections.find((s) => s.template === 'MATERIAL_STORY');
+const quizSec = dbSections.find((s) => s.template === 'RICH_TEXT_MEDIA');
+const quoteSec = dbSections.find((s) => s.template === 'HERO_SPLIT');
+const processSec = dbSections.find((s) => s.template === 'PROCESS_STEPS');
+const halalSec = dbSections.find((s) => s.template === 'HALAL_BPOM_BADGE');
+const discoverySec = dbSections.find((s) => s.template === 'DISCOVERY_BANNER');
+
+// Section visibility: permanently respected from database. If deleted or hidden, NEVER reappear!
+const showHero = !hiddenSections.includes('HERO_EDITORIAL') && (heroSec ? heroSec.isActive : dbSections.length === 0);
+const showShowcase = !hiddenSections.includes('FRAGRANCE_GRID') && (showcaseSec ? showcaseSec.isActive : dbSections.length === 0);
+const showMaterials = !hiddenSections.includes('MATERIAL_STORY') && (materialSec ? materialSec.isActive : dbSections.length === 0);
+const showQuiz = !hiddenSections.includes('RICH_TEXT_MEDIA') && (quizSec ? quizSec.isActive : dbSections.length === 0);
+const showQuote = !hiddenSections.includes('HERO_SPLIT') && (quoteSec ? quoteSec.isActive : dbSections.length === 0);
+const showProcess = !hiddenSections.includes('PROCESS_STEPS') && (processSec ? processSec.isActive : dbSections.length === 0);
+const showHalal = !hiddenSections.includes('HALAL_BPOM_BADGE') && (halalSec ? halalSec.isActive : dbSections.length === 0);
+const showDiscovery = !hiddenSections.includes('DISCOVERY_BANNER') && (discoverySec ? discoverySec.isActive : dbSections.length === 0);
+
+// 1. Hero Section texts
+const heroEyebrow = heroSec?.eyebrow || 'Maison de parfum, Jakarta';
+const heroTitle = heroSec?.title || 'Wear what cannot be seen.';
+const heroSubtitle =
+  heroSec?.subtitle ||
+  'Enam komposisi dengan material pilihan, diracik perlahan di Jakarta. Tinggal di kulit, lebih lama dari yang Anda kira.';
+const heroCtaText = heroSec?.contentData?.ctaText || 'Explore the collection';
+const heroCtaLink = heroSec?.contentData?.ctaLink || '/collection/';
+const heroSecondaryText = heroSec?.contentData?.secondaryText || 'Find your scent';
+const heroSecondaryLink = heroSec?.contentData?.secondaryLink || '/find/';
+
+// 2. Showcase Catalog Section texts
+const showcaseEyebrow = showcaseSec?.eyebrow || 'Six compositions.';
+const showcaseTitle = showcaseSec?.title || 'Satu material, satu arah.';
+const showcaseSubtitle = showcaseSec?.subtitle || 'View all fragrances';
+const showcaseFooterQuote =
+  showcaseSec?.contentData?.footerQuote ||
+  'The collection stays at six. Komposisi baru menggantikan yang lama, tidak pernah menumpuk di sampingnya.';
+
+// Enrich Perfumes dynamically from DB
+const enrichedFromDb = dbPerfumes.map((dbFrag) => {
+  const staticFrag = featured.find((f) => f.slug === dbFrag.slug) || featured[0];
+  const dbNotes = (dbFrag.notes as any) || staticFrag.notes;
+  return {
+    ...staticFrag,
+    ...dbFrag,
+    price: Number(dbFrag.price),
+    notes: dbNotes,
+    bottle: dbFrag.bottleImage || dbFrag.bottle || staticFrag.bottle,
+    bottleAlt: dbFrag.bottleAlt || staticFrag.bottleAlt,
+    macro: dbFrag.macroImage || dbFrag.macro || staticFrag.macro,
+    macroAlt: dbFrag.macroAlt || staticFrag.macroAlt,
+    card: dbFrag.bottleImage || dbFrag.card || staticFrag.card,
+    cardAlt: dbFrag.cardAlt || staticFrag.cardAlt,
+    isAvailable: dbFrag.isAvailable,
+  };
+});
+
+const [lead, ...secondary] = enrichedFromDb.length > 0 ? enrichedFromDb : featured;
+const enrichedLead = lead;
+const enrichedSecondary = secondary;
+
 const leadNotes = [
-  { label: 'Top', notes: lead.notes.top },
-  { label: 'Heart', notes: lead.notes.heart },
-  { label: 'Base', notes: lead.notes.base },
+  { label: 'Top', notes: enrichedLead.notes.top },
+  { label: 'Heart', notes: enrichedLead.notes.heart },
+  { label: 'Base', notes: enrichedLead.notes.base },
 ];
+
+// 3. Materials Section texts
+const materialTitle = materialSec?.title || 'Materials, satu per satu.';
+const materialSubtitle =
+  materialSec?.subtitle ||
+  'Setiap komposisi dimulai dari satu material dan tempat asalnya. Arahkan kursor ke nama untuk melihatnya.';
+
+// 4. Quiz Consultation texts
+const quizTitle = quizSec?.title || 'Tiga pertanyaan.';
+const quizSubtitle = quizSec?.subtitle || 'Satu parfum.';
+const quizDesc =
+  quizSec?.contentData?.description ||
+  'Tiga pertanyaan singkat tentang suasana, material favorit, dan seberapa kuat parfum yang Anda inginkan.';
+const quizItemRoom = quizSec?.contentData?.itemRoom || 'Suasana yang Anda cari';
+const quizItemMaterial = quizSec?.contentData?.itemMaterial || 'Bahan yang Anda sukai';
+const quizItemTrace = quizSec?.contentData?.itemTrace || 'Kekuatan parfumnya';
+const quizCtaText = quizSec?.contentData?.ctaText || 'Find your scent';
+const quizCtaLink = quizSec?.contentData?.ctaLink || '/find/';
+
+// 5. Quote Section texts
+const quoteText =
+  quoteSec?.title ||
+  'The house is small on purpose. Hanya dengan begitu saya bisa mencium setiap batch sebelum ia meninggalkan atelier.';
+const quoteAuthor = quoteSec?.subtitle || 'Camille Aumont';
+const quoteRole = quoteSec?.contentData?.authorRole || 'Founder and perfumer';
+const quoteCtaText = quoteSec?.contentData?.ctaText || 'Inside the maison';
+const quoteCtaLink = quoteSec?.contentData?.ctaLink || '/about/';
+
+// 6. Process Section texts
+const processTitle = processSec?.title || 'Slow is a material.';
+const processSubtitle =
+  processSec?.subtitle ||
+  'Tidak ada yang selesai karena jadwal. Formula yang menentukan kapan ia siap.';
+const step1Title = processSec?.contentData?.step1Title || 'Compose';
+const step1Copy =
+  processSec?.contentData?.step1Copy ||
+  'Satu material memimpin. Catatan lain ditulis mengelilinginya, tidak pernah menutupinya.';
+const step2Title = processSec?.contentData?.step2Title || 'Macerate';
+const step2Copy =
+  processSec?.contentData?.step2Copy ||
+  'Konsentrat beristirahat di baja, lalu kaca. Minggu-minggu berlalu dan tepinya melembut.';
+const step3Title = processSec?.contentData?.step3Title || 'Bottle';
+const step3Copy =
+  processSec?.contentData?.step3Copy ||
+  'Setiap flacon diisi, disegel, dan diberi nomor di atelier Jakarta.';
 
 const process = [
   {
-    title: 'Compose',
-    copy: 'Satu material memimpin. Catatan lain ditulis mengelilinginya, tidak pernah menutupinya.',
+    title: step1Title,
+    copy: step1Copy,
     image: images.atelier,
     alt: alts.atelier,
   },
   {
-    title: 'Macerate',
-    copy: 'Konsentrat beristirahat di baja, lalu kaca. Minggu-minggu berlalu dan tepinya melembut.',
+    title: step2Title,
+    copy: step2Copy,
     image: images.maceration,
     alt: alts.maceration,
   },
   {
-    title: 'Bottle',
-    copy: 'Setiap flacon diisi, disegel, dan diberi nomor di atelier Jakarta.',
+    title: step3Title,
+    copy: step3Copy,
     image: images.bottleOud,
     alt: alts.bottleOud,
   },
 ];
+
+// 7. Halal & BPOM texts
+const halalEyebrow = halalSec?.eyebrow || 'Legality & Trust';
+const halalTitle = halalSec?.title || 'Sertifikasi Resmi BPOM & Halal';
+const halalSubtitle =
+  halalSec?.subtitle ||
+  'Seluruh formula wewangian OMOO telah teruji di laboratorium terakreditasi, resmi terdaftar di BPOM RI, dan bersertifikat Halal Indonesia.';
+const halalCtaText = halalSec?.contentData?.ctaText || 'Verifikasi Google Lens';
+const halalCode = halalSec?.contentData?.featuredCode || 'BPOM-OM01-VETIVER';
+const halalNotice = halalSec?.contentData?.scanNotice || 'Pindai QR dus atau buka lembar sertifikat';
+
+// 8. Discovery Set texts
+const discoveryTitle = discoverySec?.title || 'Discovery Set (6 x 2 ml)';
+const discoverySubtitle =
+  discoverySec?.subtitle ||
+  'Kenali seluruh keenam wewangian di kulit Anda sebelum memilih satu flacon penuh. Nilai set dapat digunakan sebagai voucher potongan untuk botol 50 ml berikutnya.';
+const discoveryPrice = Number(discoverySec?.contentData?.price || 450000);
+const discoveryCtaText = discoverySec?.contentData?.ctaText || 'Pesan Discovery Set';
 
 const schema = {
   '@context': 'https://schema.org',
@@ -72,7 +228,8 @@ const schema = {
   description="Omoo adalah rumah parfum kecil di Jakarta. Enam komposisi extrait de parfum, diracik dari material pilihan, dibuat perlahan."
   schema={schema}
 >
-  <section class="relative overflow-hidden pb-[clamp(3rem,6vw,5rem)] pt-[clamp(1.5rem,4vw,3rem)]">
+  {showHero && (
+  <section class="relative overflow-hidden pb-[clamp(3rem,6vw,5rem)] pt-[clamp(1.5rem,4vw,3rem)]" data-section-template="HERO_EDITORIAL" data-section-name="Hero Editorial">
     <div aria-hidden="true" class="pointer-events-none absolute inset-0 overflow-hidden">
       <div
         data-mist
@@ -87,17 +244,14 @@ const schema = {
     <div class="relative mx-auto w-full max-w-page px-gutter">
       <div class="grid items-stretch gap-10 lg:grid-cols-[7fr_5fr] lg:gap-[clamp(2rem,5vw,5rem)]">
         <div class="flex flex-col justify-center py-[clamp(1rem,4vw,3.5rem)]">
-          <Eyebrow data-hero-fade style="--hero-delay: 0s">Maison de parfum, Jakarta</Eyebrow>
+          <Eyebrow data-hero-fade style="--hero-delay: 0s"><span data-editable-id="hero-eyebrow">{heroEyebrow}</span></Eyebrow>
 
           <h1
             class="mt-7 font-display text-[clamp(3.35rem,7.7vw,7.75rem)] font-light leading-[0.9] tracking-[-0.022em] text-balance"
           >
             <span class="block overflow-hidden pb-[0.08em]">
-              <span data-hero-line style="--line-delay: 0.06s" class="block">Wear what</span>
-            </span>
-            <span class="block overflow-hidden pb-[0.08em]">
-              <span data-hero-line style="--line-delay: 0.17s" class="block">
-                cannot be <em class="italic">seen</em>.
+              <span data-hero-line style="--line-delay: 0.06s" class="block" data-editable-id="hero-title">
+                {heroTitle}
               </span>
             </span>
           </h1>
@@ -106,9 +260,9 @@ const schema = {
             data-hero-fade
             style="--hero-delay: 0.38s"
             class="mt-7 max-w-[38ch] text-[clamp(1rem,1.25vw,1.15rem)] leading-[1.65] text-muted"
+            data-editable-id="hero-subtitle"
           >
-            Enam komposisi dengan material pilihan, diracik perlahan di Jakarta. Tinggal di kulit,
-            lebih lama dari yang Anda kira.
+            {heroSubtitle}
           </p>
 
           <div
@@ -116,12 +270,12 @@ const schema = {
             style="--hero-delay: 0.48s"
             class="mt-9 flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:gap-8"
           >
-            <Button href="/collection/" class="w-full sm:w-auto">Explore the collection</Button>
-            <ArrowLink href="/find/">Find your scent</ArrowLink>
+            <Button href={heroCtaLink} class="w-full sm:w-auto"><span data-editable-id="hero-cta">{heroCtaText}</span></Button>
+            <ArrowLink href={heroSecondaryLink}><span data-editable-id="hero-secondary">{heroSecondaryText}</span></ArrowLink>
           </div>
         </div>
 
-        <div class="relative">
+        <div class="relative" data-editable-img="hero-bottle">
           <div class="relative z-10" data-parallax>
             <span
               aria-hidden="true"
@@ -148,6 +302,7 @@ const schema = {
 
             <div
               data-float
+              data-editable-img="hero-macro"
               class="absolute -bottom-6 -left-4 z-20 w-24 rotate-[-3deg] border-[6px] border-bg bg-bg shadow-[0_24px_60px_rgba(0,0,0,0.22)] sm:w-32 lg:w-40"
             >
               <div data-float-loop>
@@ -165,25 +320,28 @@ const schema = {
       </div>
     </div>
   </section>
+  )}
 
+  {showShowcase && (
+  <div data-section-template="FRAGRANCE_GRID" data-section-name="Katalog Wewangian">
   <Section>
     <SectionHeader
       linkHref="/collection/"
-      linkLabel="View all fragrances"
+      linkLabel={showcaseSubtitle}
       class="mb-[clamp(2.5rem,5vw,4.5rem)]"
     >
-      Six compositions.<br /><span class="italic">Satu material, satu arah.</span>
+      <span data-editable-id="showcase-eyebrow">{showcaseEyebrow}</span><br /><span class="italic" data-editable-id="showcase-title">{showcaseTitle}</span>
     </SectionHeader>
 
     <div class="grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-gutter">
       <a
-        href={`/collection/${lead.slug}/`}
+        href={`/collection/${enrichedLead.slug}/`}
         class="group relative block [perspective:1200px] lg:col-span-6"
         data-tilt
       >
         <Media
-          src={lead.bottle}
-          alt={lead.bottleAlt}
+          src={enrichedLead.bottle}
+          alt={enrichedLead.bottleAlt}
           aspect="4 / 5"
           widths={[420, 620, 840, 1040]}
           sizes="(max-width: 1024px) 100vw, 48vw"
@@ -196,8 +354,8 @@ const schema = {
           class="absolute -bottom-6 -right-4 z-10 hidden w-32 border-[6px] border-bg bg-bg shadow-[0_24px_60px_rgba(0,0,0,0.18)] sm:block lg:w-40"
         >
           <Media
-            src={lead.macro}
-            alt={lead.macroAlt}
+            src={enrichedLead.macro}
+            alt={enrichedLead.macroAlt}
             aspect="1 / 1"
             widths={[160, 240, 360]}
             sizes="160px"
@@ -211,22 +369,22 @@ const schema = {
             aria-hidden="true"
             class="pointer-events-none absolute -top-20 right-0 hidden select-none font-display text-[clamp(8rem,13vw,13rem)] font-light leading-[0.7] text-transparent [-webkit-text-stroke:1px_var(--color-line)] lg:block"
           >
-            {lead.edition.split('-')[1]}
+            {enrichedLead.edition.split('-')[1]}
           </span>
 
           <p class="relative text-[0.65rem] font-medium uppercase tracking-[0.13em] text-muted">
-            {lead.edition} / {lead.family}
+            {enrichedLead.edition} / {enrichedLead.family}
           </p>
           <h3
             class="relative mt-4 font-display text-[clamp(2.6rem,4.4vw,4.6rem)] font-light leading-[0.94] tracking-[-0.022em]"
           >
-            {lead.name}
+            {enrichedLead.name}
           </h3>
           <p class="relative mt-4 font-display text-[clamp(1.3rem,1.8vw,1.65rem)] font-light italic leading-snug">
-            {lead.tagline}
+            {enrichedLead.tagline}
           </p>
           <p class="relative mt-5 max-w-[44ch] text-[0.95rem] leading-[1.7] text-muted">
-            {lead.description}
+            {enrichedLead.description}
           </p>
 
           <dl class="relative mt-7 grid grid-cols-3 gap-4 border-t border-line pt-4">
@@ -244,12 +402,12 @@ const schema = {
 
           <div class="relative mt-8 flex flex-wrap items-end justify-between gap-5 border-t border-line pt-4">
             <p class="flex items-baseline gap-3">
-              <span class="font-display text-3xl">{priceLabel(lead.price)}</span>
+              <span class="font-display text-3xl">{priceLabel(enrichedLead.price)}</span>
               <span class="text-[0.68rem] uppercase tracking-[0.08em] text-muted">
-                {lead.volume} / Extrait
+                {enrichedLead.volume} / Extrait
               </span>
             </p>
-            <ArrowLink href={`/collection/${lead.slug}/`}>Discover</ArrowLink>
+            <ArrowLink href={`/collection/${enrichedLead.slug}/`}>Discover</ArrowLink>
           </div>
         </div>
       </div>
@@ -257,28 +415,30 @@ const schema = {
 
     <div data-stagger class="mt-20 grid gap-12 sm:grid-cols-2 lg:mt-28 lg:grid-cols-3">
       {
-        secondary.map((fragrance) => (
+        enrichedSecondary.map((fragrance) => (
           <FragranceCard fragrance={fragrance} aspect="4 / 5" />
         ))
       }
     </div>
 
     <div class="mt-16 border-t border-line pt-6">
-      <p class="max-w-[40ch] font-display text-[clamp(1.5rem,2.4vw,2.2rem)] font-light leading-[1.08]">
-        The collection stays at six. Komposisi baru menggantikan yang lama, tidak pernah menumpuk
-        di sampingnya.
+      <p class="max-w-[40ch] font-display text-[clamp(1.5rem,2.4vw,2.2rem)] font-light leading-[1.08]" data-editable-id="showcase-quote">
+        {showcaseFooterQuote}
       </p>
     </div>
   </Section>
+  </div>
+  )}
 
+  {showMaterials && (
+  <div data-section-template="MATERIAL_STORY" data-section-name="Eksplorasi Material Asal">
   <Section tone="surface" id="materials" labelledby="materials-heading" class="relative overflow-hidden">
     <div class="relative max-w-[54ch]">
       <SectionHeader id="materials-heading">
-        Materials,<br /><span class="italic">satu per satu.</span>
+        <span data-editable-id="material-title">{materialTitle}</span>
       </SectionHeader>
-      <p data-reveal class="mt-7 max-w-[42ch] text-[0.95rem] leading-[1.7] text-muted">
-        Setiap komposisi dimulai dari satu material dan tempat asalnya. Arahkan kursor ke nama
-        untuk melihatnya.
+      <p data-reveal class="mt-7 max-w-[42ch] text-[0.95rem] leading-[1.7] text-muted" data-editable-id="material-subtitle">
+        {materialSubtitle}
       </p>
     </div>
 
@@ -337,10 +497,13 @@ const schema = {
       </ul>
     </div>
   </Section>
+  </div>
+  )}
 
-  <section class="relative overflow-hidden border-y border-line">
+  {showQuiz && (
+  <section class="relative overflow-hidden border-y border-line" data-section-template="RICH_TEXT_MEDIA" data-section-name="Konsultasi Scent">
     <div class="grid lg:grid-cols-2">
-      <div class="relative min-h-[320px] overflow-hidden lg:min-h-[680px]">
+      <div class="relative min-h-[320px] overflow-hidden lg:min-h-[680px]" data-editable-img="quiz-img">
         <div class="absolute inset-0">
           <Media
             src={images.atelier}
@@ -362,67 +525,72 @@ const schema = {
             data-reveal-title
             class="max-w-[13ch] pb-1 font-display text-[clamp(2.4rem,4.4vw,4.1rem)] font-light leading-[0.98] tracking-[-0.02em]"
           >
-            Tiga pertanyaan.<br /><span class="italic">Satu parfum.</span>
+            <span data-editable-id="quiz-title">{quizTitle}</span><br /><span class="italic" data-editable-id="quiz-subtitle">{quizSubtitle}</span>
           </h2>
-          <p data-reveal class="mt-6 max-w-[44ch] text-[0.95rem] leading-[1.7] text-muted">
-            Tiga pertanyaan singkat tentang suasana, material favorit, dan seberapa kuat parfum
-            yang Anda inginkan.
+          <p data-reveal class="mt-6 max-w-[44ch] text-[0.95rem] leading-[1.7] text-muted" data-editable-id="quiz-desc">
+            {quizDesc}
           </p>
 
           <dl class="mt-8 grid border-t border-line">
             <div data-reveal class="flex items-baseline justify-between gap-4 border-b border-line py-3">
               <dt class="font-display text-xl">Room</dt>
-              <dd class="text-[0.7rem] uppercase tracking-[0.08em] text-muted">Suasana yang Anda cari</dd>
+              <dd class="text-[0.7rem] uppercase tracking-[0.08em] text-muted" data-editable-id="quiz-item-room">{quizItemRoom}</dd>
             </div>
             <div data-reveal class="flex items-baseline justify-between gap-4 border-b border-line py-3">
               <dt class="font-display text-xl">Material</dt>
-              <dd class="text-[0.7rem] uppercase tracking-[0.08em] text-muted">Bahan yang Anda sukai</dd>
+              <dd class="text-[0.7rem] uppercase tracking-[0.08em] text-muted" data-editable-id="quiz-item-material">{quizItemMaterial}</dd>
             </div>
             <div data-reveal class="flex items-baseline justify-between gap-4 border-b border-line py-3">
               <dt class="font-display text-xl">Trace</dt>
-              <dd class="text-[0.7rem] uppercase tracking-[0.08em] text-muted">Kekuatan parfumnya</dd>
+              <dd class="text-[0.7rem] uppercase tracking-[0.08em] text-muted" data-editable-id="quiz-item-trace">{quizItemTrace}</dd>
             </div>
           </dl>
 
           <div data-reveal class="mt-8">
-            <Button href="/find/">Find your scent</Button>
+            <Button href={quizCtaLink}><span data-editable-id="quiz-cta">{quizCtaText}</span></Button>
           </div>
         </div>
       </div>
     </div>
   </section>
+  )}
 
-  <section class="pt-section">
-    <Media
-      src={images.atelierDoor}
-      alt={alts.atelierDoor}
-      fill
-      class="h-[clamp(320px,52vw,640px)] w-full"
-      widths={[720, 1080, 1600]}
-      sizes="100vw"
-      parallax
-      reveal
-    />
+  {showQuote && (
+  <section class="pt-section" data-section-template="HERO_SPLIT" data-section-name="Kutipan Perfumer">
+    <div data-editable-img="quote-door">
+      <Media
+        src={images.atelierDoor}
+        alt={alts.atelierDoor}
+        fill
+        class="h-[clamp(320px,52vw,640px)] w-full"
+        widths={[720, 1080, 1600]}
+        sizes="100vw"
+        parallax
+        reveal
+      />
+    </div>
 
     <div class="mx-auto w-full max-w-page px-gutter">
       <div class="grid gap-8 py-[clamp(2.5rem,5vw,4.5rem)] lg:grid-cols-12">
         <blockquote class="lg:col-span-8" data-reveal>
           <p class="font-display text-[clamp(1.9rem,4vw,3.9rem)] font-light leading-[1.03] tracking-[-0.015em]">
-            &ldquo;The house is small on purpose. Hanya dengan begitu saya bisa mencium setiap batch
-            sebelum ia meninggalkan atelier.&rdquo;
+            &ldquo;<span data-editable-id="quote-text">{quoteText}</span>&rdquo;
           </p>
         </blockquote>
         <div class="flex flex-col justify-end gap-5 lg:col-span-3 lg:col-start-10">
           <p class="text-[0.68rem] font-medium uppercase leading-[1.6] tracking-[0.13em] text-muted">
-            Camille Aumont<br />
-            Founder and perfumer
+            <span data-editable-id="quote-author">{quoteAuthor}</span><br />
+            <span data-editable-id="quote-role">{quoteRole}</span>
           </p>
-          <ArrowLink href="/maison/" class="self-start">Inside the maison</ArrowLink>
+          <ArrowLink href={quoteCtaLink} class="self-start"><span data-editable-id="quote-cta">{quoteCtaText}</span></ArrowLink>
         </div>
       </div>
     </div>
   </section>
+  )}
 
+  {showProcess && (
+  <div data-section-template="PROCESS_STEPS" data-section-name="Proses Peracikan">
   <Section spacing="tight">
     <div class="grid gap-12 lg:grid-cols-12">
       <div class="lg:col-span-4 lg:sticky lg:top-28 lg:self-start">
@@ -430,10 +598,10 @@ const schema = {
           data-reveal-title
           class="max-w-[10ch] pb-1 font-display text-[clamp(2.35rem,4.8vw,4.75rem)] font-light leading-[0.98] tracking-[-0.02em]"
         >
-          Slow is a material.
+          <span data-editable-id="process-title">{processTitle}</span>
         </h2>
-        <p data-reveal class="mt-6 max-w-[34ch] text-[0.95rem] leading-[1.7] text-muted">
-          Tidak ada yang selesai karena jadwal. Formula yang menentukan kapan ia siap.
+        <p data-reveal class="mt-6 max-w-[34ch] text-[0.95rem] leading-[1.7] text-muted" data-editable-id="process-subtitle">
+          {processSubtitle}
         </p>
       </div>
 
@@ -446,7 +614,7 @@ const schema = {
         ></span>
 
         {
-          process.map((step) => (
+          process.map((step, idx) => (
             <article
               data-reveal
               class="grid gap-6 border-t border-line py-10 first:pt-0 md:grid-cols-[5fr_6fr] md:items-center md:gap-10 md:py-12"
@@ -461,9 +629,9 @@ const schema = {
               />
               <div>
                 <h3 class="font-display text-[clamp(1.8rem,2.8vw,2.5rem)] font-light leading-none">
-                  {step.title}
+                  <span data-editable-id={`step${idx + 1}-title`}>{step.title}</span>
                 </h3>
-                <p class="mt-3 max-w-[34ch] text-[0.92rem] leading-[1.65] text-muted">{step.copy}</p>
+                <p class="mt-3 max-w-[34ch] text-[0.92rem] leading-[1.65] text-muted" data-editable-id={`step${idx + 1}-copy`}>{step.copy}</p>
               </div>
             </article>
           ))
@@ -471,9 +639,11 @@ const schema = {
       </div>
     </div>
   </Section>
+  </div>
+  )}
 
   <Section>
-    <SectionHeader linkHref="/journal/" linkLabel="Semua tulisan" class="mb-[clamp(2.25rem,5vw,4.25rem)]">
+    <SectionHeader linkHref="/journey/" linkLabel="Buka Galeri & Tulisan" class="mb-[clamp(2.25rem,5vw,4.25rem)]">
       From the atelier
     </SectionHeader>
 
@@ -487,7 +657,47 @@ const schema = {
     </div>
   </Section>
 
-  <DiscoverySet />
+  {showHalal && (
+    <div data-section-template="HALAL_BPOM_BADGE" data-section-name="Sertifikasi BPOM & Halal">
+    <Section tone="tint" spacing="tight">
+      <div class="grid items-center gap-8 lg:grid-cols-12">
+        <div class="lg:col-span-8">
+          <p class="text-[0.62rem] font-medium uppercase tracking-[0.14em] text-muted" data-editable-id="halal-eyebrow">
+            {halalEyebrow}
+          </p>
+          <h2
+            data-reveal-title
+            class="mt-3 max-w-[16ch] pb-1 font-display text-[clamp(2.2rem,4vw,3.8rem)] font-light leading-[0.98] tracking-[-0.02em]"
+          >
+            <span data-editable-id="halal-title">{halalTitle}</span>
+          </h2>
+          <p data-reveal class="mt-4 max-w-[44ch] text-[0.95rem] leading-[1.7] text-muted" data-editable-id="halal-subtitle">
+            {halalSubtitle}
+          </p>
+        </div>
+        <div data-reveal class="flex flex-col items-start gap-4 lg:col-span-4 lg:justify-end">
+          <Button href={`/verify/${halalCode}/`} class="w-full sm:w-auto">
+            <span data-editable-id="halal-cta">{halalCtaText}</span>
+          </Button>
+          <span class="text-[0.68rem] text-muted uppercase tracking-[0.08em]" data-editable-id="halal-notice">
+            {halalNotice}
+          </span>
+        </div>
+      </div>
+    </Section>
+    </div>
+  )}
+
+  {showDiscovery && (
+    <div data-editable-img="discovery-img" data-section-template="DISCOVERY_BANNER" data-section-name="Discovery Set Banner">
+      <DiscoverySet
+        title={discoveryTitle}
+        subtitle={discoverySubtitle}
+        price={discoveryPrice}
+        ctaText={discoveryCtaText}
+      />
+    </div>
+  )}
 </BaseLayout>
 
 <script>

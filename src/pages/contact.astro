@@ -10,6 +10,26 @@ import Faq from '../components/ui/Faq.astro';
 import { Icon } from 'astro-icon/components';
 import { images, alts } from '../data/images';
 import { site, whatsappHref } from '../data/site';
+import { prisma } from '../../server/src/db';
+
+let dbSections: any[] = [];
+try {
+  const page = await prisma.page.findUnique({
+    where: { slug: 'contact' },
+    include: {
+      sections: {
+        orderBy: { order: 'asc' },
+      },
+    },
+  });
+  if (page) dbSections = page.sections;
+} catch (e) {}
+
+const contactHero = dbSections.find((s) => s.template === 'HERO_SPLIT');
+const contactFaqSec = dbSections.find((s) => s.template === 'FAQ_ACCORDION');
+
+const headerDeck = contactHero?.subtitle || 'Toko kami buka dengan janji temu. Untuk pertanyaan tentang koleksi parfum, ketersediaan stok, atau pemesanan langsung, hubungi kami via WhatsApp atau email.';
+const headerTitle = contactHero?.title || 'Kunjungi, Hubungi & Pesan.';
 
 const stockists = [
   {
@@ -31,46 +51,56 @@ const stockists = [
 
 const faq = [
   {
-    question: 'Bisakah saya mengunjungi atelier?',
+    question: 'Bisakah saya berkunjung langsung ke toko / butik OMOO?',
     answer:
-      'Tentu. Kunjungan dilakukan dengan janji temu, Selasa sampai Jumat. Tulis ke hello@omoo.studio atau WhatsApp kami dengan hari dan waktu yang Anda inginkan, lalu kami akan mengonfirmasi.',
+      'Tentu bisa. Kunjungan dibuka Selasa sampai Jumat dengan konfirmasi terlebih dahulu. Anda bisa chat ke WhatsApp kami atau email hello@omoo.studio untuk mencocokkan jadwal kedatangan.',
   },
   {
-    question: 'Apakah Anda mengirim ke luar Indonesia?',
+    question: 'Bagaimana cara memesan parfum?',
     answer:
-      'Belum. Saat ini pengiriman hanya di dalam Indonesia. Jika Anda berada di luar negeri, hubungi kami untuk informasi lebih lanjut.',
+      'Pemesanan dapat dilakukan langsung di website ini dengan memilih produk dan checkout via QRIS/Transfer, atau bisa juga langsung memesan secara praktis melalui WhatsApp resmi OMOO.',
   },
   {
-    question: 'Bagaimana cara memesan?',
+    question: 'Berapa lama estimasi pengiriman pesanan?',
     answer:
-      'Semua pemesanan diproses lewat WhatsApp. Buka halaman parfum atau discovery set, tekan Pesan via WhatsApp, lalu kirim pesan yang sudah terisi. Kami akan mengonfirmasi stok, pembayaran, dan pengiriman. Saat ini kami hanya mengirim di dalam Indonesia.',
+      'Pesanan dikirimkan dalam 1-2 hari kerja menggunakan ekspedisi terpercaya (JNE YES / Paxel) dengan kemasan botol aman berlapis bubble wrap tebal dan asuransi pengiriman.',
   },
   {
-    question: 'Bagaimana cara menyimpan botol?',
+    question: 'Bagaimana cara menyimpan botol parfum yang benar?',
     answer:
-      'Berdiri tegak, jauh dari cahaya dan panas. Lemari lebih baik daripada rak kamar mandi. Extrait de parfum tetap baik selama bertahun-tahun ketika dibiarkan tenang.',
+      'Simpan botol parfum dalam posisi berdiri tegak, di tempat sejuk dan terhindar dari paparan sinar matahari langsung atau suhu panas berlebih agar kualitas aroma tetap terjaga sempurna.',
   },
   {
-    question: 'Apakah parfumnya unisex?',
+    question: 'Apakah wewangian OMOO cocok untuk pria dan wanita (unisex)?',
     answer:
-      'Ya. Kami tidak membagi koleksi berdasarkan gender. Materialnya adalah satu-satunya arahan.',
+      'Ya, seluruh wewangian OMOO dirancang unisex. Setiap orang bebas memilih aroma yang paling cocok dengan karakter dan selera masing-masing.',
   },
   {
-    question: 'Bisa bertanya lewat WhatsApp?',
+    question: 'Apakah produk OMOO sudah terdaftar BPOM dan Halal?',
     answer:
-      'Bisa. Untuk pertanyaan cepat, pemesanan, atau janji temu, WhatsApp adalah jalur tercepat. Kami membalas pada hari kerja.',
+      'Ya, seluruh produk wewangian OMOO telah teruji aman dan resmi terdaftar di BPOM RI serta bersertifikasi Halal.',
   },
 ];
+
+const dynamicFaqs = (contactFaqSec?.contentData?.faqs || []).map((f: any) => ({
+  question: f.q || f.question,
+  answer: f.a || f.answer,
+}));
+const allFaqs = dynamicFaqs.length > 0 ? dynamicFaqs : faq;
 ---
 
 <BaseLayout
   title="Contact"
   description="Kunjungi atelier Omoo di Jakarta, temukan stockist di Indonesia, atau hubungi kami lewat WhatsApp dan email untuk koleksi serta pemesanan."
 >
-  <PageHeader
-    deck="Atelier kami buka dengan janji temu. Untuk pertanyaan tentang koleksi, stockist, atau pemesanan, hubungi kami lewat WhatsApp atau email."
-  >
-    <Fragment slot="title">Visit, write,<br /><span class="italic">smell.</span></Fragment>
+  <PageHeader deck={headerDeck}>
+    <Fragment slot="title">
+      {contactHero?.title ? (
+        <span>{headerTitle}</span>
+      ) : (
+        <>Visit, write,<br /><span class="italic">smell.</span></>
+      )}
+    </Fragment>
     <div class="mt-8 flex flex-wrap items-center gap-4">
       <p class="text-[0.62rem] font-medium uppercase tracking-[0.14em] text-muted">
         Follow the house
@@ -159,41 +189,6 @@ const faq = [
     </div>
   </Section>
 
-  <Section>
-    <div class="grid gap-8 lg:grid-cols-12">
-      <div class="lg:col-span-4">
-        <h2
-          data-reveal-title
-          class="max-w-[10ch] pb-1 font-display text-[clamp(2.35rem,4.4vw,4.25rem)] font-light leading-[0.98] tracking-[-0.02em]"
-        >
-          Selected stockists
-        </h2>
-        <p data-reveal class="mt-5 max-w-[30ch] text-[0.9rem] leading-[1.7] text-muted">
-          Beberapa tempat memilih koleksi untuk Anda cium langsung.
-        </p>
-      </div>
-      <div class="lg:col-span-7 lg:col-start-6">
-        <div data-stagger class="grid border-t border-line sm:grid-cols-3">
-          {
-            stockists.map((stockist) => (
-              <div
-                data-reveal
-                class="border-b border-line py-6 sm:border-b-0 sm:border-r sm:px-6 sm:first:pl-0 sm:last:border-r-0"
-              >
-                <p class="font-display text-2xl font-light">{stockist.city}</p>
-                <p class="mt-2 whitespace-pre-line text-[0.85rem] leading-[1.6] text-muted">
-                  {stockist.name}
-                  {'\n'}
-                  {stockist.address}
-                </p>
-              </div>
-            ))
-          }
-        </div>
-      </div>
-    </div>
-  </Section>
-
   <Section tone="surface" spacing="tight">
     <div class="grid gap-10 lg:grid-cols-12">
       <div class="lg:col-span-4">
@@ -209,7 +204,7 @@ const faq = [
       </div>
 
       <div class="lg:col-span-7 lg:col-start-6">
-        <Faq items={faq} />
+        <Faq items={allFaqs} />
       </div>
     </div>
   </Section>

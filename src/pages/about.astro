@@ -1,0 +1,265 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/ui/PageHeader.astro';
+import Button from '../components/ui/Button.astro';
+import ArrowLink from '../components/ui/ArrowLink.astro';
+import Media from '../components/ui/Media.astro';
+import Section from '../components/ui/Section.astro';
+import { images, alts } from '../data/images';
+import { prisma } from '../../server/src/db';
+
+export const prerender = false;
+
+let dbElements: Record<string, string> = {};
+let dbImages: Record<string, string> = {};
+let dbTimeline: Array<{ year: string; copy: string; id: string }> | null = null;
+let hiddenSections: string[] = [];
+
+try {
+  const page = await prisma.page.findFirst({
+    where: { slug: { in: ['about', 'maison'] } },
+    include: { sections: true },
+  });
+
+  if (page) {
+    for (const sec of page.sections) {
+      const c = (sec.contentData as any) || {};
+      if (c.elements) dbElements = { ...dbElements, ...c.elements };
+      if (c.images) dbImages = { ...dbImages, ...c.images };
+      if (Array.isArray(c.hiddenSections)) {
+        hiddenSections = [...hiddenSections, ...c.hiddenSections];
+      }
+      if (Array.isArray(c.timeline) && c.timeline.length > 0) {
+        dbTimeline = c.timeline;
+      }
+    }
+  }
+} catch (e) {}
+
+const showAboutHero = !hiddenSections.includes('about-hero');
+const showAboutMaterials = !hiddenSections.includes('about-materials');
+const showAboutTimeline = !hiddenSections.includes('about-timeline');
+const showAboutQuote = !hiddenSections.includes('about-quote');
+
+const getTxt = (id: string, fallback: string) => dbElements[id] || fallback;
+const getImg = (id: string, fallback: string) => dbImages[id] || fallback;
+
+const sources = [
+  {
+    key: 'source-vetiver',
+    name: 'Vetiver',
+    origin: 'Haiti',
+    copy: 'Akar diangkat dengan tangan, dikeringkan di bawah naungan, lalu disuling dekat ladang.',
+    image: getImg('source-vetiver-img', '/src/assets/images/macro-vetiver.jpg'),
+    alt: 'Akar Vetiver Asli Haiti',
+    aspect: '3 / 4',
+  },
+  {
+    key: 'source-iris',
+    name: 'Iris Pallida',
+    origin: 'Tuscany',
+    copy: 'Rizom dibiarkan beristirahat bertahun-tahun sebelum disuling. Bedaknya adalah tujuannya.',
+    image: getImg('source-iris-img', '/src/assets/images/macro-iris.jpg'),
+    alt: 'Rizom Iris Asli Tuscany',
+    aspect: '1 / 1',
+  },
+  {
+    key: 'source-oud',
+    name: 'Wild Oud',
+    origin: 'Kalimantan',
+    copy: 'Kayu resin murni, dipanen etis dalam lot kecil. Tidak ada yang diencerkan dengan bahan sintetis.',
+    image: getImg('source-oud-img', '/src/assets/images/macro-oud.jpg'),
+    alt: 'Kayu Gaharu Alami Kalimantan',
+    aspect: '3 / 4',
+  },
+];
+
+const defaultTimeline = [
+  {
+    year: '2019',
+    copy: 'Camille Aumont mendaftarkan Omoo dan membuka studio wewangian di Jakarta Selatan.',
+    id: 'timeline-2019',
+  },
+  {
+    year: '2021',
+    copy: 'Vetiver Obscura dan Iris Cendre untuk pertama kali dikemas dalam botol kaca tebal.',
+    id: 'timeline-2021',
+  },
+  {
+    year: '2023',
+    copy: 'Fasilitas peracikan diperluas untuk menjaga kualitas bahan wewangian.',
+    id: 'timeline-2023',
+  },
+  {
+    year: '2026',
+    copy: 'Ambrette 12 melengkapi enam komposisi wewangian extrait de parfum bernomor seri.',
+    id: 'timeline-2026',
+  },
+];
+
+const timeline = dbTimeline && dbTimeline.length > 0 ? dbTimeline : defaultTimeline;
+---
+
+<BaseLayout
+  title="About Us — OMOO"
+  description="Tentang OMOO: rumah parfum di Jakarta dengan material yang dipilih dari Grasse dan sekitarnya."
+>
+  <PageHeader deck={getTxt('about-deck', 'OMOO bekerja dari studio peracikan di Jakarta, dengan material pilihan. Setiap formula dikerjakan teliti, satu per satu.')}>
+    <Fragment slot="title">
+      <span data-editable-id="about-title">{getTxt('about-title', 'A house built around one material at a time.')}</span>
+    </Fragment>
+  </PageHeader>
+
+  {/* Hero Split Section */}
+  {showAboutHero && (
+  <div data-section-template="about-hero" data-section-name="Filosofi Peracikan">
+  <Section spacing="tight" class="pt-0">
+    <div class="grid gap-12 lg:grid-cols-12 lg:items-center">
+      <div class="lg:col-span-7">
+        <div data-editable-img="about-hero-img">
+          <Media
+            src={getImg('about-hero-img', '/src/assets/images/atelier.jpg')}
+            alt="Ruang Peracikan dan Maserasi Atelier Omoo"
+            aspect="16 / 10"
+            widths={[640, 960, 1280]}
+            sizes="(max-width: 1024px) 100vw, 58vw"
+            priority
+            reveal
+          />
+        </div>
+      </div>
+
+      <div class="space-y-6 lg:col-span-5">
+        <p class="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-accent" data-editable-id="about-tagline">
+          {getTxt('about-tagline', 'Filosofi Peracikan & Integritas Bahan')}
+        </p>
+
+        <h2 class="font-display text-[clamp(2rem,3.4vw,3.2rem)] font-light leading-[1.04] tracking-[-0.015em]" data-editable-id="about-headline">
+          {getTxt('about-headline', 'Menolak jalan pintas industri wewangian massal.')}
+        </h2>
+
+        <div class="space-y-4 text-[0.95rem] leading-[1.75] text-muted">
+          <p data-editable-id="about-p1">
+            {getTxt('about-p1', 'Kebanyakan parfum modern dimulai dari brief pemasaran: siapa target pasarnya, tren apa yang sedang laku, berapa anggaran cairan per mililiter. Kami memulainya dari bahan mentah yang kami cintai.')}
+          </p>
+          <p data-editable-id="about-p2">
+            {getTxt('about-p2', 'Kami tidak menggunakan filler atau pengikat sintetis murah untuk memperpanjang daya sebar buatan. Yang Anda cium di kulit Anda adalah ekstrak alami yang menua secara jujur bersama suhu tubuh Anda.')}
+          </p>
+        </div>
+
+        <div class="pt-2">
+          <ArrowLink href="/collection/">Lihat Koleksi Parfum</ArrowLink>
+        </div>
+      </div>
+    </div>
+  </Section>
+  </div>
+  )}
+
+  {/* Materials Sourcing Section */}
+  {showAboutMaterials && (
+  <div data-section-template="about-materials" data-section-name="Eksplorasi Asal">
+  <Section tone="surface">
+    <div class="mx-auto max-w-page">
+      <div class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-line pb-6">
+        <div>
+          <span class="text-[0.62rem] uppercase font-bold tracking-[0.16em] text-accent block">
+            Eksplorasi Asal
+          </span>
+          <h2 class="font-display text-[clamp(2.2rem,3.8vw,3.5rem)] font-light leading-tight mt-1" data-editable-id="about-mat-title">
+            {getTxt('about-mat-title', 'Tiga Bahan Baku Utama')}
+          </h2>
+        </div>
+        <p class="max-w-[36ch] text-xs text-muted leading-relaxed" data-editable-id="about-mat-desc">
+          {getTxt('about-mat-desc', 'Dipanen etis pada musim terbaik dan disuling tanpa distorsi suhu.')}
+        </p>
+      </div>
+
+      <div class="grid gap-8 md:grid-cols-3">
+        {sources.map((s) => (
+          <div class="space-y-4 border border-line bg-bg p-5 transition-transform duration-300 hover:-translate-y-1">
+            <div data-editable-img={`${s.key}-img`}>
+              <Media
+                src={s.image}
+                alt={s.alt}
+                aspect="4 / 3"
+                widths={[320, 480, 640]}
+                sizes="(max-width: 768px) 100vw, 33vw"
+              />
+            </div>
+            <div class="pt-2 space-y-1">
+              <span class="text-[0.6rem] uppercase tracking-wider text-muted">{s.origin}</span>
+              <h3 class="font-display text-2xl font-light text-ink" data-editable-id={`${s.key}-name`}>
+                {getTxt(`${s.key}-name`, s.name)}
+              </h3>
+              <p class="text-xs text-muted leading-relaxed pt-1" data-editable-id={`${s.key}-copy`}>
+                {getTxt(`${s.key}-copy`, s.copy)}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </Section>
+  </div>
+  )}
+
+  {/* Atelier History & Timeline */}
+  {showAboutTimeline && (
+  <div data-section-template="about-timeline" data-section-name="Jejak Langkah Atelier">
+  <Section>
+    <div class="grid gap-12 lg:grid-cols-12">
+      <div class="lg:col-span-4">
+        <span class="text-[0.62rem] uppercase font-bold tracking-[0.16em] text-accent block">
+          Kronologi
+        </span>
+        <h2 class="font-display text-[clamp(2.4rem,4.2vw,3.8rem)] font-light leading-[0.98] tracking-[-0.02em] mt-1" data-editable-id="about-timeline-title">
+          {getTxt('about-timeline-title', 'Jejak Langkah OMOO.')}
+        </h2>
+        <p class="mt-4 text-xs text-muted leading-relaxed" data-editable-id="about-timeline-desc">
+          {getTxt('about-timeline-desc', 'Dari botol eksperimental pertama hingga pengakuan sertifikasi halal dan legalitas resmi BPOM RI.')}
+        </p>
+      </div>
+
+      <div class="lg:col-span-7 lg:col-start-6 space-y-6" id="about-timeline-list">
+        {timeline.map((item, index) => (
+          <div
+            class="timeline-item group relative flex items-start gap-6 border-b border-line pb-6"
+            data-timeline-id={item.id || `timeline-${index}`}
+          >
+            <span
+              class="font-display text-3xl font-light text-accent shrink-0 w-24 timeline-year"
+              data-editable-id={`${item.id || `timeline-${index}`}-year`}
+            >
+              {item.year}
+            </span>
+            <p
+              class="text-sm text-ink leading-relaxed flex-1 pt-1 timeline-copy"
+              data-editable-id={`${item.id || `timeline-${index}`}-copy`}
+            >
+              {item.copy}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </Section>
+  </div>
+  )}
+
+  {/* Quote Section */}
+  {showAboutQuote && (
+  <div data-section-template="about-quote" data-section-name="Kutipan Camille Aumont">
+  <section class="py-section-tight border-t border-line bg-surface/30">
+    <div class="mx-auto w-full max-w-page px-gutter text-center space-y-4">
+      <blockquote class="font-display text-[clamp(1.8rem,3.2vw,3rem)] font-light italic leading-snug max-w-3xl mx-auto" data-editable-id="about-quote">
+        "{getTxt('about-quote', 'Parfum adalah seni paling sunyi: ia tidak bersuara, tidak meminta dilihat, namun tinggal paling lama di ingatan.')}"
+      </blockquote>
+      <figcaption class="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-muted" data-editable-id="about-quote-author">
+        {getTxt('about-quote-author', 'Camille Aumont — Pendiri & Perfumer OMOO')}
+      </figcaption>
+    </div>
+  </section>
+  </div>
+  )}
+</BaseLayout>

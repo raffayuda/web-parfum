@@ -1,0 +1,23 @@
+---
+import { OrderCreatePage } from '../../../admin/components/OrderCreatePage';
+import '@fontsource/cormorant-garamond';
+import '@fontsource-variable/instrument-sans';
+import '../../../styles/global.css';
+
+export const prerender = false;
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tambah Pesanan Manual — OMOO Admin</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body class="bg-bg text-ink antialiased">
+    <div id="root">
+      <OrderCreatePage client:load />
+    </div>
+  </body>
+</html>
