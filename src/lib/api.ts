@@ -1,4 +1,15 @@
-export const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3001';
+// Resolve API URL dynamically: prioritizes PUBLIC_API_URL, auto-detects domain in production browser, or defaults to localhost
+export const getApiUrl = (): string => {
+  if (typeof import.meta !== 'undefined' && import.meta.env?.PUBLIC_API_URL) {
+    return import.meta.env.PUBLIC_API_URL;
+  }
+  if (typeof window !== 'undefined' && window.location.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return `https://api.${window.location.hostname}`;
+  }
+  return 'http://localhost:3001';
+};
+
+export const API_URL = getApiUrl();
 export const API_BASE = `${API_URL}/api`;
 
 export async function fetcher<T = any>(endpoint: string, options?: RequestInit): Promise<T> {
