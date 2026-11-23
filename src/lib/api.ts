@@ -1,12 +1,31 @@
-// Resolve API URL dynamically: prioritizes PUBLIC_API_URL, auto-detects domain in production browser, or defaults to localhost
+// Resolve API URL dynamically:
+// - In production browser (omoo.web.id): always targets https://api.omoo.web.id
+// - In local browser (localhost): targets http://localhost:3001
+// - In server-side SSR: uses PUBLIC_API_URL or defaults to https://api.omoo.web.id
 export const getApiUrl = (): string => {
+  // Running in browser
+  if (typeof window !== 'undefined' && window.location?.hostname) {
+    // If testing on localhost, use local backend
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://localhost:3001';
+    }
+    // In production browser, prioritize configured non-localhost PUBLIC_API_URL or auto-resolve from hostname
+    if (
+      typeof import.meta !== 'undefined' &&
+      import.meta.env?.PUBLIC_API_URL &&
+      !import.meta.env.PUBLIC_API_URL.includes('localhost') &&
+      !import.meta.env.PUBLIC_API_URL.includes('127.0.0.1')
+    ) {
+      return import.meta.env.PUBLIC_API_URL;
+    }
+    return `https://api.${window.location.hostname}`;
+  }
+
+  // Server-side (Cloudflare Worker SSR)
   if (typeof import.meta !== 'undefined' && import.meta.env?.PUBLIC_API_URL) {
     return import.meta.env.PUBLIC_API_URL;
   }
-  if (typeof window !== 'undefined' && window.location.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-    return `https://api.${window.location.hostname}`;
-  }
-  return 'http://localhost:3001';
+  return 'https://api.omoo.web.id';
 };
 
 export const API_URL = getApiUrl();
