@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../../lib/api';
+import { api, API_BASE } from '../../lib/api';
 import { toast } from 'sonner';
 import { Button } from '../ui/react/Button';
 import { Input, Textarea } from '../ui/react/Input';
@@ -70,7 +70,7 @@ export const LiveLandingEditor: React.FC<LiveLandingEditorProps> = ({
     setIsLoggingIn(true);
     setLoginError(null);
     try {
-      const res = await fetch('http://localhost:3001/api/auth/sign-in/email', {
+      const res = await fetch(`${API_BASE}/auth/sign-in/email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

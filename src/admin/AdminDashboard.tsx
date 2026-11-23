@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '../lib/query-client';
+import { API_BASE } from '../lib/api';
 import { OverviewTab } from './components/OverviewTab';
 import { PageBuilderTab } from './components/PageBuilderTab';
 import { CatalogTab } from './components/CatalogTab';
@@ -86,7 +87,7 @@ const AdminDashboardInner: React.FC = () => {
 
     try {
       // Connect to Better Auth API
-      const res = await fetch('http://localhost:3001/api/auth/sign-in/email', {
+      const res = await fetch(`${API_BASE}/auth/sign-in/email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

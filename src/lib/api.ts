@@ -1,4 +1,5 @@
-const API_BASE = 'http://localhost:3001/api';
+export const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3001';
+export const API_BASE = `${API_URL}/api`;
 
 export async function fetcher<T = any>(endpoint: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${endpoint}`, {
@@ -113,7 +114,7 @@ export const api = {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('category', category);
-    const res = await fetch('http://localhost:3001/api/upload', {
+    const res = await fetch(`${API_BASE}/upload`, {
       method: 'POST',
       body: formData,
     });

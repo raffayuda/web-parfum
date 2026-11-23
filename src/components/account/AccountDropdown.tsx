@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { api } from '../../lib/api';
+import { api, API_BASE } from '../../lib/api';
 import { CustomerAccountModal } from './CustomerAccountModal';
 import { toast } from 'sonner';
 import {
@@ -100,7 +100,7 @@ export const AccountDropdown: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:3001/api/auth/sign-out', {
+      await fetch(`${API_BASE}/auth/sign-out`, {
         method: 'POST',
         credentials: 'include',
       });

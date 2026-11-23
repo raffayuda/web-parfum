@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../../components/ui/react/Button';
 import { Input } from '../../components/ui/react/Input';
+import { API_BASE } from '../../lib/api';
 
 interface AdminLayoutProps {
   activeTab?: string;
@@ -51,7 +52,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     setLoginError('');
 
     try {
-      const res = await fetch('http://localhost:3001/api/auth/sign-in/email', {
+      const res = await fetch(`${API_BASE}/auth/sign-in/email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

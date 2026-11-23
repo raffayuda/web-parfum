@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal } from '../ui/react/Modal';
 import { Button } from '../ui/react/Button';
 import { Input } from '../ui/react/Input';
-import { api } from '../../lib/api';
+import { api, API_BASE } from '../../lib/api';
 import { toast } from 'sonner';
 import { User, LogIn, UserPlus, Package, LogOut, Shield, Award, CheckCircle2 } from 'lucide-react';
 
@@ -87,7 +87,7 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
     setFormSuccess(null);
 
     try {
-      const res = await fetch('http://localhost:3001/api/auth/sign-in/email', {
+      const res = await fetch(`${API_BASE}/auth/sign-in/email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -131,7 +131,7 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
     setFormSuccess(null);
 
     try {
-      const res = await fetch('http://localhost:3001/api/auth/sign-up/email', {
+      const res = await fetch(`${API_BASE}/auth/sign-up/email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -172,7 +172,7 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:3001/api/auth/sign-out', {
+      await fetch(`${API_BASE}/auth/sign-out`, {
         method: 'POST',
         credentials: 'include',
       });

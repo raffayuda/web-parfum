@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { UploadCloud, CheckCircle, AlertCircle, X } from 'lucide-react';
 import { Button } from './Button';
+import { API_BASE, API_URL } from '../../../lib/api';
 
 export interface FileUploaderProps {
   onUploadSuccess: (url: string) => void;
@@ -38,7 +39,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
       formData.append('file', file);
       formData.append('category', category);
 
-      const apiUrl = 'http://localhost:3001/api/upload';
+      const apiUrl = `${API_BASE}/upload`;
       const res = await fetch(apiUrl, {
         method: 'POST',
         body: formData,
@@ -49,7 +50,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
         throw new Error(data.message || 'Gagal mengunggah file.');
       }
 
-      const fullUrl = `http://localhost:3001${data.url}`;
+      const fullUrl = data.url.startsWith('http') ? data.url : `${API_URL}${data.url}`;
       setPreview(fullUrl);
       onUploadSuccess(fullUrl);
     } catch (err: any) {

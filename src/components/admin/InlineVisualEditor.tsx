@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../../lib/api';
+import { api, API_BASE } from '../../lib/api';
 import { Button } from '../ui/react/Button';
 import { Input } from '../ui/react/Input';
 import { Modal } from '../ui/react/Modal';
@@ -468,7 +468,7 @@ export const InlineVisualEditor: React.FC = () => {
     setIsLoggingIn(true);
     setLoginError(null);
     try {
-      const res = await fetch('http://localhost:3001/api/auth/sign-in/email', {
+      const res = await fetch(`${API_BASE}/auth/sign-in/email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
