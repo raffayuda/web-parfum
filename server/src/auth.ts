@@ -13,6 +13,10 @@ export const auth = betterAuth({
     'http://127.0.0.1:4321',
     'http://localhost:3000',
     'http://localhost:3001',
+    'https://omoo.web.id',
+    'https://api.omoo.web.id',
+    ...(process.env.PUBLIC_SITE_URL ? [process.env.PUBLIC_SITE_URL] : []),
+    ...(process.env.PUBLIC_API_URL ? [process.env.PUBLIC_API_URL] : []),
   ],
   emailAndPassword: {
     enabled: true,

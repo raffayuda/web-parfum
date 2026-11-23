@@ -5,7 +5,7 @@ import react from '@astrojs/react';
 import node from '@astrojs/node';
 
 export default defineConfig({
-  site: 'https://omoo.studio',
+  site: process.env.PUBLIC_SITE_URL || 'https://omoo.web.id',
   output: 'server',
   adapter: node({
     mode: 'standalone',
