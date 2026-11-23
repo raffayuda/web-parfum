@@ -4,3 +4,4 @@ dist/
 .tmp-images/
 .DS_Store
 *.log
+.wrangler/

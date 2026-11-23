@@ -14,6 +14,7 @@
     "check": "astro check"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^14.4.9",
     "@astrojs/node": "^11.1.14",
     "@astrojs/react": "^7.1.9",
     "@elysiajs/cors": "^1.4.3",
