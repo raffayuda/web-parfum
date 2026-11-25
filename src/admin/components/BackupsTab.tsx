@@ -227,10 +227,11 @@ export const BackupsTab: React.FC = () => {
                         deleteMutation.mutate(b.id);
                       }
                     }}
-                    className="p-1.5 border border-line hover:border-red-700 hover:text-red-700 transition-colors text-muted cursor-pointer disabled:opacity-50"
+                    className="inline-flex items-center justify-center w-9 h-9 border border-red-500/40 bg-red-500/10 hover:bg-red-500/20 hover:border-red-500 text-red-600 dark:text-red-400 transition-colors cursor-pointer disabled:opacity-50"
                     title="Hapus backup ini"
+                    aria-label="Hapus backup ini"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </td>

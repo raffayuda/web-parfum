@@ -665,40 +665,44 @@ export const PageBuilderTab: React.FC = () => {
                   <button
                     onClick={() => handleMove(index, 'up')}
                     disabled={index === 0}
-                    className="p-1.5 border border-line hover:border-ink disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                    className="inline-flex items-center justify-center w-9 h-9 border border-line bg-surface/40 hover:border-accent disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
                     title="Pindahkan ke atas"
+                    aria-label="Pindahkan ke atas"
                   >
-                    <ArrowUp className="w-3.5 h-3.5 text-ink" />
+                    <ArrowUp className="w-4 h-4 text-ink" />
                   </button>
                   <button
                     onClick={() => handleMove(index, 'down')}
                     disabled={index === sections.length - 1}
-                    className="p-1.5 border border-line hover:border-ink disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                    className="inline-flex items-center justify-center w-9 h-9 border border-line bg-surface/40 hover:border-accent disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
                     title="Pindahkan ke bawah"
+                    aria-label="Pindahkan ke bawah"
                   >
-                    <ArrowDown className="w-3.5 h-3.5 text-ink" />
+                    <ArrowDown className="w-4 h-4 text-ink" />
                   </button>
 
                   {/* Toggle Active */}
                   <button
                     onClick={() => handleToggleActive(sec)}
-                    className="p-1.5 border border-line hover:border-ink transition-colors"
+                    className="inline-flex items-center justify-center w-9 h-9 border border-line bg-surface/40 hover:border-accent transition-colors cursor-pointer"
                     title={sec.isActive ? 'Sembunyikan seksi' : 'Aktifkan seksi'}
+                    aria-label={sec.isActive ? 'Sembunyikan seksi' : 'Aktifkan seksi'}
                   >
                     {sec.isActive ? (
-                      <Eye className="w-3.5 h-3.5 text-accent" />
+                      <Eye className="w-4 h-4 text-accent" />
                     ) : (
-                      <EyeOff className="w-3.5 h-3.5 text-muted" />
+                      <EyeOff className="w-4 h-4 text-muted" />
                     )}
                   </button>
 
                   {/* Edit - Navigates to full sub-view */}
                   <button
                     onClick={() => handleOpenEdit(sec)}
-                    className="p-1.5 border border-line hover:border-ink transition-colors"
+                    className="inline-flex items-center justify-center w-9 h-9 border border-line bg-surface/40 hover:border-accent hover:bg-surface text-ink transition-colors cursor-pointer"
                     title="Edit seksi"
+                    aria-label="Edit seksi"
                   >
-                    <Edit className="w-3.5 h-3.5 text-ink" />
+                    <Edit className="w-4 h-4 text-accent" />
                   </button>
 
                   {/* Delete - Opens custom Modal (NO ALERT) */}
@@ -707,10 +711,11 @@ export const PageBuilderTab: React.FC = () => {
                       setSectionToDelete(sec);
                       setIsDeleteModalOpen(true);
                     }}
-                    className="p-1.5 border border-line hover:border-red-600 transition-colors"
+                    className="inline-flex items-center justify-center w-9 h-9 border border-red-500/40 bg-red-500/10 hover:bg-red-500/20 hover:border-red-500 text-red-600 dark:text-red-400 transition-colors cursor-pointer"
                     title="Hapus seksi"
+                    aria-label="Hapus seksi"
                   >
-                    <Trash2 className="w-3.5 h-3.5 text-red-600" />
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>

@@ -31,6 +31,8 @@ import {
   Trash2,
   User,
   ShoppingBag,
+  RotateCcw,
+  AlertTriangle,
 } from 'lucide-react';
 
 export const OrdersTab: React.FC = () => {
@@ -44,6 +46,14 @@ export const OrdersTab: React.FC = () => {
   const [trackingNumber, setTrackingNumber] = useState('');
   const [courier, setCourier] = useState('JNE YES');
   const [adminNotes, setAdminNotes] = useState('');
+  const [pendingAction, setPendingAction] = useState<
+    | { type: 'delete'; order: any }
+    | { type: 'validate'; order: any }
+    | { type: 'ship'; order: any; trackingNumber: string; courier: string; notes: string }
+    | { type: 'complete'; order: any }
+    | { type: 'revert'; order: any; targetStatus: string; targetLabel: string }
+    | null
+  >(null);
 
   // ---------------------------------------------------------------------------
   // Modal: Tambah Pesanan Manual
@@ -188,6 +198,24 @@ export const OrdersTab: React.FC = () => {
     },
   });
 
+  const revertStatusMutation = useMutation({
+    mutationFn: ({ id, targetStatus, targetLabel }: { id: string; targetStatus: string; targetLabel: string }) =>
+      api.updateOrderStatus(id, {
+        status: targetStatus,
+        adminNotes: `Status dikembalikan ke "${targetLabel}" oleh Admin.`,
+      }),
+    onSuccess: (res, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+      toast.success(`Status pesanan dikembalikan ke "${vars.targetLabel}".`);
+      if (res.data) {
+        setSelectedOrder(res.data);
+      }
+    },
+    onError: (err: any) => {
+      toast.error(err.message || 'Gagal mengembalikan status pesanan');
+    },
+  });
+
   const deleteOrderMutation = useMutation({
     mutationFn: (id: string) => api.deleteOrder(id),
     onSuccess: () => {
@@ -245,10 +273,112 @@ export const OrdersTab: React.FC = () => {
   };
 
   const handleDeleteOrder = (order: any) => {
-    if (confirm(`Apakah Anda yakin ingin menghapus pesanan #${order.orderNumber} ini secara permanen? Data yang dihapus tidak dapat dipulihkan.`)) {
-      deleteOrderMutation.mutate(order.id);
-    }
+    setPendingAction({ type: 'delete', order });
   };
+
+  const handleConfirmPendingAction = () => {
+    if (!pendingAction) return;
+    if (pendingAction.type === 'delete') {
+      deleteOrderMutation.mutate(pendingAction.order.id);
+    } else if (pendingAction.type === 'validate') {
+      validateMutation.mutate({ id: pendingAction.order.id });
+    } else if (pendingAction.type === 'ship') {
+      shipMutation.mutate({
+        id: pendingAction.order.id,
+        trackingNumber: pendingAction.trackingNumber,
+        courier: pendingAction.courier,
+        notes: pendingAction.notes,
+      });
+    } else if (pendingAction.type === 'complete') {
+      completeMutation.mutate(pendingAction.order.id);
+    } else if (pendingAction.type === 'revert') {
+      revertStatusMutation.mutate({
+        id: pendingAction.order.id,
+        targetStatus: pendingAction.targetStatus,
+        targetLabel: pendingAction.targetLabel,
+      });
+    }
+    setPendingAction(null);
+  };
+
+  const confirmModalNode = (
+    <Modal
+      isOpen={!!pendingAction}
+      onClose={() => setPendingAction(null)}
+      title={
+        pendingAction?.type === 'delete'
+          ? 'Konfirmasi Hapus Data Pesanan'
+          : pendingAction?.type === 'validate'
+          ? 'Konfirmasi Validasi Pembayaran'
+          : pendingAction?.type === 'ship'
+          ? 'Konfirmasi Pengiriman & Resi'
+          : pendingAction?.type === 'complete'
+          ? 'Konfirmasi Pesanan Selesai'
+          : 'Konfirmasi Kembalikan Proses Pesanan'
+      }
+      size="sm"
+    >
+      <div className="space-y-4">
+        <div className="flex items-start gap-3">
+          <AlertTriangle
+            className={`w-5 h-5 shrink-0 mt-0.5 ${
+              pendingAction?.type === 'delete' ? 'text-red-500' : 'text-amber-500'
+            }`}
+          />
+          <p className="text-xs leading-relaxed text-ink">
+            {pendingAction?.type === 'delete' && (
+              <>
+                Apakah Anda yakin ingin menghapus pesanan{' '}
+                <strong>#{pendingAction.order?.orderNumber}</strong> secara permanen? Data yang dihapus tidak dapat dipulihkan.
+              </>
+            )}
+            {pendingAction?.type === 'validate' && (
+              <>
+                Validasi pembayaran lunas untuk pesanan{' '}
+                <strong>#{pendingAction.order?.orderNumber}</strong> dan pindahkan proses ke tahap{' '}
+                <strong>Diramu &amp; Dikemas</strong>?
+              </>
+            )}
+            {pendingAction?.type === 'ship' && (
+              <>
+                Terbitkan resi <strong>{pendingAction.trackingNumber}</strong> ({pendingAction.courier}) dan pindahkan pesanan{' '}
+                <strong>#{pendingAction.order?.orderNumber}</strong> ke status <strong>Dalam Pengiriman</strong>?
+              </>
+            )}
+            {pendingAction?.type === 'complete' && (
+              <>
+                Tandai pesanan <strong>#{pendingAction.order?.orderNumber}</strong> telah diterima pelanggan dan berstatus{' '}
+                <strong>Selesai</strong>?
+              </>
+            )}
+            {pendingAction?.type === 'revert' && (
+              <>
+                Kembalikan status pesanan <strong>#{pendingAction.order?.orderNumber}</strong> ke tahap{' '}
+                <strong>{pendingAction.targetLabel}</strong>?
+              </>
+            )}
+          </p>
+        </div>
+
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-line">
+          <Button type="button" variant="ghost" onClick={() => setPendingAction(null)}>
+            Batal
+          </Button>
+          <Button
+            type="button"
+            variant={pendingAction?.type === 'delete' ? 'danger' : 'primary'}
+            onClick={handleConfirmPendingAction}
+          >
+            {pendingAction?.type === 'delete'
+              ? 'Ya, Hapus Pesanan'
+              : pendingAction?.type === 'revert'
+              ? 'Ya, Kembalikan Status'
+              : 'Ya, Lanjutkan'}
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
 
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -562,7 +692,7 @@ export const OrdersTab: React.FC = () => {
             </h3>
 
             {selectedOrder.status === 'AWAITING_VALIDATION' && (
-              <div className="p-4 border border-amber-600/30 bg-amber-950/20 text-amber-300 space-y-3">
+              <div className="p-4 border border-amber-600/40 bg-amber-500/10 text-amber-950 dark:text-amber-200 space-y-3">
                 <p className="text-xs">
                   Customer telah mengunggah bukti transfer. Silakan periksa mutasi rekening atau QRIS sebelum memvalidasi.
                 </p>
@@ -570,7 +700,7 @@ export const OrdersTab: React.FC = () => {
                   variant="primary"
                   icon={<CheckCircle2 className="w-4 h-4 text-accent" />}
                   isLoading={validateMutation.isPending}
-                  onClick={() => validateMutation.mutate({ id: selectedOrder.id })}
+                  onClick={() => setPendingAction({ type: 'validate', order: selectedOrder })}
                 >
                   Validasi Pembayaran Lunas & Mulai Peracikan
                 </Button>
@@ -619,8 +749,9 @@ export const OrdersTab: React.FC = () => {
                         toast.error('Mohon isi nomor resi pengiriman terlebih dahulu.');
                         return;
                       }
-                      shipMutation.mutate({
-                        id: selectedOrder.id,
+                      setPendingAction({
+                        type: 'ship',
+                        order: selectedOrder,
                         trackingNumber: trackingNumber.trim(),
                         courier: courier.trim(),
                         notes: adminNotes.trim(),
@@ -635,19 +766,99 @@ export const OrdersTab: React.FC = () => {
                       variant="secondary"
                       icon={<CheckCircle2 className="w-4 h-4" />}
                       isLoading={completeMutation.isPending}
-                      onClick={() => completeMutation.mutate(selectedOrder.id)}
+                      onClick={() => setPendingAction({ type: 'complete', order: selectedOrder })}
                     >
                       Tandai Pesanan Selesai (Diterima Customer)
                     </Button>
+                  )}
+
+                  {selectedOrder.status === 'PROCESSING' && (
+                    <button
+                      type="button"
+                      disabled={revertStatusMutation.isPending}
+                      onClick={() =>
+                        setPendingAction({
+                          type: 'revert',
+                          order: selectedOrder,
+                          targetStatus: 'AWAITING_VALIDATION',
+                          targetLabel: 'Menunggu Validasi',
+                        })
+                      }
+                      className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium border border-line bg-surface/40 hover:border-amber-600/60 text-muted hover:text-ink transition-colors cursor-pointer"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Kembalikan ke Menunggu Validasi</span>
+                    </button>
+                  )}
+
+                  {selectedOrder.status === 'SHIPPED' && (
+                    <button
+                      type="button"
+                      disabled={revertStatusMutation.isPending}
+                      onClick={() =>
+                        setPendingAction({
+                          type: 'revert',
+                          order: selectedOrder,
+                          targetStatus: 'PROCESSING',
+                          targetLabel: 'Diramu & Dikemas',
+                        })
+                      }
+                      className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium border border-line bg-surface/40 hover:border-amber-600/60 text-muted hover:text-ink transition-colors cursor-pointer"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Kembalikan ke Diramu & Dikemas</span>
+                    </button>
                   )}
                 </div>
               </div>
             )}
 
             {selectedOrder.status === 'COMPLETED' && (
-              <div className="p-4 border border-emerald-600/30 bg-emerald-950/20 text-emerald-400 text-xs flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 shrink-0" />
-                <span>Seluruh rangkaian pemesanan telah selesai dan sampai ke tangan pelanggan dengan baik.</span>
+              <div className="space-y-3">
+                <div className="p-4 border border-emerald-600/30 bg-emerald-500/10 text-emerald-950 dark:text-emerald-300 text-xs flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 shrink-0" />
+                  <span>Seluruh rangkaian pemesanan telah selesai dan sampai ke tangan pelanggan dengan baik.</span>
+                </div>
+                <button
+                  type="button"
+                  disabled={revertStatusMutation.isPending}
+                  onClick={() =>
+                    setPendingAction({
+                      type: 'revert',
+                      order: selectedOrder,
+                      targetStatus: 'SHIPPED',
+                      targetLabel: 'Dalam Pengiriman',
+                    })
+                  }
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium border border-line bg-surface/40 hover:border-amber-600/60 text-muted hover:text-ink transition-colors cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Kembalikan ke Dalam Pengiriman</span>
+                </button>
+              </div>
+            )}
+
+            {selectedOrder.status === 'CANCELLED' && (
+              <div className="space-y-3">
+                <div className="p-4 border border-red-500/40 bg-red-500/10 text-red-700 dark:text-red-300 text-xs">
+                  Pesanan ini sedang berstatus Dibatalkan.
+                </div>
+                <button
+                  type="button"
+                  disabled={revertStatusMutation.isPending}
+                  onClick={() =>
+                    setPendingAction({
+                      type: 'revert',
+                      order: selectedOrder,
+                      targetStatus: 'AWAITING_VALIDATION',
+                      targetLabel: 'Menunggu Validasi',
+                    })
+                  }
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium border border-line bg-surface/40 hover:border-amber-600/60 text-muted hover:text-ink transition-colors cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Aktifkan Kembali ke Menunggu Validasi</span>
+                </button>
               </div>
             )}
           </div>
@@ -670,6 +881,7 @@ export const OrdersTab: React.FC = () => {
             paymentMethod={selectedOrder.paymentMethod}
           />
         </div>
+        {confirmModalNode}
       </div>
     );
   }
@@ -813,31 +1025,33 @@ export const OrdersTab: React.FC = () => {
 
               {/* Action Buttons: Detail, Edit, Hapus */}
               <td className="py-4 px-4 whitespace-nowrap text-right">
-                <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                   <a
                     href={`/admin/orders/${o.id}`}
-                    className="inline-flex items-center gap-1 px-2.5 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wider bg-ink text-bg hover:bg-ink/80 transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 text-[0.68rem] font-semibold uppercase tracking-wider bg-ink text-bg hover:bg-ink/85 transition-colors cursor-pointer"
                     title="Buka halaman penuh detail pesanan"
                   >
-                    <Eye className="w-3 h-3 text-accent" />
+                    <Eye className="w-4 h-4 text-accent" />
                     <span>Detail & Kelola</span>
                   </a>
 
                   <a
                     href={`/admin/orders/${o.id}/edit`}
-                    className="p-1.5 border border-line hover:border-accent text-muted hover:text-ink transition-colors cursor-pointer inline-flex items-center"
+                    className="inline-flex items-center justify-center w-9 h-9 border border-line bg-surface/40 hover:border-accent hover:bg-surface text-ink transition-colors cursor-pointer"
                     title="Edit pesanan"
+                    aria-label="Edit pesanan"
                   >
-                    <Edit className="w-3.5 h-3.5" />
+                    <Edit className="w-4 h-4 text-accent" />
                   </a>
 
                   <button
                     type="button"
                     onClick={() => handleDeleteOrder(o)}
-                    className="p-1.5 border border-line hover:border-red-500 text-muted hover:text-red-400 transition-colors cursor-pointer"
+                    className="inline-flex items-center justify-center w-9 h-9 border border-red-500/40 bg-red-500/10 hover:bg-red-500/20 hover:border-red-500 text-red-600 dark:text-red-400 transition-colors cursor-pointer"
                     title="Hapus pesanan"
+                    aria-label="Hapus pesanan"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </td>
@@ -845,6 +1059,7 @@ export const OrdersTab: React.FC = () => {
           );
         })}
       </Table>
+      {confirmModalNode}
     </div>
   );
 };

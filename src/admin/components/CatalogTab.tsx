@@ -1087,18 +1087,20 @@ export const CatalogTab: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => handleOpenEdit(p)}
-                    className="p-1.5 border border-line hover:border-ink text-ink transition-colors cursor-pointer"
+                    className="inline-flex items-center justify-center w-9 h-9 border border-line bg-surface/40 hover:border-accent hover:bg-surface text-ink transition-colors cursor-pointer"
                     title="Edit Data Parfum"
+                    aria-label="Edit Data Parfum"
                   >
-                    <Edit className="w-3.5 h-3.5" />
+                    <Edit className="w-4 h-4 text-accent" />
                   </button>
                   <button
                     type="button"
                     onClick={() => handleOpenDelete(p)}
-                    className="p-1.5 border border-line hover:border-red-600 text-red-600 transition-colors cursor-pointer"
+                    className="inline-flex items-center justify-center w-9 h-9 border border-red-500/40 bg-red-500/10 hover:bg-red-500/20 hover:border-red-500 text-red-600 dark:text-red-400 transition-colors cursor-pointer"
                     title="Hapus Parfum"
+                    aria-label="Hapus Parfum"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -1174,26 +1176,29 @@ export const CatalogTab: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleOpenDetail(p)}
-                          className="p-1.5 border border-line hover:border-ink transition-colors cursor-pointer"
+                          className="inline-flex items-center justify-center w-9 h-9 border border-line bg-surface/40 hover:border-accent hover:bg-surface transition-colors cursor-pointer"
                           title="Lihat Detail Parfum"
+                          aria-label="Lihat Detail Parfum"
                         >
-                          <Eye className="w-3.5 h-3.5 text-accent" />
+                          <Eye className="w-4 h-4 text-accent" />
                         </button>
                         <button
                           type="button"
                           onClick={() => handleOpenEdit(p)}
-                          className="p-1.5 border border-line hover:border-ink transition-colors cursor-pointer"
+                          className="inline-flex items-center justify-center w-9 h-9 border border-line bg-surface/40 hover:border-accent hover:bg-surface text-ink transition-colors cursor-pointer"
                           title="Edit Parfum"
+                          aria-label="Edit Parfum"
                         >
-                          <Edit className="w-3.5 h-3.5 text-ink" />
+                          <Edit className="w-4 h-4 text-accent" />
                         </button>
                         <button
                           type="button"
                           onClick={() => handleOpenDelete(p)}
-                          className="p-1.5 border border-line hover:border-red-600 transition-colors cursor-pointer"
+                          className="inline-flex items-center justify-center w-9 h-9 border border-red-500/40 bg-red-500/10 hover:bg-red-500/20 hover:border-red-500 text-red-600 dark:text-red-400 transition-colors cursor-pointer"
                           title="Hapus Parfum"
+                          aria-label="Hapus Parfum"
                         >
-                          <Trash2 className="w-3.5 h-3.5 text-red-600" />
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </td>

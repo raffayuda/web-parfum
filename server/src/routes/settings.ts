@@ -122,4 +122,126 @@ export const settingsRoute = new Elysia({ prefix: '/settings' })
       set.status = 400;
       return { success: false, message: e.message };
     }
-  });
+  })
+
+  // Resolve Google Maps URL (including short links like maps.app.goo.gl) into coordinates
+  .post(
+    '/resolve-maps-link',
+    async ({ body, set }) => {
+      const rawUrl = (body.url || '').trim();
+      if (!rawUrl) {
+        set.status = 400;
+        return { success: false, message: 'URL Google Maps tidak boleh kosong.' };
+      }
+
+      const isValidLatLng = (lat: number, lng: number) =>
+        Number.isFinite(lat) &&
+        Number.isFinite(lng) &&
+        lat >= -90 &&
+        lat <= 90 &&
+        lng >= -180 &&
+        lng <= 180;
+
+      const extractCoords = (text: string): { lat: number; lng: number } | null => {
+        if (!text) return null;
+        const patterns = [
+          /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/,
+          /@(-?\d+\.\d+),(-?\d+\.\d+)/,
+          /[?&](?:q|query|ll|center)=(-?\d+\.\d+)(?:,|%2C|\s)+(-?\d+\.\d+)/i,
+          /(-?\d{1,2}\.\d{3,})\s*,\s*(-?\d{1,3}\.\d{3,})/,
+        ];
+
+        for (const regex of patterns) {
+          const m = text.match(regex);
+          if (m) {
+            const lat = parseFloat(m[1]);
+            const lng = parseFloat(m[2]);
+            if (isValidLatLng(lat, lng)) {
+              return { lat: Number(lat.toFixed(6)), lng: Number(lng.toFixed(6)) };
+            }
+          }
+        }
+        return null;
+      };
+
+      // 1. Try direct extraction first
+      const direct = extractCoords(rawUrl);
+      if (direct) {
+        return { success: true, data: { ...direct, resolvedUrl: rawUrl } };
+      }
+
+      // 2. Validate hostname before fetching server-side
+      let parsed: URL;
+      try {
+        parsed = new URL(rawUrl);
+      } catch {
+        set.status = 400;
+        return { success: false, message: 'Format link Google Maps tidak valid.' };
+      }
+
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        set.status = 400;
+        return { success: false, message: 'Protokol URL harus http atau https.' };
+      }
+
+      const allowedHosts = [
+        'maps.app.goo.gl',
+        'goo.gl',
+        'g.co',
+        'google.com',
+        'www.google.com',
+        'maps.google.com',
+        'google.co.id',
+        'www.google.co.id',
+      ];
+      const host = parsed.hostname.toLowerCase();
+      const isAllowed = allowedHosts.some((h) => host === h || host.endsWith(`.${h}`));
+      if (!isAllowed) {
+        set.status = 400;
+        return { success: false, message: 'Gunakan link resmi Google Maps (maps.app.goo.gl atau google.com/maps).' };
+      }
+
+      try {
+        const res = await fetch(parsed.toString(), {
+          method: 'GET',
+          redirect: 'follow',
+          signal: AbortSignal.timeout(8000),
+          headers: {
+            'User-Agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'id-ID,id;q=0.9,en;q=0.8',
+          },
+        });
+
+        const finalUrl = res.url || rawUrl;
+        const fromFinalUrl = extractCoords(decodeURIComponent(finalUrl));
+        if (fromFinalUrl) {
+          return { success: true, data: { ...fromFinalUrl, resolvedUrl: finalUrl } };
+        }
+
+        const html = await res.text();
+        const fromHtml = extractCoords(html);
+        if (fromHtml) {
+          return { success: true, data: { ...fromHtml, resolvedUrl: finalUrl } };
+        }
+
+        set.status = 422;
+        return {
+          success: false,
+          message: 'Koordinat tidak ditemukan di link tersebut. Coba buka link di browser lalu salin URL lengkapnya.',
+        };
+      } catch (err: any) {
+        set.status = 500;
+        return {
+          success: false,
+          message: 'Gagal memproses link Google Maps. Silakan coba lagi atau salin URL lengkap dari browser.',
+        };
+      }
+    },
+    {
+      body: t.Object({
+        url: t.String(),
+      }),
+    }
+  );

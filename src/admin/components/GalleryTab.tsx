@@ -277,10 +277,11 @@ export const GalleryTab: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => openEditModal(item)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-line bg-bg hover:border-ink text-xs font-medium text-ink transition-colors cursor-pointer"
+                  className="inline-flex items-center justify-center w-9 h-9 border border-line bg-surface/40 hover:border-accent hover:bg-surface text-ink transition-colors cursor-pointer"
+                  title="Edit Foto"
+                  aria-label="Edit Foto"
                 >
-                  <Edit3 className="w-3.5 h-3.5 text-muted" />
-                  <span>Edit</span>
+                  <Edit3 className="w-4 h-4 text-accent" />
                 </button>
                 <button
                   type="button"
@@ -290,10 +291,11 @@ export const GalleryTab: React.FC = () => {
                       deleteMutation.mutate(item.id);
                     }
                   }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-line bg-bg hover:border-red-700 hover:text-red-700 text-xs font-medium text-muted transition-colors cursor-pointer disabled:opacity-50"
+                  className="inline-flex items-center justify-center w-9 h-9 border border-red-500/40 bg-red-500/10 hover:bg-red-500/20 hover:border-red-500 text-red-600 dark:text-red-400 transition-colors cursor-pointer disabled:opacity-50"
+                  title="Hapus Foto"
+                  aria-label="Hapus Foto"
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>Hapus</span>
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../../lib/api';
 import { Button } from '../../components/ui/react/Button';
 import { Input } from '../../components/ui/react/Input';
@@ -15,11 +15,45 @@ import {
   Sparkles,
   CheckCircle2,
   Building,
+  Loader2,
 } from 'lucide-react';
+
+function extractCoordsFromMapsText(text: string): { lat: number; lng: number } | null {
+  const trimmed = text.trim();
+  if (!trimmed) return null;
+
+  let decoded = trimmed;
+  try {
+    decoded = decodeURIComponent(trimmed);
+  } catch {
+    // keep raw string if malformed URI sequence
+  }
+
+  const patterns = [
+    /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/,
+    /@(-?\d+\.\d+),(-?\d+\.\d+)/,
+    /[?&](?:q|query|ll|center)=(-?\d+\.\d+)(?:,|%2C|\s)+(-?\d+\.\d+)/i,
+    /^(-?\d{1,2}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)$/,
+  ];
+
+  for (const regex of patterns) {
+    const m = decoded.match(regex);
+    if (m) {
+      const lat = parseFloat(m[1]);
+      const lng = parseFloat(m[2]);
+      if (Number.isFinite(lat) && Number.isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+        return { lat: Number(lat.toFixed(6)), lng: Number(lng.toFixed(6)) };
+      }
+    }
+  }
+  return null;
+}
 
 export const SettingsTab: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isResolvingMap, setIsResolvingMap] = useState(false);
+  const resolveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [form, setForm] = useState({
     brandName: 'OMOO',
@@ -69,6 +103,59 @@ export const SettingsTab: React.FC = () => {
 
   const handleChange = (key: string, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleGoogleMapsUrlChange = (rawValue: string) => {
+    setForm((prev) => ({ ...prev, googleMapsUrl: rawValue }));
+
+    if (resolveTimeoutRef.current) {
+      clearTimeout(resolveTimeoutRef.current);
+      resolveTimeoutRef.current = null;
+    }
+
+    const trimmed = rawValue.trim();
+    if (!trimmed) {
+      setIsResolvingMap(false);
+      return;
+    }
+
+    // 1. Try instant client-side extraction (handles full Google Maps URLs or raw "lat, lng")
+    const directCoords = extractCoordsFromMapsText(trimmed);
+    if (directCoords) {
+      setIsResolvingMap(false);
+      setForm((prev) => ({
+        ...prev,
+        googleMapsUrl: rawValue,
+        mapLat: directCoords.lat,
+        mapLng: directCoords.lng,
+      }));
+      toast.success(`Koordinat peta diperbarui (${directCoords.lat}, ${directCoords.lng})`);
+      return;
+    }
+
+    // 2. If it's a shortened or full Google Maps URL without visible coords, resolve via backend
+    if (/^https?:\/\/(maps\.app\.goo\.gl|goo\.gl\/maps|g\.co|(www\.|maps\.)?google\.(com|co\.id))\//i.test(trimmed)) {
+      setIsResolvingMap(true);
+      resolveTimeoutRef.current = setTimeout(async () => {
+        try {
+          const res = await api.resolveMapsLink(trimmed);
+          if (res.success && res.data?.lat != null && res.data?.lng != null) {
+            setForm((prev) => ({
+              ...prev,
+              mapLat: res.data.lat,
+              mapLng: res.data.lng,
+            }));
+            toast.success(`Koordinat peta otomatis ditemukan (${res.data.lat}, ${res.data.lng})`);
+          } else {
+            toast.error(res.message || 'Koordinat tidak ditemukan dari link tersebut.');
+          }
+        } catch (err: any) {
+          toast.error(err?.message || 'Gagal membaca koordinat dari link Google Maps.');
+        } finally {
+          setIsResolvingMap(false);
+        }
+      }, 350);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -337,13 +424,22 @@ export const SettingsTab: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="text-[0.62rem] uppercase font-semibold tracking-wider text-muted block mb-1">
-                  Link Google Maps (Opsional)
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[0.62rem] uppercase font-semibold tracking-wider text-muted block">
+                    Link Google Maps (Opsional)
+                  </label>
+                  {isResolvingMap && (
+                    <span className="inline-flex items-center gap-1 text-[0.62rem] text-accent">
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      Mengambil titik...
+                    </span>
+                  )}
+                </div>
                 <Input
                   value={form.googleMapsUrl}
-                  onChange={(e) => handleChange('googleMapsUrl', e.target.value)}
+                  onChange={(e) => handleGoogleMapsUrlChange(e.target.value)}
                   placeholder="https://maps.app.goo.gl/..."
+                  helperText="Tempel link Google Maps (termasuk maps.app.goo.gl) untuk ubah pin peta otomatis."
                 />
               </div>
             </div>

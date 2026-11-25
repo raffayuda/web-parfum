@@ -591,10 +591,11 @@ export const CertificatesTab: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => openEditModal(c)}
-                  className="p-1.5 border border-line hover:border-ink transition-colors text-ink inline-flex items-center cursor-pointer"
+                  className="inline-flex items-center justify-center w-9 h-9 border border-line bg-surface/40 hover:border-accent hover:bg-surface text-ink transition-colors cursor-pointer"
                   title="Edit Sertifikat"
+                  aria-label="Edit Sertifikat"
                 >
-                  <Edit3 className="w-3.5 h-3.5" />
+                  <Edit3 className="w-4 h-4 text-accent" />
                 </button>
                 <button
                   type="button"
@@ -604,19 +605,21 @@ export const CertificatesTab: React.FC = () => {
                       deleteMutation.mutate(c.id);
                     }
                   }}
-                  className="p-1.5 border border-line hover:border-red-700 hover:text-red-700 transition-colors text-muted inline-flex items-center cursor-pointer disabled:opacity-50"
+                  className="inline-flex items-center justify-center w-9 h-9 border border-red-500/40 bg-red-500/10 hover:bg-red-500/20 hover:border-red-500 text-red-600 dark:text-red-400 transition-colors cursor-pointer disabled:opacity-50"
                   title="Hapus Sertifikat"
+                  aria-label="Hapus Sertifikat"
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
+                  <Trash2 className="w-4 h-4" />
                 </button>
                 <a
                   href={`/verify/${c.verifyCode}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-1.5 border border-line hover:border-ink transition-colors text-ink inline-flex items-center"
+                  className="inline-flex items-center justify-center w-9 h-9 border border-line bg-surface/40 hover:border-accent hover:bg-surface text-ink transition-colors"
                   title="Buka halaman verifikasi publik"
+                  aria-label="Buka halaman verifikasi publik"
                 >
-                  <ExternalLink className="w-3.5 h-3.5" />
+                  <ExternalLink className="w-4 h-4" />
                 </a>
               </div>
             </td>

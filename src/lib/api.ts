@@ -66,6 +66,8 @@ export const api = {
   // Store & Atelier Global Settings
   getSettings: () => fetcher('/settings'),
   updateSettings: (data: any) => fetcher('/settings', { method: 'PUT', body: JSON.stringify(data) }),
+  resolveMapsLink: (url: string) =>
+    fetcher('/settings/resolve-maps-link', { method: 'POST', body: JSON.stringify({ url }) }),
 
   // Users & Customer Data
   getUsers: (params?: { search?: string }) => {

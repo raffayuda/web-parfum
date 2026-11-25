@@ -717,18 +717,20 @@ export const CustomersTab: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleOpenEditModal(u)}
-                          className="p-1 border border-line hover:border-accent text-muted hover:text-ink transition-colors"
+                          className="inline-flex items-center justify-center w-9 h-9 border border-line bg-surface/40 hover:border-accent hover:bg-surface text-ink transition-colors cursor-pointer"
                           title="Edit user"
+                          aria-label="Edit user"
                         >
-                          <Edit className="w-3.5 h-3.5" />
+                          <Edit className="w-4 h-4 text-accent" />
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDeleteUser(u.id, u.name)}
-                          className="p-1 border border-line hover:border-red-500 text-muted hover:text-red-400 transition-colors"
+                          className="inline-flex items-center justify-center w-9 h-9 border border-red-500/40 bg-red-500/10 hover:bg-red-500/20 hover:border-red-500 text-red-600 dark:text-red-400 transition-colors cursor-pointer"
                           title="Hapus user"
+                          aria-label="Hapus user"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </td>

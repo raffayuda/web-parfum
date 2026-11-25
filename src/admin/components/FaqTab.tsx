@@ -285,39 +285,42 @@ export const FaqTab: React.FC = () => {
                 type="button"
                 onClick={() => handleMove(idx, 'up')}
                 disabled={idx === 0}
-                className="p-1.5 border border-line hover:border-ink text-muted hover:text-ink disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                className="inline-flex items-center justify-center w-9 h-9 border border-line bg-surface/40 hover:border-accent text-ink disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
                 title="Pindah ke Atas"
+                aria-label="Pindah ke Atas"
               >
-                <ArrowUp className="w-3.5 h-3.5" />
+                <ArrowUp className="w-4 h-4" />
               </button>
 
               <button
                 type="button"
                 onClick={() => handleMove(idx, 'down')}
                 disabled={idx === faqs.length - 1}
-                className="p-1.5 border border-line hover:border-ink text-muted hover:text-ink disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                className="inline-flex items-center justify-center w-9 h-9 border border-line bg-surface/40 hover:border-accent text-ink disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
                 title="Pindah ke Bawah"
+                aria-label="Pindah ke Bawah"
               >
-                <ArrowDown className="w-3.5 h-3.5" />
+                <ArrowDown className="w-4 h-4" />
               </button>
 
               <button
                 type="button"
                 onClick={() => handleOpenEdit(idx)}
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 border border-line hover:border-accent text-xs text-ink transition-colors cursor-pointer"
+                className="inline-flex items-center justify-center w-9 h-9 border border-line bg-surface/40 hover:border-accent text-ink transition-colors cursor-pointer"
                 title="Edit FAQ ini"
+                aria-label="Edit FAQ ini"
               >
-                <Edit className="w-3 h-3 text-accent" />
-                <span>Edit</span>
+                <Edit className="w-4 h-4 text-accent" />
               </button>
 
               <button
                 type="button"
                 onClick={() => handleDelete(idx)}
-                className="p-1.5 border border-line hover:border-red-500 text-muted hover:text-red-400 transition-colors cursor-pointer"
+                className="inline-flex items-center justify-center w-9 h-9 border border-red-500/40 bg-red-500/10 hover:bg-red-500/20 hover:border-red-500 text-red-600 dark:text-red-400 transition-colors cursor-pointer"
                 title="Hapus FAQ"
+                aria-label="Hapus FAQ"
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                <Trash2 className="w-4 h-4" />
               </button>
             </div>
           </div>
