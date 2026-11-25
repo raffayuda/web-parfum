@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
 import { Button } from '../ui/react/Button';
 import { Input } from '../ui/react/Input';
-import { ArrowLeft, MailCheck, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, MailCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ForgotPasswordPanelProps {
@@ -21,7 +21,6 @@ export const ForgotPasswordPanel: React.FC<ForgotPasswordPanelProps> = ({
   const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -155,29 +154,9 @@ export const ForgotPasswordPanel: React.FC<ForgotPasswordPanelProps> = ({
         required
       />
 
-      <div className="flex justify-end">
-        <button
-          type="button"
-          onClick={() => setShowPassword((v) => !v)}
-          className="inline-flex items-center gap-1.5 text-[0.65rem] uppercase tracking-wider text-muted hover:text-ink cursor-pointer"
-        >
-          {showPassword ? (
-            <>
-              <EyeOff className="w-3.5 h-3.5" />
-              <span>Sembunyikan</span>
-            </>
-          ) : (
-            <>
-              <Eye className="w-3.5 h-3.5" />
-              <span>Lihat Sandi</span>
-            </>
-          )}
-        </button>
-      </div>
-
       <Input
         label="Kata Sandi Baru"
-        type={showPassword ? 'text' : 'password'}
+        type="password"
         value={newPassword}
         onChange={(e) => setNewPassword(e.target.value)}
         placeholder="Minimal 8 karakter"
@@ -187,7 +166,7 @@ export const ForgotPasswordPanel: React.FC<ForgotPasswordPanelProps> = ({
 
       <Input
         label="Konfirmasi Kata Sandi Baru"
-        type={showPassword ? 'text' : 'password'}
+        type="password"
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
         placeholder="Ulangi kata sandi baru"

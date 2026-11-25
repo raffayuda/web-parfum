@@ -89,6 +89,7 @@ export function resolveImage(src: ImageMetadata | string | undefined | null, fal
 /** Normalize image URLs for client-side <img> elements so legacy /src/assets/images/* paths never 404. */
 export function resolvePublicImageUrl(src: string | undefined | null, fallback = '/images/bottle-vetiver.jpg'): string {
   if (!src) return fallback;
+  if (src.startsWith('data:')) return src;
   return src.replace(/^\/src\/assets\/images\//, '/images/');
 }
 

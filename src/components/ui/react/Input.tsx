@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -7,8 +8,10 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, helperText, className = '', id, ...props }, ref) => {
+  ({ label, error, helperText, className = '', id, type, ...props }, ref) => {
     const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
+    const isPassword = type === 'password';
+    const [showPassword, setShowPassword] = useState(false);
 
     return (
       <div className="w-full flex flex-col gap-1.5 text-left">
@@ -17,14 +20,30 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {label}
           </label>
         )}
-        <input
-          id={inputId}
-          ref={ref}
-          className={`w-full bg-surface/50 border ${
-            error ? 'border-red-600 focus:border-red-600' : 'border-line focus:border-ink'
-          } text-ink placeholder:text-muted/60 px-3.5 py-2.5 text-sm transition-colors duration-200 outline-none rounded-none ${className}`}
-          {...props}
-        />
+        <div className="relative w-full">
+          <input
+            id={inputId}
+            ref={ref}
+            type={isPassword ? (showPassword ? 'text' : 'password') : type}
+            className={`w-full bg-surface/50 border ${
+              error ? 'border-red-600 focus:border-red-600' : 'border-line focus:border-ink'
+            } text-ink placeholder:text-muted/60 px-3.5 py-2.5 ${
+              isPassword ? 'pr-10' : ''
+            } text-sm transition-colors duration-200 outline-none rounded-none ${className}`}
+            {...props}
+          />
+          {isPassword && (
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Lihat kata sandi'}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-muted hover:text-ink transition-colors cursor-pointer"
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          )}
+        </div>
         {error && <p className="text-[0.7rem] text-red-600 tracking-wide">{error}</p>}
         {helperText && !error && <p className="text-[0.68rem] text-muted">{helperText}</p>}
       </div>

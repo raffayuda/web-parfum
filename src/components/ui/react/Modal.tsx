@@ -47,11 +47,11 @@ export const Modal: React.FC<ModalProps> = ({
   if (!mounted) return null;
 
   const maxWidthClasses = {
-    sm: 'max-w-sm',
-    md: 'max-w-md',
-    lg: 'max-w-lg',
-    xl: 'max-w-xl',
-    '2xl': 'max-w-3xl',
+    sm: 'max-w-md',
+    md: 'max-w-xl',
+    lg: 'max-w-2xl',
+    xl: 'max-w-4xl',
+    '2xl': 'max-w-5xl',
   };
 
   const modalContent = (
@@ -107,7 +107,7 @@ export const Modal: React.FC<ModalProps> = ({
               )}
 
               {/* Content Body */}
-              <div className="max-h-[70vh] overflow-y-auto pr-1">{children}</div>
+              <div className="max-h-[80vh] overflow-y-auto pr-1">{children}</div>
 
               {/* Footer */}
               {footer && (

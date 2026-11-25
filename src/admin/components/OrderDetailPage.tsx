@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '../../lib/query-client';
 import { api } from '../../lib/api';
+import { openImageInNewTab } from '../../lib/imageCompression';
 import { AdminLayout } from './AdminLayout';
 import { Button } from '../../components/ui/react/Button';
 import { Input, Textarea } from '../../components/ui/react/Input';
@@ -434,15 +435,14 @@ const OrderDetailContent: React.FC<OrderDetailPageProps> = ({ orderId }) => {
                 />
               </div>
               <div className="flex items-center justify-between text-xs">
-                <a
-                  href={order.paymentProofUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-accent hover:underline font-semibold"
+                <button
+                  type="button"
+                  onClick={() => openImageInNewTab(order.paymentProofUrl)}
+                  className="inline-flex items-center gap-1.5 text-accent hover:underline font-semibold cursor-pointer"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                   <span>Buka Ukuran Penuh di Tab Baru ↗</span>
-                </a>
+                </button>
                 {order.paymentProofNote && (
                   <span className="text-muted italic">"{order.paymentProofNote}"</span>
                 )}

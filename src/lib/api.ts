@@ -1,3 +1,5 @@
+import { compressImageFile } from './imageCompression';
+
 // Resolve API URL dynamically:
 // - Single project / single domain: backend API is hosted at the same origin (/api)
 // - In browser: uses window.location.origin (e.g. https://omoo.web.id or http://localhost:4321)
@@ -146,10 +148,14 @@ export const api = {
   resetPasswordWithOtp: (data: { email: string; otp: string; newPassword: string }) =>
     fetcher('/auth/forgot-password/reset', { method: 'POST', body: JSON.stringify(data) }),
 
-  // Direct File Upload
-  uploadFile: async (file: File, category: string = 'perfumes'): Promise<{ success: boolean; url: string; message?: string }> => {
+  // Direct File Upload (auto-compressed + 2 MB max)
+  uploadFile: async (
+    file: File,
+    category: string = 'receipts'
+  ): Promise<{ success: boolean; url: string; message?: string; compressedSize?: number }> => {
+    const processedFile = await compressImageFile(file);
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', processedFile);
     formData.append('category', category);
     const res = await fetch(`${API_BASE}/upload`, {
       method: 'POST',

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
+import { compressImageFile, MAX_UPLOAD_BYTES } from '../../lib/imageCompression';
 import { resolvePublicImageUrl } from '../../data/images';
 import { Button } from '../ui/react/Button';
 import { Input, Textarea } from '../ui/react/Input';
@@ -582,12 +583,30 @@ export const CheckoutPage: React.FC = () => {
     }
   };
 
-  // 7. Upload Receipt File directly
-  const handleReceiptFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // 7. Upload Receipt File directly (max 2 MB, auto-compressed)
+  const handleReceiptFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setReceiptFile(file);
-      setReceiptPreview(URL.createObjectURL(file));
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Format bukti bayar harus berupa gambar (JPG, PNG, atau WEBP).');
+      e.target.value = '';
+      return;
+    }
+
+    if (file.size > MAX_UPLOAD_BYTES) {
+      toast.error('Ukuran file maksimal 2 MB. Silakan pilih gambar yang lebih kecil.');
+      e.target.value = '';
+      return;
+    }
+
+    try {
+      const compressed = await compressImageFile(file);
+      setReceiptFile(compressed);
+      setReceiptPreview(URL.createObjectURL(compressed));
+    } catch (err: any) {
+      toast.error(err.message || 'Gagal memproses gambar.');
+      e.target.value = '';
     }
   };
 
@@ -1239,7 +1258,7 @@ export const CheckoutPage: React.FC = () => {
                           Pilih File Foto Bukti Transfer dari Perangkat
                         </span>
                         <span className="text-[0.65rem] text-muted block">
-                          Format JPG, PNG, atau WEBP (Maksimal 5MB)
+                          Format JPG, PNG, atau WEBP (Maksimal 2MB, dikompres otomatis)
                         </span>
                         <input
                           type="file"

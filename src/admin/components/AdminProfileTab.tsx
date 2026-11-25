@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
 import { Button } from '../../components/ui/react/Button';
 import { Input } from '../../components/ui/react/Input';
-import { UserCog, Lock, Eye, EyeOff, Save, CheckCircle2 } from 'lucide-react';
+import { UserCog, Lock, Save, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface AdminProfileTabProps {
@@ -17,7 +17,6 @@ export const AdminProfileTab: React.FC<AdminProfileTabProps> = ({ onProfileUpdat
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPasswords, setShowPasswords] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -145,30 +144,11 @@ export const AdminProfileTab: React.FC<AdminProfileTabProps> = ({ onProfileUpdat
 
         {/* Password Change Card */}
         <div className="border border-line bg-surface/20 p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-line/70 pb-3">
-            <div className="flex items-center gap-2">
-              <Lock className="w-4 h-4 text-accent" />
-              <h4 className="font-display text-lg text-ink font-normal">
-                Ubah Kata Sandi (Opsional)
-              </h4>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowPasswords((v) => !v)}
-              className="inline-flex items-center gap-1.5 text-[0.68rem] uppercase tracking-wider text-muted hover:text-ink cursor-pointer"
-            >
-              {showPasswords ? (
-                <>
-                  <EyeOff className="w-3.5 h-3.5" />
-                  <span>Sembunyikan</span>
-                </>
-              ) : (
-                <>
-                  <Eye className="w-3.5 h-3.5" />
-                  <span>Lihat Sandi</span>
-                </>
-              )}
-            </button>
+          <div className="flex items-center gap-2 border-b border-line/70 pb-3">
+            <Lock className="w-4 h-4 text-accent" />
+            <h4 className="font-display text-lg text-ink font-normal">
+              Ubah Kata Sandi (Opsional)
+            </h4>
           </div>
 
           <p className="text-[0.72rem] text-muted">
@@ -177,7 +157,7 @@ export const AdminProfileTab: React.FC<AdminProfileTabProps> = ({ onProfileUpdat
 
           <Input
             label="Kata Sandi Saat Ini"
-            type={showPasswords ? 'text' : 'password'}
+            type="password"
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
             placeholder="••••••••"
@@ -187,7 +167,7 @@ export const AdminProfileTab: React.FC<AdminProfileTabProps> = ({ onProfileUpdat
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Kata Sandi Baru"
-              type={showPasswords ? 'text' : 'password'}
+              type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="Minimal 6 karakter"
@@ -195,7 +175,7 @@ export const AdminProfileTab: React.FC<AdminProfileTabProps> = ({ onProfileUpdat
             />
             <Input
               label="Konfirmasi Kata Sandi Baru"
-              type={showPasswords ? 'text' : 'password'}
+              type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Ulangi sandi baru"

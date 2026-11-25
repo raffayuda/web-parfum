@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api';
+import { openImageInNewTab } from '../../lib/imageCompression';
 import { Button } from '../../components/ui/react/Button';
 import { Input, Textarea } from '../../components/ui/react/Input';
 import { Badge } from '../../components/ui/react/Badge';
@@ -533,15 +534,14 @@ export const OrdersTab: React.FC = () => {
                   />
                 </div>
                 <div className="flex items-center justify-between text-xs">
-                  <a
-                    href={selectedOrder.paymentProofUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-accent hover:underline font-semibold"
+                  <button
+                    type="button"
+                    onClick={() => openImageInNewTab(selectedOrder.paymentProofUrl)}
+                    className="inline-flex items-center gap-1.5 text-accent hover:underline font-semibold cursor-pointer"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                     <span>Buka Ukuran Penuh di Tab Baru ↗</span>
-                  </a>
+                  </button>
                   {selectedOrder.paymentProofNote && (
                     <span className="text-muted italic">"{selectedOrder.paymentProofNote}"</span>
                   )}
@@ -793,15 +793,14 @@ export const OrdersTab: React.FC = () => {
               {/* Payment Proof */}
               <td className="py-4 px-4 whitespace-nowrap">
                 {o.paymentProofUrl ? (
-                  <a
-                    href={o.paymentProofUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs text-accent hover:underline"
+                  <button
+                    type="button"
+                    onClick={() => openImageInNewTab(o.paymentProofUrl)}
+                    className="inline-flex items-center gap-1.5 text-xs text-accent hover:underline cursor-pointer"
                   >
                     <FileImage className="w-3.5 h-3.5" />
                     <span>Lihat Bukti</span>
-                  </a>
+                  </button>
                 ) : (
                   <span className="text-xs text-muted">Belum ada</span>
                 )}

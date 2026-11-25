@@ -13,14 +13,12 @@ import { usersRoute } from './routes/users';
 import { settingsRoute } from './routes/settings';
 import { galleryRoute } from './routes/gallery';
 import { join } from 'path';
-import { mkdir } from 'fs/promises';
+import { existsSync } from 'fs';
 
 const uploadsDir = join(process.cwd(), 'uploads');
-try {
-  await mkdir(uploadsDir, { recursive: true });
-} catch {}
+const hasLocalUploads = existsSync(uploadsDir);
 
-export const app = new Elysia()
+const baseApp = new Elysia()
   .use(
     cors({
       origin: true,
@@ -39,13 +37,18 @@ export const app = new Elysia()
         },
       },
     })
-  )
-  .use(
+  );
+
+if (hasLocalUploads) {
+  baseApp.use(
     staticPlugin({
       assets: uploadsDir,
       prefix: '/uploads',
     })
-  )
+  );
+}
+
+export const app = baseApp
   .group('/api', (app) =>
     app
       .use(authRoute)

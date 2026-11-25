@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { UploadCloud, CheckCircle, AlertCircle, X } from 'lucide-react';
 import { Button } from './Button';
 import { API_BASE, API_URL } from '../../../lib/api';
+import { compressImageFile, MAX_UPLOAD_BYTES } from '../../../lib/imageCompression';
 
 export interface FileUploaderProps {
   onUploadSuccess: (url: string) => void;
@@ -15,7 +16,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
   onUploadSuccess,
   category = 'receipts',
   label = 'Unggah Bukti Transfer',
-  helperText = 'Format JPG, PNG, atau WEBP. Maksimal 5MB.',
+  helperText = 'Format JPG, PNG, atau WEBP. Maksimal 2MB (dikompres otomatis).',
   initialUrl,
 }) => {
   const [preview, setPreview] = useState<string | null>(initialUrl || null);
@@ -26,8 +27,9 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Ukuran file maksimal 5MB.');
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setError('Ukuran gambar maksimal 2 MB.');
+      e.target.value = '';
       return;
     }
 
@@ -35,8 +37,9 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
     setIsUploading(true);
 
     try {
+      const compressedFile = await compressImageFile(file);
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', compressedFile);
       formData.append('category', category);
 
       const apiUrl = `${API_BASE}/upload`;
@@ -50,7 +53,10 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
         throw new Error(data.message || 'Gagal mengunggah file.');
       }
 
-      const fullUrl = data.url.startsWith('http') ? data.url : `${API_URL}${data.url}`;
+      const fullUrl =
+        data.url.startsWith('http') || data.url.startsWith('data:')
+          ? data.url
+          : `${API_URL}${data.url}`;
       setPreview(fullUrl);
       onUploadSuccess(fullUrl);
     } catch (err: any) {

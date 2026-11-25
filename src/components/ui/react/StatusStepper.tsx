@@ -13,6 +13,7 @@ import {
   QrCode,
   FileCheck,
 } from 'lucide-react';
+import { openImageInNewTab } from '../../../lib/imageCompression';
 
 export interface TimelineEvent {
   title: string;
@@ -123,15 +124,14 @@ export const StatusStepper: React.FC<StatusStepperProps> = ({
       isCurrent: currentIndex === 1,
       icon: FileCheck,
       meta: paymentProofUrl ? (
-        <a
-          href={paymentProofUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 mt-2 text-[0.68rem] font-semibold text-accent underline hover:text-ink"
+        <button
+          type="button"
+          onClick={() => openImageInNewTab(paymentProofUrl)}
+          className="inline-flex items-center gap-1.5 mt-2 text-[0.68rem] font-semibold text-accent underline hover:text-ink cursor-pointer"
         >
           <ExternalLink className="w-3 h-3" />
           <span>Lihat Bukti Transfer</span>
-        </a>
+        </button>
       ) : null,
     },
     {

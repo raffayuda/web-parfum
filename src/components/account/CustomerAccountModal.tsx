@@ -4,7 +4,7 @@ import { Button } from '../ui/react/Button';
 import { Input } from '../ui/react/Input';
 import { api, API_BASE } from '../../lib/api';
 import { toast } from 'sonner';
-import { User, Package, LogOut, Shield, Award, ArrowLeft, MailCheck, Eye, EyeOff } from 'lucide-react';
+import { User, Package, LogOut, Shield, Award, ArrowLeft, MailCheck } from 'lucide-react';
 import { ForgotPasswordPanel } from '../auth/ForgotPasswordPanel';
 
 export interface CustomerAccountModalProps {
@@ -46,7 +46,6 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPasswords, setShowPasswords] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -297,7 +296,7 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
             ? `Masuk sebagai ${currentUser.email}`
             : 'Masuk, daftar akun, atau lacak status pesanan Anda.'
         }
-        maxWidth="md"
+        maxWidth="lg"
       >
         {!currentUser && (
           <div className="flex justify-center pb-4 mb-4 border-b border-line/60">
@@ -459,31 +458,10 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
                   placeholder="nama@email.com"
                   required
                 />
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[0.68rem] uppercase tracking-[0.14em] text-muted font-medium">
-                      Password
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => setShowPasswords((v) => !v)}
-                      className="inline-flex items-center gap-1 text-[0.62rem] uppercase tracking-wider text-muted hover:text-ink cursor-pointer"
-                    >
-                      {showPasswords ? (
-                        <>
-                          <EyeOff className="w-3 h-3" />
-                          <span>Tutup</span>
-                        </>
-                      ) : (
-                        <>
-                          <Eye className="w-3 h-3" />
-                          <span>Lihat</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
+                <div className="space-y-1">
                   <Input
-                    type={showPasswords ? 'text' : 'password'}
+                    label="Password"
+                    type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
@@ -522,20 +500,22 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
 
             {activeTab === 'register' && registerStep === 'form' && (
               <form onSubmit={handleSendRegisterOtp} className="space-y-4">
-                <Input
-                  label="Nama Lengkap"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Nama Anda"
-                  required
-                />
-                <Input
-                  label="Nomor WhatsApp"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="081234567890"
-                  required
-                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Input
+                    label="Nama Lengkap"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Nama Anda"
+                    required
+                  />
+                  <Input
+                    label="Nomor WhatsApp"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="081234567890"
+                    required
+                  />
+                </div>
                 <Input
                   label="Email"
                   type="email"
@@ -544,31 +524,10 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
                   placeholder="nama@email.com"
                   required
                 />
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[0.68rem] uppercase tracking-[0.14em] text-muted font-medium">
-                      Password Akun
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setShowPasswords((v) => !v)}
-                      className="inline-flex items-center gap-1 text-[0.62rem] uppercase tracking-wider text-muted hover:text-ink cursor-pointer"
-                    >
-                      {showPasswords ? (
-                        <>
-                          <EyeOff className="w-3 h-3" />
-                          <span>Sembunyikan</span>
-                        </>
-                      ) : (
-                        <>
-                          <Eye className="w-3 h-3" />
-                          <span>Lihat</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
-                    type={showPasswords ? 'text' : 'password'}
+                    label="Password"
+                    type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Minimal 8 karakter"
@@ -577,7 +536,7 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
                   />
                   <Input
                     label="Konfirmasi Password"
-                    type={showPasswords ? 'text' : 'password'}
+                    type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Ulangi password Anda"
