@@ -86,11 +86,36 @@ export function resolveImage(src: ImageMetadata | string | undefined | null, fal
   return assetMap[src] || src.replace(/^\/src\/assets\/images\//, '/images/');
 }
 
-/** Normalize image URLs for client-side <img> elements so legacy /src/assets/images/* paths never 404. */
-export function resolvePublicImageUrl(src: string | undefined | null, fallback = '/images/bottle-vetiver.jpg'): string {
+/** Normalize image URLs for client-side <img> elements so legacy paths, filenames, or ImageMetadata never 404. */
+export function resolvePublicImageUrl(src: any, fallback = '/images/bottle-vetiver.jpg'): string {
   if (!src) return fallback;
-  if (src.startsWith('data:')) return src;
-  return src.replace(/^\/src\/assets\/images\//, '/images/');
+  if (typeof src === 'object' && typeof src.src === 'string') {
+    return src.src;
+  }
+  const str = String(src).trim();
+  if (!str) return fallback;
+  if (
+    str.startsWith('data:') ||
+    str.startsWith('http://') ||
+    str.startsWith('https://') ||
+    str.startsWith('/_astro/') ||
+    str.startsWith('/images/')
+  ) {
+    return str;
+  }
+  if (str.startsWith('/src/assets/images/')) {
+    return str.replace(/^\/src\/assets\/images\//, '/images/');
+  }
+  if (str.startsWith('src/assets/images/')) {
+    return str.replace(/^src\/assets\/images\//, '/images/');
+  }
+  if (str.startsWith('images/')) {
+    return `/${str}`;
+  }
+  if (!str.includes('/')) {
+    return `/images/${str}`;
+  }
+  return str;
 }
 
 export const alts: Record<string, string> = {

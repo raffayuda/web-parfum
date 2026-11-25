@@ -1,6 +1,7 @@
 ---
 import Media from './ui/Media.astro';
 import { priceLabel, type Fragrance } from '../data/fragrances';
+import { resolvePublicImageUrl } from '../data/images';
 import { AddToCartButton } from './cart/AddToCartButton';
 
 interface Props {
@@ -11,7 +12,7 @@ interface Props {
 }
 
 const { fragrance, aspect = '4 / 5', loading = 'lazy', class: className } = Astro.props;
-const cardImage = (fragrance as any).bottleImage || fragrance.card || fragrance.bottle;
+const cardImage = resolvePublicImageUrl((fragrance as any).bottleImage || fragrance.card || fragrance.bottle);
 ---
 
 <div class:list={['flex flex-col gap-3', className]}>

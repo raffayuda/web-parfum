@@ -7,6 +7,7 @@ import Media from '../../components/ui/Media.astro';
 import Section from '../../components/ui/Section.astro';
 import FragranceCard from '../../components/FragranceCard.astro';
 import { bySlug, fragrances, priceLabel } from '../../data/fragrances';
+import { resolvePublicImageUrl } from '../../data/images';
 import { whatsappHref } from '../../data/site';
 import { prisma } from '../../../server/src/db';
 import { ProductOrderActions } from '../../components/checkout/ProductOrderActions';
@@ -56,9 +57,9 @@ const fragrance = {
   ...(staticFrag || {}),
   ...(dbFrag || {}),
   price: dbFrag ? Number(dbFrag.price) : staticFrag?.price,
-  bottle: dbFrag?.bottleImage || staticFrag?.bottle || '/images/bottle-vetiver.jpg',
-  card: dbFrag?.bottleImage || staticFrag?.card || '/images/bottle-vetiver.jpg',
-  macro: dbFrag?.macroImage || staticFrag?.macro || '/images/macro-vetiver.jpg',
+  bottle: resolvePublicImageUrl(dbFrag?.bottleImage || staticFrag?.bottle),
+  card: resolvePublicImageUrl(dbFrag?.bottleImage || staticFrag?.card),
+  macro: resolvePublicImageUrl(dbFrag?.macroImage || staticFrag?.macro, '/images/macro-vetiver.jpg'),
   notes: dbFrag?.notes ? (dbFrag.notes as any) : (staticFrag?.notes || { top: [], heart: [], base: [] }),
   material: dbFrag?.material ? (dbFrag.material as any) : (staticFrag?.material || { name: 'Raw Material', origin: 'Grasse', phrase: 'Murni dari alam' }),
   story: dbFrag?.story

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ShoppingBag, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { addToCart, openCartDrawer } from '../../lib/cart';
+import { resolvePublicImageUrl } from '../../data/images';
 
 export interface AddToCartButtonProps {
   product: {
@@ -41,7 +42,7 @@ export const AddToCartButton: React.FC<AddToCartButtonProps> = ({
         edition: product.edition,
         volume: product.volume,
         price: Number(product.price) || 0,
-        bottleImage: product.bottleImage,
+        bottleImage: resolvePublicImageUrl(product.bottleImage),
       },
       1
     );

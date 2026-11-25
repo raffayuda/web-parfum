@@ -6,6 +6,7 @@ import Section from '../../components/ui/Section.astro';
 import FragranceCard from '../../components/FragranceCard.astro';
 import DiscoverySet from '../../components/DiscoverySet.astro';
 import { families, fragrances } from '../../data/fragrances';
+import { resolvePublicImageUrl } from '../../data/images';
 import { prisma } from '../../../server/src/db';
 
 export const prerender = false;
@@ -45,11 +46,11 @@ const enrichedFragrances = (dbPerfumes.length > 0 ? dbPerfumes : fragrances).map
     volume: item.volume || '50 ml',
     concentration: item.concentration || 'Extrait de parfum, 20%',
     isAvailable: item.isAvailable !== undefined ? item.isAvailable : true,
-    bottle: item.bottleImage || item.bottle || staticFrag?.bottle || '/images/bottle-vetiver.jpg',
+    bottle: resolvePublicImageUrl(item.bottleImage || item.bottle || staticFrag?.bottle),
     bottleAlt: item.bottleAlt || `${item.name} Bottle`,
-    card: item.bottleImage || item.card || staticFrag?.card || '/images/bottle-vetiver.jpg',
+    card: resolvePublicImageUrl(item.bottleImage || item.card || staticFrag?.card),
     cardAlt: item.cardAlt || `${item.name} Card`,
-    macro: item.macroImage || item.macro || staticFrag?.macro || '/images/macro-vetiver.jpg',
+    macro: resolvePublicImageUrl(item.macroImage || item.macro || staticFrag?.macro, '/images/macro-vetiver.jpg'),
     macroAlt: item.macroAlt || `${item.name} Macro`,
     notes: (item.notes as any) || staticFrag?.notes || { top: [], heart: [], base: [] },
     material: (item.material as any) || staticFrag?.material || { name: '', origin: '', phrase: '' },

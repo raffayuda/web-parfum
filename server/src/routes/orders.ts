@@ -166,7 +166,11 @@ export const ordersRoute = new Elysia({ prefix: '/orders' })
         };
       });
 
-      const totalAmount = data.totalAmount ? Number(data.totalAmount) : calculatedTotal;
+      const shippingCost = Math.max(0, Number(data.shippingCost || 0));
+      const totalAmount =
+        data.totalAmount !== undefined
+          ? Number(data.totalAmount)
+          : calculatedTotal + shippingCost;
 
       // Generate QRIS payload & QR code Data URL
       const qrisPayload = generateQrisPayload({

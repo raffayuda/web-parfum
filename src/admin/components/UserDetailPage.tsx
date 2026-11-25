@@ -578,7 +578,7 @@ const UserDetailContent: React.FC<UserDetailPageProps> = ({ userId }) => {
 export const UserDetailPage: React.FC<UserDetailPageProps> = (props) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <Toaster position="top-right" richColors />
+      <Toaster position="bottom-right" richColors />
       <UserDetailContent {...props} />
     </QueryClientProvider>
   );

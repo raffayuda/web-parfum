@@ -324,7 +324,7 @@ const OrderEditContent: React.FC<OrderEditPageProps> = ({ orderId }) => {
 export const OrderEditPage: React.FC<OrderEditPageProps> = (props) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <Toaster position="top-right" richColors />
+      <Toaster position="bottom-right" richColors />
       <OrderEditContent {...props} />
     </QueryClientProvider>
   );

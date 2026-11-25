@@ -786,7 +786,7 @@ const OrderCreateContent: React.FC = () => {
 export const OrderCreatePage: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <Toaster position="top-right" richColors />
+      <Toaster position="bottom-right" richColors />
       <OrderCreateContent />
     </QueryClientProvider>
   );

@@ -1,3 +1,5 @@
+import { resolvePublicImageUrl } from '../data/images';
+
 export interface CartItem {
   id?: string;
   slug: string;
@@ -28,6 +30,7 @@ export function getCartItems(): CartItem[] {
       .filter((item) => item && item.name && Number(item.price) > 0)
       .map((item) => ({
         ...item,
+        bottleImage: resolvePublicImageUrl(item.bottleImage),
         price: Number(item.price) || 0,
         quantity: Math.max(1, Number(item.quantity) || 1),
       }));

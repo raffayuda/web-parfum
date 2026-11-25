@@ -93,6 +93,7 @@ export const CheckoutPage: React.FC = () => {
   ]);
   const [catalogPerfumes, setCatalogPerfumes] = useState<any[]>([]);
   const [adminWaNumber, setAdminWaNumber] = useState<string>('6281200000000');
+  const [baseShippingFee, setBaseShippingFee] = useState<number>(25000);
   const [isCartMode, setIsCartMode] = useState(false);
   const [isLoadingProduct, setIsLoadingProduct] = useState(false);
 
@@ -170,7 +171,7 @@ export const CheckoutPage: React.FC = () => {
       })
       .catch(() => {});
 
-    // Load Store Settings (Admin WhatsApp number)
+    // Load Store Settings (Admin WhatsApp number & shippingFee)
     api
       .getSettings()
       .then((res) => {
@@ -180,6 +181,9 @@ export const CheckoutPage: React.FC = () => {
           if (digits) {
             setAdminWaNumber(digits.startsWith('0') ? `62${digits.slice(1)}` : digits);
           }
+        }
+        if (res?.data?.shippingFee !== undefined) {
+          setBaseShippingFee(Math.max(0, Number(res.data.shippingFee) || 0));
         }
       })
       .catch(() => {});
@@ -613,6 +617,7 @@ export const CheckoutPage: React.FC = () => {
         shippingPostal: postalCode.trim() || '12190',
         postalCode: postalCode.trim() || '12190',
         notes: notes.trim(),
+        shippingCost: appliedShippingFee,
         totalAmount,
         items: cartItems.map((item) => ({
           name: item.name,
@@ -710,7 +715,16 @@ export const CheckoutPage: React.FC = () => {
   };
 
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-  const totalAmount = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotalAmount = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const freeShippingBenefit = (loyaltyInfo?.benefits || []).find(
+    (b: any) => b.id === 'free-shipping'
+  );
+  const hasFreeShippingPerk = freeShippingBenefit
+    ? Boolean(freeShippingBenefit.unlocked)
+    : Boolean(loyaltyInfo?.isVip || loggedInUser?.memberTier === 'Collector');
+  const appliedShippingFee = hasFreeShippingPerk ? 0 : baseShippingFee;
+  const totalAmount = subtotalAmount + appliedShippingFee;
+  const formattedSubtotal = formatIdr(subtotalAmount);
   const formattedTotal = formatIdr(totalAmount);
 
   const updateCheckoutItemQty = (slugOrName: string, delta: number) => {
@@ -1161,8 +1175,11 @@ export const CheckoutPage: React.FC = () => {
                       <div key={key} className="flex gap-3.5 items-start p-3 bg-bg border border-line">
                         <div className="w-16 h-20 border border-line bg-surface overflow-hidden shrink-0">
                           <img
-                            src={item.bottleImage}
+                            src={resolvePublicImageUrl(item.bottleImage)}
                             alt={item.name}
+                            onError={(e) => {
+                              e.currentTarget.src = '/images/bottle-vetiver.jpg';
+                            }}
                             className="w-full h-full object-cover"
                           />
                         </div>
@@ -1240,17 +1257,39 @@ export const CheckoutPage: React.FC = () => {
                 <div className="space-y-2.5 pt-3 border-t border-line text-xs">
                   <div className="flex justify-between text-muted">
                     <span>Subtotal ({totalQuantity} item)</span>
-                    <span className="text-ink font-medium">{formattedTotal}</span>
+                    <span className="text-ink font-medium">{formattedSubtotal}</span>
                   </div>
 
-                  <div className="flex justify-between text-muted">
-                    <span className="flex items-center gap-1.5">
-                      <Truck className="w-3.5 h-3.5 text-accent" />
-                      <span>Pengiriman Kurir Ekspedisi</span>
-                    </span>
-                    <span className="text-emerald-700 font-semibold uppercase tracking-wider text-[0.68rem]">
-                      Gratis (Free Delivery)
-                    </span>
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-muted">
+                      <span className="flex items-center gap-1.5">
+                        <Truck className="w-3.5 h-3.5 text-accent" />
+                        <span>Ongkos Kirim Ekspedisi</span>
+                      </span>
+                      {hasFreeShippingPerk ? (
+                        <span className="text-emerald-700 font-semibold uppercase tracking-wider text-[0.68rem]">
+                          {baseShippingFee > 0 && (
+                            <span className="line-through text-muted/70 mr-1.5 font-normal">
+                              {formatIdr(baseShippingFee)}
+                            </span>
+                          )}
+                          Gratis ({loyaltyInfo?.vipTierLabel || 'Collector VIP'})
+                        </span>
+                      ) : (
+                        <span className="text-ink font-medium">
+                          {appliedShippingFee > 0 ? formatIdr(appliedShippingFee) : 'Gratis'}
+                        </span>
+                      )}
+                    </div>
+                    {!hasFreeShippingPerk && baseShippingFee > 0 && loyaltyInfo && (
+                      <p className="text-[0.65rem] text-muted text-right">
+                        Gratis ongkir otomatis untuk {loyaltyInfo.vipTierLabel || 'Collector VIP'} (
+                        {loyaltyInfo.remainingForVip > 0
+                          ? `kurang ${formatIdr(loyaltyInfo.remainingForVip)}`
+                          : 'target tercapai'}
+                        )
+                      </p>
+                    )}
                   </div>
 
                   <div className="flex justify-between text-muted">

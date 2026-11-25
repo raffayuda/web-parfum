@@ -18,6 +18,7 @@ export const defaultSettings = {
   googleMapsUrl: '',
   hours: 'Senin - Sabtu: 10:00 - 20:00 WIB | Minggu: Janji Temu',
   visitNote: 'Kunjungan dengan janji temu',
+  shippingFee: 25000,
   instagramHandle: '@omoo.parfums',
   instagramUrl: 'https://www.instagram.com/omoo.parfums/',
   tiktokHandle: '@omoo.parfums',

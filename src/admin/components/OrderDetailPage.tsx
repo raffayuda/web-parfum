@@ -576,7 +576,7 @@ const OrderDetailContent: React.FC<OrderDetailPageProps> = ({ orderId }) => {
 export const OrderDetailPage: React.FC<OrderDetailPageProps> = (props) => {
   return (
     <QueryClientProvider client={queryClient}>
-      <Toaster position="top-right" richColors />
+      <Toaster position="bottom-right" richColors />
       <OrderDetailContent {...props} />
     </QueryClientProvider>
   );

@@ -37,6 +37,7 @@ export const SettingsTab: React.FC = () => {
     googleMapsUrl: '',
     hours: 'Senin - Sabtu: 10:00 - 20:00 WIB | Minggu: Janji Temu',
     visitNote: 'Kunjungan dengan janji temu',
+    shippingFee: 25000,
     instagramHandle: '@omoo.parfums',
     instagramUrl: 'https://www.instagram.com/omoo.parfums/',
     tiktokHandle: '@omoo.parfums',
@@ -251,7 +252,7 @@ export const SettingsTab: React.FC = () => {
             />
           </div>
 
-          <div className="md:col-span-3">
+          <div className="md:col-span-2">
             <label className="text-[0.65rem] uppercase font-semibold tracking-wider text-muted block mb-1.5">
               Jam Buka / Operasional
             </label>
@@ -259,6 +260,23 @@ export const SettingsTab: React.FC = () => {
               value={form.hours}
               onChange={(e) => handleChange('hours', e.target.value)}
               placeholder="Senin - Sabtu: 10:00 - 20:00 WIB | Minggu: Janji Temu"
+            />
+          </div>
+
+          <div>
+            <label className="text-[0.65rem] uppercase font-semibold tracking-wider text-muted block mb-1.5">
+              Ongkos Kirim Reguler (IDR)
+            </label>
+            <Input
+              type="number"
+              min={0}
+              step={1000}
+              value={form.shippingFee}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, shippingFee: Math.max(0, Number(e.target.value) || 0) }))
+              }
+              placeholder="25000"
+              helperText="Gratis otomatis bagi member yang memenuhi syarat Collector VIP."
             />
           </div>
 
