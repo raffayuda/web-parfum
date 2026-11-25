@@ -3,6 +3,7 @@ import { prisma } from '../db';
 import { OrderStatus, PaymentMethod, UserRole } from '@prisma/client';
 import { generateQrisPayload, generateQrCodeDataUrl } from '../utils/qrcode';
 import { hashPassword } from 'better-auth/crypto';
+import { syncLoyaltyForOrder } from '../utils/loyalty';
 
 export const ordersRoute = new Elysia({ prefix: '/orders' })
   // List all orders (Admin)
@@ -268,10 +269,12 @@ export const ordersRoute = new Elysia({ prefix: '/orders' })
         data: {
           status: OrderStatus.PROCESSING,
           validatedAt: new Date(),
-          validatedBy: validatedBy || 'Atelier Concierge',
+          validatedBy: validatedBy || 'Admin OMOO',
           adminNotes: adminNotes || 'Pembayaran transfer QRIS telah diverifikasi valid.',
         },
       });
+
+      await syncLoyaltyForOrder(updated).catch(() => {});
 
       return {
         success: true,
@@ -303,6 +306,8 @@ export const ordersRoute = new Elysia({ prefix: '/orders' })
         where: { id },
         data: dataToUpdate,
       });
+
+      await syncLoyaltyForOrder(updated).catch(() => {});
 
       return {
         success: true,
@@ -405,7 +410,7 @@ export const ordersRoute = new Elysia({ prefix: '/orders' })
           paymentMethod: PaymentMethod.WHATSAPP_MANUAL,
           status: paymentStatus as OrderStatus,
           validatedAt: new Date(),
-          validatedBy: 'Admin Concierge (Manual WA)',
+          validatedBy: 'Admin OMOO (Manual WA)',
           adminNotes: adminNotes || 'Pesanan dibuat manual oleh admin dari interaksi WhatsApp.',
           items: {
             create: orderItems,
@@ -416,9 +421,11 @@ export const ordersRoute = new Elysia({ prefix: '/orders' })
         },
       });
 
+      await syncLoyaltyForOrder(order).catch(() => {});
+
       // 5. Build pre-crafted WhatsApp message to send back to customer
       const trackingUrl = `${process.env.PUBLIC_SITE_URL || 'http://localhost:4321'}/account/tracker?order=${orderNumber}`;
-      const waGreeting = `Halo Kak ${customerName},\n\nTerima kasih atas pemesanan wewangian OMOO melalui WhatsApp!\n\nPesanan Anda telah kami input ke sistem dengan nomor *${orderNumber}* (Total: Rp ${totalAmount.toLocaleString('id-ID')}).\n\nUntuk memantau proses peracikan botol dan pengiriman secara real-time, Anda dapat membuka tracker resmi kami:\n🔗 ${trackingUrl}\n` +
+      const waGreeting = `Halo Kak ${customerName},\n\nTerima kasih atas pemesanan wewangian OMOO melalui WhatsApp!\n\nPesanan Anda telah kami input ke sistem dengan nomor *${orderNumber}* (Total: Rp ${totalAmount.toLocaleString('id-ID')}).\n\nUntuk memantau proses pengemasan dan pengiriman secara real-time, Anda dapat membuka tracker resmi kami:\n${trackingUrl}\n` +
         (isNewAccount
           ? `\nKami juga telah membuatkan akun member Anda:\nEmail: *${customerEmail}*\nPassword Sementara: *${temporaryPassword}*\n`
           : `\nSilakan masuk dengan akun yang sudah terdaftar.`);
@@ -481,6 +488,8 @@ export const ordersRoute = new Elysia({ prefix: '/orders' })
         include: { items: true },
       });
 
+      await syncLoyaltyForOrder(updated).catch(() => {});
+
       return {
         success: true,
         message: 'Pesanan berhasil diperbarui.',
@@ -495,9 +504,18 @@ export const ordersRoute = new Elysia({ prefix: '/orders' })
   // Admin deletes an order
   .delete('/:id', async ({ params: { id }, set }) => {
     try {
+      const existing = await prisma.order.findUnique({
+        where: { id },
+        select: { userId: true, customerEmail: true },
+      });
+
       // Delete order items first
       await prisma.orderItem.deleteMany({ where: { orderId: id } });
       await prisma.order.delete({ where: { id } });
+
+      if (existing) {
+        await syncLoyaltyForOrder(existing).catch(() => {});
+      }
 
       return {
         success: true,

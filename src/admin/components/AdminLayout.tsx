@@ -13,6 +13,7 @@ import {
   Lock,
   Sliders,
   HelpCircle,
+  Camera,
 } from 'lucide-react';
 import { Button } from '../../components/ui/react/Button';
 import { Input } from '../../components/ui/react/Input';
@@ -133,6 +134,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       group: 'PRODUK & TOKO',
       items: [
         { id: 'catalog', label: 'Katalog Parfum & Stok', icon: Sparkles },
+        { id: 'gallery', label: 'Galeri & Dokumentasi', icon: Camera },
         { id: 'faq', label: 'Kelola FAQ (Tanya Jawab)', icon: HelpCircle },
         { id: 'settings', label: 'Pengaturan Toko & Kontak', icon: Sliders },
       ],
@@ -142,7 +144,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       items: [
         { id: 'orders', label: 'Validasi Pesanan & Bukti', icon: ShoppingBag },
         { id: 'customers', label: 'Data User & Customer', icon: Users },
-        { id: 'members', label: 'Validasi Member Privé', icon: ShieldCheck },
+        { id: 'members', label: 'Member & Loyalty', icon: ShieldCheck },
       ],
     },
     {
@@ -170,13 +172,17 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     return (
       <div className="min-h-screen bg-bg flex items-center justify-center p-4">
         <div className="w-full max-w-md border border-line bg-surface/30 p-8 shadow-2xl space-y-6">
-          <div className="text-center space-y-2">
-            <div className="w-12 h-12 rounded-full border border-line bg-surface flex items-center justify-center mx-auto text-ink">
-              <Lock className="w-5 h-5" />
-            </div>
-            <h1 className="font-display text-3xl font-light text-ink tracking-[0.1em] uppercase">
-              OMOO ADMIN
-            </h1>
+          <div className="text-center space-y-3">
+            <img
+              src="/images/omoo-full-black.svg"
+              alt="O.M.OO"
+              className="h-16 w-auto object-contain mx-auto block dark:hidden"
+            />
+            <img
+              src="/images/omoo-full-gold.svg"
+              alt="O.M.OO"
+              className="h-16 w-auto object-contain mx-auto hidden dark:block"
+            />
             <p className="text-[0.68rem] uppercase tracking-[0.15em] text-muted font-medium">
               Portal Manajemen Administrator
             </p>
@@ -253,9 +259,28 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         <div>
           <div className="h-16 px-6 border-b border-line flex items-center justify-between">
             <a href="/admin?tab=overview" className="flex items-center gap-2.5">
-              <span className="font-display text-2xl font-normal tracking-[0.15em] uppercase text-ink">
-                OMOO
-              </span>
+              <img
+                src="/images/omoo-wordmark-black.svg"
+                alt="O.M.OO"
+                className="h-4 w-auto object-contain block dark:hidden"
+              />
+              <img
+                src="/images/omoo-wordmark-gold.svg"
+                alt="O.M.OO"
+                className="h-4 w-auto object-contain hidden dark:block"
+              />
+              <img
+                src="/images/omoo-logo-black.svg"
+                alt=""
+                aria-hidden="true"
+                className="h-5 w-auto object-contain block dark:hidden"
+              />
+              <img
+                src="/images/omoo-logo-gold.svg"
+                alt=""
+                aria-hidden="true"
+                className="h-5 w-auto object-contain hidden dark:block"
+              />
               <span className="px-2 py-0.5 text-[0.58rem] uppercase font-semibold bg-ink text-bg tracking-[0.1em]">
                 ADMIN
               </span>

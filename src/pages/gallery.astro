@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/ui/PageHeader.astro';
+import Section from '../components/ui/Section.astro';
+import { GalleryGrid } from '../components/gallery/GalleryGrid';
+import { getGalleryItems } from '../../server/src/utils/gallery';
+
+export const prerender = false;
+
+const items = await getGalleryItems();
+---
+
+<BaseLayout
+  title="Gallery — OMOO"
+  description="Dokumentasi proses pembuatan, eksperimen aroma, dan kegiatan kolaborasi OMOO."
+>
+  <PageHeader
+    deck="Dokumentasi proses pembuatan, momen kolaborasi event, dan arsip visual perjalanan awal OMOO."
+  >
+    <Fragment slot="title">Gallery.</Fragment>
+  </PageHeader>
+
+  <Section spacing="tight" class="pt-0">
+    <GalleryGrid client:load initialItems={items} />
+  </Section>
+</BaseLayout>

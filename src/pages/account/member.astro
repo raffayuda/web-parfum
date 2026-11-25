@@ -1,22 +1,21 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/ui/PageHeader.astro';
-import { QueryProvider } from '../../components/QueryProvider';
 import { MemberPortal } from '../../components/member/MemberPortal';
 ---
 
 <BaseLayout
-  title="Cercle Privé Membership"
-  description="Bergabung dengan keanggotaan eksklusif OMOO Cercle Privé untuk akses batch khusus dan undangan pribadi di atelier."
+  title="OMOO Loyalty Membership"
+  description="Program loyalitas otomatis OMOO untuk kolektor wewangian: riwayat pesanan, gratis ongkos kirim, sampel 2 ml, dan akses batch terbatas."
 >
   <PageHeader
-    deck="Lingkaran keanggotaan istimewa bagi para pencinta wewangian lambat. Akses batch terbatas dan layanan concierge."
+    deck="Keanggotaan otomatis berdasarkan akumulasi pembelian Anda. Tanpa formulir pengajuan atau persetujuan manual."
   >
-    <Fragment slot="title">Cercle <span class="italic">Privé</span>.</Fragment>
+    <Fragment slot="title">OMOO <span class="italic">Membership</span>.</Fragment>
   </PageHeader>
 
-  <section class="py-12 px-gutter">
-    <div class="mx-auto max-w-page">
+  <section class="py-12 md:py-20 bg-bg">
+    <div class="container">
       <MemberPortal client:load />
     </div>
   </section>

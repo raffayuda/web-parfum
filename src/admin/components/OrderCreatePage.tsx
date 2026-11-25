@@ -702,7 +702,7 @@ const OrderCreateContent: React.FC = () => {
               />
             </div>
             <p className="text-[0.68rem] text-muted">
-              💡 Klik langsung pada peta atau geser pin hijau untuk mengunci koordinat akurat alamat pengantaran kurir.
+              Klik langsung pada peta atau geser pin hijau untuk mengunci koordinat alamat pengantaran kurir.
             </p>
           </div>
         </div>

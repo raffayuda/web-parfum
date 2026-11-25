@@ -9,12 +9,8 @@ import {
   Save,
   CheckCircle2,
   X,
-  ExternalLink,
   Image as ImageIcon,
-  Sparkles,
-  RefreshCw,
-  Lock,
-  Layers,
+  LayoutDashboard,
 } from 'lucide-react';
 
 export const InlineVisualEditor: React.FC = () => {
@@ -147,8 +143,9 @@ export const InlineVisualEditor: React.FC = () => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className =
-          'edit-photo-btn absolute top-3 right-3 z-30 flex items-center gap-1.5 px-3 py-1.5 bg-ink text-bg text-[0.65rem] uppercase font-semibold tracking-wider border border-line shadow-xl hover:bg-ink/80 transition-all cursor-pointer rounded-full';
-        btn.innerHTML = '📷 Ganti Foto';
+          'edit-photo-btn absolute top-3 right-3 z-30 inline-flex items-center gap-1.5 px-3 py-1.5 bg-ink text-bg text-[0.65rem] uppercase font-medium tracking-[0.1em] border border-line shadow-lg hover:bg-ink/85 transition-colors cursor-pointer';
+        btn.innerHTML =
+          '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg><span>Ganti Foto</span>';
         btn.onclick = (e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -181,7 +178,7 @@ export const InlineVisualEditor: React.FC = () => {
           itemEl.innerHTML = `
             <span class="font-display text-3xl font-light text-accent shrink-0 w-24 timeline-year outline-dashed outline-1 outline-accent/70 hover:bg-accent/10 cursor-text" contenteditable="true" data-editable-id="${newId}-year">2027</span>
             <p class="text-sm text-ink leading-relaxed flex-1 pt-1 timeline-copy outline-dashed outline-1 outline-accent/70 hover:bg-accent/10 cursor-text" contenteditable="true" data-editable-id="${newId}-copy">Deskripsi catatan baru...</p>
-            <button type="button" class="timeline-del-btn opacity-80 hover:opacity-100 text-xs text-red-400 hover:text-red-300 px-2 py-1 border border-red-500/30 hover:border-red-400 rounded transition-all ml-2 self-start">✕ Hapus</button>
+            <button type="button" class="timeline-del-btn text-[0.65rem] uppercase tracking-wider text-red-600 hover:text-red-500 px-2.5 py-1 border border-red-500/30 hover:border-red-500 transition-colors ml-2 self-start cursor-pointer">Hapus</button>
           `;
           const delBtn = itemEl.querySelector<HTMLButtonElement>('.timeline-del-btn');
           if (delBtn) {
@@ -197,8 +194,8 @@ export const InlineVisualEditor: React.FC = () => {
           const delBtn = document.createElement('button');
           delBtn.type = 'button';
           delBtn.className =
-            'timeline-del-btn opacity-80 hover:opacity-100 text-xs text-red-400 hover:text-red-300 px-2 py-1 border border-red-500/30 hover:border-red-400 rounded transition-all ml-2 self-start';
-          delBtn.innerText = '✕ Hapus';
+            'timeline-del-btn text-[0.65rem] uppercase tracking-wider text-red-600 hover:text-red-500 px-2.5 py-1 border border-red-500/30 hover:border-red-500 transition-colors ml-2 self-start cursor-pointer';
+          delBtn.innerText = 'Hapus';
           delBtn.onclick = () => {
             item.remove();
           };
@@ -215,10 +212,10 @@ export const InlineVisualEditor: React.FC = () => {
         const name = sec.getAttribute('data-section-name') || tmpl || `Seksi ${idx + 1}`;
         const badge = document.createElement('div');
         badge.className =
-          'section-control-badge absolute top-3 left-4 z-30 flex items-center gap-2 bg-ink text-bg text-[0.65rem] px-3 py-1.5 font-medium tracking-wider uppercase backdrop-blur shadow-xl rounded border border-line';
+          'section-control-badge absolute top-3 left-4 z-30 flex items-center gap-3 bg-bg/95 text-ink text-[0.62rem] px-3 py-1.5 font-medium tracking-[0.1em] uppercase backdrop-blur-md shadow-md border border-line';
         badge.innerHTML = `
           <span class="text-accent font-semibold">${name}</span>
-          <button type="button" class="del-section-btn text-red-400 hover:text-red-300 font-bold ml-2 transition-colors cursor-pointer" title="Hapus seksi ini permanen">✕ Hapus Seksi</button>
+          <button type="button" class="del-section-btn text-red-600 hover:text-red-500 font-semibold border-l border-line pl-2.5 transition-colors cursor-pointer" title="Hapus seksi ini permanen">Hapus Seksi</button>
         `;
         const delBtn = badge.querySelector<HTMLButtonElement>('.del-section-btn');
         if (delBtn) {
@@ -393,7 +390,7 @@ export const InlineVisualEditor: React.FC = () => {
       const path = typeof window !== 'undefined' ? window.location.pathname : '/';
       let currentSlug = 'home';
       if (path.includes('/about') || path.includes('/maison')) currentSlug = 'about';
-      else if (path.includes('/journey') || path.includes('/journal')) currentSlug = 'journey';
+      else if (path.includes('/gallery') || path.includes('/journey') || path.includes('/journal')) currentSlug = 'gallery';
       else if (path.includes('/collection')) currentSlug = 'collection';
       else if (path.includes('/find')) currentSlug = 'find';
 
@@ -493,72 +490,84 @@ export const InlineVisualEditor: React.FC = () => {
   return (
     <>
       <Toaster position="top-right" richColors />
-      {/* FLOATING LIVE EDITOR DOCK (Bottom-Center, Non-intrusive, Navbar stays 100% accessible) */}
+      {/* EDITORIAL LIVE EDITOR BAR (Sharp, minimal, consistent with OMOO design system) */}
       {isEditMode && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] flex flex-wrap items-center gap-3 bg-[#0a0d08]/95 border border-accent/60 px-5 py-3 shadow-[0_20px_50px_rgba(0,0,0,0.85)] backdrop-blur-xl rounded-full text-xs animate-in slide-in-from-bottom duration-300 max-w-[95vw]">
-          {/* Badge Mode */}
-          <div className="flex items-center gap-2 pr-3 border-r border-line shrink-0">
-            <div className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse" />
-            <span className="font-semibold text-accent tracking-wider uppercase text-[0.66rem]">
-              Live Visual Editor
-            </span>
-          </div>
+        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[9999] max-w-[96vw] border border-line bg-bg/95 text-ink backdrop-blur-md shadow-[0_16px_48px_rgba(0,0,0,0.16)]">
+          <div className="flex items-center gap-3 px-4 py-2.5 overflow-x-auto whitespace-nowrap text-[0.65rem] uppercase tracking-[0.11em]">
+            {/* Label */}
+            <div className="flex items-center gap-2 pr-3 border-r border-line shrink-0">
+              <Edit3 className="w-3.5 h-3.5 text-accent" />
+              <span className="font-semibold text-ink">Editor</span>
+            </div>
 
-          {/* Direct Quick Jump Links across all editable pages */}
-          <div className="hidden sm:flex items-center gap-1 pr-3 border-r border-line text-[0.66rem] font-medium uppercase tracking-wider text-muted shrink-0">
-            <span className="text-[0.6rem] text-muted/60 mr-1">Halaman:</span>
-            {[
-              { href: '/', label: 'Home' },
-              { href: '/collection', label: 'Collection' },
-              { href: '/about', label: 'About Us' },
-              { href: '/journey', label: 'Journey' },
-              { href: '/find', label: 'Find Scent' },
-            ].map((page) => (
-              <a
-                key={page.href}
-                href={page.href}
-                className="px-2 py-1 rounded hover:bg-surface/60 hover:text-ink transition-colors"
-                title={`Pindah ke halaman ${page.label}`}
+            {/* Quick page navigation */}
+            <nav aria-label="Editor pages" className="hidden md:flex items-center gap-1 pr-3 border-r border-line shrink-0">
+              {[
+                { href: '/', label: 'Home' },
+                { href: '/collection', label: 'Collection' },
+                { href: '/about', label: 'About' },
+                { href: '/gallery', label: 'Gallery' },
+                { href: '/find', label: 'Find' },
+              ].map((page) => {
+                const isCurrent =
+                  typeof window !== 'undefined' &&
+                  (page.href === '/'
+                    ? window.location.pathname === '/'
+                    : window.location.pathname.startsWith(page.href));
+                return (
+                  <a
+                    key={page.href}
+                    href={page.href}
+                    className={`px-2 py-1 transition-colors ${
+                      isCurrent
+                        ? 'text-ink font-semibold border-b border-accent'
+                        : 'text-muted hover:text-ink'
+                    }`}
+                  >
+                    {page.label}
+                  </a>
+                );
+              })}
+            </nav>
+
+            {saveSuccess && (
+              <span className="inline-flex items-center gap-1 text-accent font-semibold shrink-0">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Tersimpan</span>
+              </span>
+            )}
+
+            {/* Actions */}
+            <div className="flex items-center gap-2 shrink-0">
+              <Button
+                variant="primary"
+                size="sm"
+                icon={<Save className="w-3.5 h-3.5" />}
+                isLoading={isSaving}
+                onClick={handleSaveAll}
+                className="px-3.5 py-1.5 text-[0.64rem]"
               >
-                {page.label}
+                Simpan
+              </Button>
+
+              <button
+                type="button"
+                onClick={disableEditMode}
+                className="inline-flex items-center gap-1 px-3 py-1.5 font-medium text-muted hover:text-ink border border-line hover:border-ink transition-colors cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+                <span>Tutup</span>
+              </button>
+
+              <a
+                href="/admin"
+                className="inline-flex items-center justify-center p-1.5 text-muted hover:text-ink border border-line hover:border-ink transition-colors"
+                title="Dashboard Admin"
+                aria-label="Dashboard Admin"
+              >
+                <LayoutDashboard className="w-3.5 h-3.5" />
               </a>
-            ))}
-          </div>
-
-          {saveSuccess && (
-            <span className="flex items-center gap-1.5 text-xs text-emerald-400 font-medium animate-in fade-in shrink-0">
-              <CheckCircle2 className="w-4 h-4" />
-              <span>Tersimpan!</span>
-            </span>
-          )}
-
-          <div className="flex items-center gap-2 shrink-0">
-            <Button
-              variant="primary"
-              size="sm"
-              icon={<Save className="w-3.5 h-3.5" />}
-              isLoading={isSaving}
-              onClick={handleSaveAll}
-              className="bg-accent text-bg hover:bg-accent/90 rounded-full px-4 text-xs font-semibold uppercase tracking-wider"
-            >
-              Simpan Perubahan
-            </Button>
-
-            <button
-              type="button"
-              onClick={disableEditMode}
-              className="px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-wider text-muted hover:text-ink border border-line hover:border-ink rounded-full transition-colors cursor-pointer"
-            >
-              Keluar Edit
-            </button>
-
-            <a
-              href="/admin"
-              className="p-1.5 text-muted hover:text-ink border border-line hover:border-ink rounded-full transition-colors"
-              title="Buka Dashboard Admin"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
+            </div>
           </div>
         </div>
       )}

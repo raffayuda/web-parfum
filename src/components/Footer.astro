@@ -21,13 +21,26 @@ try {
   }
 } catch (e) {}
 
-const getTxt = (key: string, fallback: string) => settings[key] || fallback;
+const getTxt = (key: string, fallback: string) =>
+  String(settings[key] || fallback)
+    .replace(/\bAtelier\b/g, 'Studio')
+    .replace(/\batelier\b/g, 'studio');
 ---
 
 <footer class="mt-12 border-t border-line bg-bg-tint md:mt-20">
   <Container>
     <div class="grid gap-12 py-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-24 lg:py-24">
-      <div class="flex flex-col items-start gap-8">
+      <div class="flex flex-col items-start gap-6">
+        <img
+          src="/images/omoo-full-black.svg"
+          alt="O.M.OO"
+          class="h-16 sm:h-20 w-auto object-contain block dark:hidden"
+        />
+        <img
+          src="/images/omoo-full-gold.svg"
+          alt="O.M.OO"
+          class="h-16 sm:h-20 w-auto object-contain hidden dark:block"
+        />
         <p
           class="max-w-[20ch] font-display text-[clamp(1.9rem,3.2vw,3.1rem)] font-light leading-[1.03] tracking-[-0.015em]"
           data-editable-id="footer-headline"
@@ -57,9 +70,9 @@ const getTxt = (key: string, fallback: string) => settings[key] || fallback;
                 ['/collection', 'Collection'],
                 ['/find', 'Find your scent'],
                 ['/about', 'About Us'],
-                ['/journey', 'Journey & Gallery'],
-                ['/account/orders', 'Pesanan Saya'],
-                ['/member', 'Membership Privé'],
+                ['/gallery', 'Gallery'],
+                ['/account/orders', 'My Orders'],
+                ['/member', 'Membership'],
                 ['/admin', 'Portal Admin'],
               ].map(([href, label]) => (
                 <li>
@@ -124,7 +137,8 @@ const getTxt = (key: string, fallback: string) => settings[key] || fallback;
     </div>
 
     <Wordmark
-      class="block overflow-hidden whitespace-nowrap pt-2 text-[clamp(4rem,17.5vw,16rem)] leading-[0.72] tracking-[0.12em] -translate-x-[0.06em]"
+      variant="footer"
+      class="pt-4 pb-2"
     />
 
     <div

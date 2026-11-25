@@ -9,9 +9,9 @@ const path = Astro.url.pathname;
 const items = [
   { href: '/collection', label: 'Collection', note: 'Enam komposisi' },
   { href: '/about', label: 'About Us', note: 'Dari Grasse ke Jakarta' },
-  { href: '/journey', label: 'Journey', note: 'Arsip & Galeri OMOO' },
-  { href: '/account/orders', label: 'Pesanan Saya', note: 'Status pesanan & riwayat transaksi' },
-  { href: '/member', label: 'Membership', note: 'Member Eksklusif OMOO' },
+  { href: '/gallery', label: 'Gallery', note: 'Dokumentasi & Event OMOO' },
+  { href: '/account/orders', label: 'My Orders', note: 'Order status & history' },
+  { href: '/member', label: 'Membership', note: 'Program Loyalty OMOO' },
   { href: '/contact', label: 'Contact', note: 'Hubungi Kami & Lokasi Toko' },
 ];
 const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`);
@@ -27,7 +27,7 @@ const actionLink =
   class="sticky top-0 z-50 border-b border-line bg-bg/90 backdrop-blur-md backdrop-saturate-150"
 >
   <div class="mx-auto flex min-h-[72px] w-full max-w-page items-center justify-between gap-6 px-gutter">
-    <Wordmark class="text-[1.55rem] -translate-x-[0.1em]" />
+    <Wordmark variant="nav" />
 
     <nav class="hidden nav:flex" aria-label="Primary">
       <ul class="flex items-center gap-[clamp(1.1rem,1.8vw,2.2rem)]">
@@ -87,7 +87,7 @@ const actionLink =
     ></div>
 
     <div class="relative flex items-center justify-between border-b border-line pb-5">
-      <Wordmark class="text-[1.55rem]" />
+      <Wordmark variant="full" />
       <button
         type="button"
         data-menu-close
@@ -225,7 +225,7 @@ const actionLink =
       });
       animate(links, { opacity: [0, 1], y: [22, 0] }, {
         duration: 0.55,
-        delay: stagger(0.055, { start: 0.1 }),
+        delay: stagger(0.055, { startDelay: 0.1 }),
         ease: [0.16, 1, 0.3, 1],
         onComplete: () => {
           links.forEach((link) => {

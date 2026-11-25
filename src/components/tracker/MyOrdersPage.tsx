@@ -338,7 +338,7 @@ const MyOrdersInner: React.FC = () => {
               )}
             </div>
             <h2 className="font-display text-3xl sm:text-4xl text-ink font-normal mt-1">
-              Pesanan Saya
+              My Orders
             </h2>
             <p className="text-xs text-muted mt-1 max-w-xl leading-relaxed">
               {currentUser

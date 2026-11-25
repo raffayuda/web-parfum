@@ -237,7 +237,7 @@ const UserDetailContent: React.FC<UserDetailPageProps> = ({ userId }) => {
                 </h1>
                 {user.memberTier ? (
                   <span className="px-2 py-0.5 text-[0.62rem] uppercase font-semibold bg-accent-fill/20 border border-accent/40 text-ink">
-                    Cercle Privé {user.memberTier}
+                    {user.memberTier === 'Collector' ? 'Collector VIP' : user.memberTier}
                   </span>
                 ) : (
                   <span className="px-2 py-0.5 text-[0.62rem] uppercase font-semibold bg-muted/10 border border-muted/30 text-muted">
@@ -548,7 +548,7 @@ const UserDetailContent: React.FC<UserDetailPageProps> = ({ userId }) => {
               label="Tier Member"
               value={formData.memberTier}
               onChange={(e) => setFormData({ ...formData, memberTier: e.target.value })}
-              placeholder="e.g. Cercle Privé"
+              placeholder="Member atau Collector"
             />
           </div>
 

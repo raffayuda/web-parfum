@@ -1,11 +1,35 @@
-import { Elysia, t } from 'elysia';
+import { Elysia } from 'elysia';
 import { prisma } from '../db';
 import { CertType } from '@prisma/client';
 import { generateQrCodeDataUrl } from '../utils/qrcode';
 
+function resolveSiteUrl(request?: Request): string {
+  const envUrl = process.env.PUBLIC_SITE_URL?.trim();
+  if (envUrl) return envUrl.replace(/\/+$/, '');
+
+  if (request) {
+    const forwardedHost = request.headers.get('x-forwarded-host');
+    const host = forwardedHost || request.headers.get('host');
+    const proto = request.headers.get('x-forwarded-proto') || (host?.includes('localhost') ? 'http' : 'https');
+    if (host) return `${proto}://${host}`;
+  }
+
+  return 'http://localhost:4321';
+}
+
+async function resolveSafeProductSlug(productSlug?: string | null): Promise<string | null> {
+  const cleaned = productSlug?.trim();
+  if (!cleaned) return null;
+  const fragrance = await prisma.fragrance.findUnique({
+    where: { slug: cleaned },
+    select: { slug: true },
+  });
+  return fragrance ? fragrance.slug : null;
+}
+
 export const certificatesRoute = new Elysia({ prefix: '/certificates' })
   // List all certificates
-  .get('/', async ({ query }) => {
+  .get('/', async ({ query, request }) => {
     const { type } = query as { type?: CertType };
     const where: any = {};
     if (type) where.certType = type;
@@ -20,12 +44,11 @@ export const certificatesRoute = new Elysia({ prefix: '/certificates' })
       },
     });
 
-    // Ensure all have a qrCodeUrl generated
-    const siteUrl = process.env.PUBLIC_SITE_URL || 'http://localhost:4321';
+    const siteUrl = resolveSiteUrl(request);
     const enriched = await Promise.all(
       certs.map(async (c) => {
         const verifyUrl = `${siteUrl}/verify/${c.verifyCode}`;
-        const qrCodeUrl = c.qrCodeUrl || (await generateQrCodeDataUrl(verifyUrl));
+        const qrCodeUrl = await generateQrCodeDataUrl(verifyUrl);
         return {
           ...c,
           verifyUrl,
@@ -38,7 +61,7 @@ export const certificatesRoute = new Elysia({ prefix: '/certificates' })
   })
 
   // Public verification endpoint (Target for Google Lens & phone camera QR code scans)
-  .get('/verify/:verifyCode', async ({ params: { verifyCode }, set }) => {
+  .get('/verify/:verifyCode', async ({ params: { verifyCode }, request, set }) => {
     const cert = await prisma.certification.findUnique({
       where: { verifyCode },
       include: {
@@ -54,7 +77,7 @@ export const certificatesRoute = new Elysia({ prefix: '/certificates' })
       };
     }
 
-    const siteUrl = process.env.PUBLIC_SITE_URL || 'http://localhost:4321';
+    const siteUrl = resolveSiteUrl(request);
     const verifyUrl = `${siteUrl}/verify/${cert.verifyCode}`;
     const qrCodeUrl = await generateQrCodeDataUrl(verifyUrl);
 
@@ -71,23 +94,36 @@ export const certificatesRoute = new Elysia({ prefix: '/certificates' })
   })
 
   // Create new certification (Admin)
-  .post('/', async ({ body, set }) => {
+  .post('/', async ({ body, request, set }) => {
     try {
       const data = body as any;
-      const siteUrl = process.env.PUBLIC_SITE_URL || 'http://localhost:4321';
-      const verifyUrl = `${siteUrl}/verify/${data.verifyCode}`;
+      const verifyCode = String(data.verifyCode || '').trim();
+      if (!verifyCode || !data.certNumber?.trim() || !data.productName?.trim()) {
+        set.status = 400;
+        return { success: false, message: 'Nomor sertifikat, nama produk, dan kode verifikasi wajib diisi.' };
+      }
+
+      const siteUrl = resolveSiteUrl(request);
+      const verifyUrl = `${siteUrl}/verify/${verifyCode}`;
       const qrCodeUrl = await generateQrCodeDataUrl(verifyUrl);
+      const safeProductSlug = await resolveSafeProductSlug(data.productSlug);
 
       const created = await prisma.certification.create({
         data: {
-          certType: data.certType as CertType,
-          certNumber: data.certNumber,
-          productSlug: data.productSlug || null,
-          productName: data.productName,
-          authority: data.authority,
-          issueDate: new Date(data.issueDate),
-          validUntil: new Date(data.validUntil),
-          verifyCode: data.verifyCode,
+          certType: (data.certType || 'BPOM') as CertType,
+          certNumber: String(data.certNumber).trim(),
+          productSlug: safeProductSlug,
+          productName: String(data.productName).trim(),
+          authority:
+            String(data.authority || '').trim() ||
+            (data.certType === 'HALAL'
+              ? 'BPJPH Kementerian Agama RI'
+              : 'Badan Pengawas Obat dan Makanan RI'),
+          issueDate: data.issueDate ? new Date(data.issueDate) : new Date(),
+          validUntil: data.validUntil
+            ? new Date(data.validUntil)
+            : new Date(new Date().setFullYear(new Date().getFullYear() + 5)),
+          verifyCode,
           qrCodeUrl,
           status: data.status || 'VERIFIED',
           details: data.details || {},
@@ -97,7 +133,7 @@ export const certificatesRoute = new Elysia({ prefix: '/certificates' })
       return {
         success: true,
         message: 'Sertifikasi berhasil didaftarkan.',
-        data: created,
+        data: { ...created, verifyUrl },
       };
     } catch (e: any) {
       set.status = 400;
@@ -106,34 +142,36 @@ export const certificatesRoute = new Elysia({ prefix: '/certificates' })
   })
 
   // Update certification (Admin)
-  .put('/:id', async ({ params: { id }, body, set }) => {
+  .put('/:id', async ({ params: { id }, body, request, set }) => {
     try {
       const data = body as any;
-      const siteUrl = process.env.PUBLIC_SITE_URL || 'http://localhost:4321';
-      const verifyUrl = `${siteUrl}/verify/${data.verifyCode}`;
+      const verifyCode = String(data.verifyCode || '').trim();
+      const siteUrl = resolveSiteUrl(request);
+      const verifyUrl = `${siteUrl}/verify/${verifyCode}`;
       const qrCodeUrl = await generateQrCodeDataUrl(verifyUrl);
+      const safeProductSlug = await resolveSafeProductSlug(data.productSlug);
 
       const updated = await prisma.certification.update({
         where: { id },
         data: {
-          certType: data.certType as CertType,
-          certNumber: data.certNumber,
-          productSlug: data.productSlug,
-          productName: data.productName,
-          authority: data.authority,
+          certType: (data.certType || 'BPOM') as CertType,
+          certNumber: String(data.certNumber).trim(),
+          productSlug: safeProductSlug,
+          productName: String(data.productName).trim(),
+          authority: String(data.authority).trim(),
           issueDate: new Date(data.issueDate),
           validUntil: new Date(data.validUntil),
-          verifyCode: data.verifyCode,
+          verifyCode,
           qrCodeUrl,
-          status: data.status,
-          details: data.details,
+          status: data.status || 'VERIFIED',
+          details: data.details || {},
         },
       });
 
       return {
         success: true,
         message: 'Sertifikasi berhasil diperbarui.',
-        data: updated,
+        data: { ...updated, verifyUrl },
       };
     } catch (e: any) {
       set.status = 400;

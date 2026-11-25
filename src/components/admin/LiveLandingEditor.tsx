@@ -457,7 +457,7 @@ export const LiveLandingEditor: React.FC<LiveLandingEditorProps> = ({
                               placeholder="The collection stays at six. Komposisi baru menggantikan yang lama..."
                             />
                             <div className="p-3 bg-surface/30 border border-line text-xs text-muted">
-                              💡 Botol parfum pada katalog dibaca secara otomatis dari menu <strong>Katalog Parfum & Stok</strong> di database. Anda dapat mengubah harga, nama, dan status stok parfum di sana.
+                              Botol parfum pada katalog dibaca secara otomatis dari menu <strong>Katalog Parfum &amp; Stok</strong> di database. Anda dapat mengubah harga, nama, dan status stok parfum di sana.
                             </div>
                           </>
                         )}

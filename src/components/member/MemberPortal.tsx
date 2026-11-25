@@ -1,245 +1,379 @@
-import React, { useState, useEffect } from 'react';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from '../../lib/query-client';
+import React, { useState, useEffect, useCallback } from 'react';
 import { api } from '../../lib/api';
 import { toast } from 'sonner';
-import { Button } from '../ui/react/Button';
-import { Input, Textarea } from '../ui/react/Input';
-import { Badge } from '../ui/react/Badge';
-import { Award, CheckCircle, Sparkles, ShieldCheck, Clock, User, ArrowRight } from 'lucide-react';
+import {
+  Award,
+  CheckCircle2,
+  Lock,
+  ArrowRight,
+  RefreshCw,
+  ShoppingBag,
+  Sparkles,
+  UserCheck,
+} from 'lucide-react';
 
-const MemberPortalInner: React.FC = () => {
+interface LoyaltyBenefit {
+  id: string;
+  label: string;
+  description: string;
+  unlocked: boolean;
+}
+
+interface LoyaltySummary {
+  tier: 'Member' | 'Collector';
+  tierLabel?: string;
+  memberTierLabel?: string;
+  vipTierLabel?: string;
+  isVip: boolean;
+  autoUpgradeEnabled?: boolean;
+  totalSpent: number;
+  paidOrdersCount: number;
+  threshold: number;
+  remainingForVip: number;
+  progressPercent: number;
+  benefits: LoyaltyBenefit[];
+}
+
+const formatRupiah = (amount: number) =>
+  new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    maximumFractionDigits: 0,
+  }).format(amount || 0);
+
+export const MemberPortal: React.FC = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [reason, setReason] = useState('');
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loyalty, setLoyalty] = useState<LoyaltySummary | null>(null);
 
-  useEffect(() => {
-    // 1. Initial hydrate from localStorage
-    const cached = localStorage.getItem('omoo_customer_user');
-    if (cached) {
-      try {
-        const u = JSON.parse(cached);
-        setCurrentUser(u);
-        setFullName(u.name || '');
-        setEmail(u.email || '');
-        setPhone(u.phone || '');
-      } catch {}
-    }
-
-    // 2. Fetch fresh user session from database
-    api.getMe().then((res) => {
-      if (res && res.success && res.user) {
-        setCurrentUser(res.user);
-        localStorage.setItem('omoo_customer_user', JSON.stringify(res.user));
-        setFullName(res.user.name || '');
-        setEmail(res.user.email || '');
-        setPhone(res.user.phone || '');
-      }
-    }).catch(() => {});
-  }, []);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const fetchStatus = useCallback(async () => {
     setIsLoading(true);
-
     try {
-      const res = await api.applyMember({
-        userId: currentUser?.id,
-        fullName: fullName.trim(),
-        email: email.trim(),
-        phone: phone.trim(),
-        reason: reason.trim(),
-      });
-
-      if (res && res.success) {
-        setIsSubmitted(true);
-        // Update user state to PENDING in local cache
-        const updated = { ...currentUser, memberStatus: 'PENDING' };
-        setCurrentUser(updated);
-        localStorage.setItem('omoo_customer_user', JSON.stringify(updated));
-        toast.success('Pengajuan Cercle Privé berhasil dikirim!');
-      } else {
-        throw new Error(res?.message || 'Gagal mengajukan keanggotaan.');
+      const res = await api.getMyLoyalty();
+      if (res.success) {
+        setAuthenticated(Boolean(res.authenticated));
+        setCurrentUser(res.user || null);
+        setLoyalty(res.loyalty || null);
       }
-    } catch (err: any) {
-      toast.error(err.message || 'Gagal mengajukan keanggotaan.');
+    } catch {
+      toast.error('Gagal memuat status loyalty.');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const isMemberActive = currentUser?.memberStatus === 'ACTIVE';
-  const isMemberPending = currentUser?.memberStatus === 'PENDING' || isSubmitted;
+  useEffect(() => {
+    fetchStatus();
+    const handleAuthChanged = () => fetchStatus();
+    window.addEventListener('omoo:auth-changed', handleAuthChanged);
+    return () => window.removeEventListener('omoo:auth-changed', handleAuthChanged);
+  }, [fetchStatus]);
 
-  return (
-    <div className="w-full max-w-2xl mx-auto space-y-8">
-      {/* Introduction Card */}
-      <div className="border border-line bg-surface/20 p-8 text-center space-y-3">
-        <Award className="w-10 h-10 text-accent mx-auto" />
-        <span className="text-[0.62rem] uppercase font-semibold tracking-[0.16em] text-accent">
-          Privilege Program
-        </span>
-        <h3 className="font-display text-3xl font-light text-ink">
-          OMOO Cercle Privé
-        </h3>
-        <p className="text-xs text-muted max-w-md mx-auto leading-relaxed">
-          Program keanggotaan eksklusif OMOO. Anggota terdaftar mendapatkan akses awal ke rilisan edisi terbatas, undangan sesi tester privat di Jakarta, dan pengiriman prioritas.
+  if (isLoading) {
+    return (
+      <div className="max-w-3xl mx-auto border border-line bg-surface/20 p-10 text-center space-y-3">
+        <RefreshCw className="w-6 h-6 text-accent mx-auto animate-spin" />
+        <p className="text-xs uppercase tracking-[0.14em] text-muted">
+          Memuat status keanggotaan Anda...
         </p>
       </div>
+    );
+  }
 
-      {/* CASE 1: ACTIVE MEMBER PASS */}
-      {isMemberActive ? (
-        <div className="border-2 border-accent bg-surface/40 p-8 space-y-6 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 transform translate-x-8 -translate-y-8 w-32 h-32 bg-accent/10 rounded-full blur-2xl pointer-events-none" />
+  const threshold = loyalty?.threshold ?? 2_500_000;
+  const totalSpent = loyalty?.totalSpent ?? 0;
+  const remainingForVip = loyalty?.remainingForVip ?? threshold;
+  const progressPercent = loyalty?.progressPercent ?? 0;
+  const isVip = Boolean(loyalty?.isVip);
+  const benefits = loyalty?.benefits ?? [];
+  const memberLabel = loyalty?.memberTierLabel || 'Member';
+  const vipLabel = loyalty?.vipTierLabel || 'Collector VIP';
+  const activeTierLabel = loyalty?.tierLabel || (isVip ? vipLabel : memberLabel);
 
-          <div className="flex items-center justify-between border-b border-line pb-4">
-            <div>
-              <span className="text-[0.6rem] uppercase tracking-[0.2em] text-accent font-semibold block">
-                Official Membership Pass
+  return (
+    <div className="max-w-4xl mx-auto space-y-8">
+      {/* Top Card: Authenticated Loyalty Pass OR Guest Explainer */}
+      {authenticated && currentUser ? (
+        <div
+          className={`border p-6 sm:p-8 space-y-6 ${
+            isVip
+              ? 'border-accent bg-accent-fill/15 shadow-xl'
+              : 'border-line bg-surface/25'
+          }`}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-line pb-6">
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2.5">
+                <span
+                  className={`px-2.5 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] border ${
+                    isVip
+                      ? 'bg-accent-fill/30 text-ink border-accent'
+                      : 'bg-surface text-muted border-line'
+                  }`}
+                >
+                  {isVip ? vipLabel.toUpperCase() : `${memberLabel.toUpperCase()} AKTIF`}
+                </span>
+                <span className="text-[0.68rem] uppercase tracking-[0.12em] text-muted">
+                  Otomatis Berdasarkan Pembelian
+                </span>
+              </div>
+
+              <h2 className="font-display text-2xl sm:text-3xl font-normal text-ink pt-1">
+                {currentUser.name}
+              </h2>
+              <p className="text-xs text-muted">{currentUser.email}</p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={fetchStatus}
+                className="inline-flex items-center gap-1.5 px-3 py-2 border border-line bg-bg hover:border-ink text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-ink transition-colors cursor-pointer"
+              >
+                <RefreshCw className="w-3.5 h-3.5 text-muted" />
+                <span>Segarkan</span>
+              </button>
+              <a
+                href="/collection"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-ink text-bg hover:bg-ink/85 text-[0.68rem] font-semibold uppercase tracking-[0.1em] transition-colors"
+              >
+                <span>Belanja Koleksi</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          </div>
+
+          {/* Metrics Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="border border-line bg-bg/70 p-4 space-y-1">
+              <span className="text-[0.62rem] uppercase tracking-[0.12em] text-muted font-medium">
+                Tier Saat Ini
               </span>
-              <h4 className="font-display text-3xl font-normal text-ink mt-0.5">
-                {currentUser?.memberTier || 'Cercle Privé Gold'}
-              </h4>
+              <p className="font-display text-xl text-ink">
+                {activeTierLabel}
+              </p>
+              <p className="text-[0.68rem] text-muted">
+                {currentUser.memberSince
+                  ? `Aktif sejak ${new Date(currentUser.memberSince).toLocaleDateString('id-ID', {
+                      month: 'short',
+                      year: 'numeric',
+                    })}`
+                  : 'Keanggotaan otomatis'}
+              </p>
             </div>
-            <span className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-semibold uppercase tracking-[0.1em]">
-              Status: Aktif
-            </span>
+
+            <div className="border border-line bg-bg/70 p-4 space-y-1">
+              <span className="text-[0.62rem] uppercase tracking-[0.12em] text-muted font-medium">
+                Akumulasi Belanja Tervalidasi
+              </span>
+              <p className="font-display text-xl text-ink">{formatRupiah(totalSpent)}</p>
+              <p className="text-[0.68rem] text-muted">
+                Dari {loyalty?.paidOrdersCount ?? 0} pesanan terbayar
+              </p>
+            </div>
+
+            <div className="border border-line bg-bg/70 p-4 space-y-1">
+              <span className="text-[0.62rem] uppercase tracking-[0.12em] text-muted font-medium">
+                Status Collector VIP
+              </span>
+              <p className="font-display text-xl text-ink">
+                {isVip ? 'Terbuka Penuh' : formatRupiah(remainingForVip)}
+              </p>
+              <p className="text-[0.68rem] text-muted">
+                {isVip
+                  ? 'Semua benefit VIP aktif di checkout'
+                  : `Sisa belanja menuju batas ${formatRupiah(threshold)}`}
+              </p>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 text-xs">
-            <div>
-              <span className="text-[0.65rem] uppercase text-muted tracking-wider block">Nama Anggota</span>
-              <span className="font-medium text-ink text-sm">{currentUser?.name}</span>
+          {/* Progress Bar toward Collector VIP */}
+          <div className="space-y-2.5 pt-1">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-medium text-ink">
+                {isVip
+                  ? `Anda telah mencapai status ${vipLabel} OMOO`
+                  : `Progres menuju ${vipLabel} (${progressPercent}%)`}
+              </span>
+              <span className="text-muted">
+                {formatRupiah(Math.min(totalSpent, threshold))} / {formatRupiah(threshold)}
+              </span>
             </div>
-            <div>
-              <span className="text-[0.65rem] uppercase text-muted tracking-wider block">ID Keanggotaan</span>
-              <span className="font-mono text-ink text-xs">{currentUser?.id?.slice(0, 14)}</span>
-            </div>
-            <div>
-              <span className="text-[0.65rem] uppercase text-muted tracking-wider block">Email Terdaftar</span>
-              <span className="font-mono text-ink">{currentUser?.email}</span>
-            </div>
-            <div>
-              <span className="text-[0.65rem] uppercase text-muted tracking-wider block">WhatsApp Concierge</span>
-              <span className="font-mono text-ink">{currentUser?.phone || '+62 812-0000-0000'}</span>
-            </div>
-          </div>
 
-          <div className="pt-4 border-t border-line space-y-2">
-            <span className="text-[0.65rem] uppercase tracking-[0.12em] font-semibold text-accent block">
-              Hak Istimewa Anggota Anda:
-            </span>
-            <ul className="text-xs text-muted space-y-1.5 leading-relaxed">
-              <li className="flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5 text-accent shrink-0" />
-                <span>Akses reservasi pertama untuk setiap peluncuran formula baru.</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5 text-accent shrink-0" />
-                <span>Undangan sesi privat mencoba aroma terbaru di studio Jakarta Selatan.</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5 text-accent shrink-0" />
-                <span>Bebas biaya kirim pengiriman kilat (Express Overnight) ke seluruh Indonesia.</span>
-              </li>
-            </ul>
-          </div>
+            <div className="w-full h-2 bg-surface border border-line overflow-hidden">
+              <div
+                className="h-full bg-accent transition-all duration-500"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
 
-          <div className="pt-2 flex justify-end">
-            <a
-              href="/collection"
-              className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-accent hover:text-ink transition-colors"
-            >
-              <span>Jelajahi Koleksi Khusus Member</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </a>
+            {!isVip && (
+              <p className="text-[0.72rem] text-muted">
+                Selesaikan transaksi tervalidasi senilai{' '}
+                <strong className="text-ink">{formatRupiah(remainingForVip)}</strong> lagi untuk
+                otomatis naik ke tier Collector VIP tanpa pengajuan manual.
+              </p>
+            )}
           </div>
-        </div>
-      ) : isMemberPending ? (
-        /* CASE 2: PENDING REVIEW */
-        <div className="border border-line bg-surface/30 p-8 text-center space-y-4">
-          <Clock className="w-10 h-10 text-amber-600 dark:text-amber-400 mx-auto" />
-          <h4 className="font-display text-2xl text-ink font-normal">
-            Permohonan Keanggotaan Sedang Ditinjau
-          </h4>
-          <span className="inline-block px-3 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-300 text-xs font-semibold uppercase tracking-[0.1em]">
-            Status: Menunggu Persetujuan
-          </span>
-          <p className="text-xs text-muted max-w-sm mx-auto leading-relaxed">
-            Tim kami sedang memverifikasi data pendaftaran Anda ({email || currentUser?.email}).
-            Setelah disetujui oleh admin, status keanggotaan Cercle Privé Anda akan aktif secara otomatis.
-          </p>
         </div>
       ) : (
-        /* CASE 3: APPLICATION FORM */
-        <div className="border border-line bg-surface/30 p-6 sm:p-8">
-          <h4 className="font-display text-xl text-ink mb-2">
-            Ajukan Keanggotaan Cercle Privé
-          </h4>
-          <p className="text-xs text-muted mb-6 leading-relaxed">
-            {currentUser
-              ? `Anda sedang masuk sebagai ${currentUser.email}. Silakan lengkapi formulir di bawah ini.`
-              : 'Silakan isi formulir di bawah ini untuk mengajukan permohonan keanggotaan OMOO.'}
-          </p>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              label="Nama Lengkap"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="Nama sesuai identitas"
-              required
-            />
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Input
-                label="Nomor WhatsApp"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="081234567890"
-                required
-              />
-              <Input
-                label="Email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="email@anda.com"
-                required
-              />
+        <div className="border border-line bg-surface/25 p-6 sm:p-8 space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-2 max-w-xl">
+              <div className="inline-flex items-center gap-2 text-[0.65rem] uppercase tracking-[0.14em] text-accent font-semibold">
+                <UserCheck className="w-3.5 h-3.5" />
+                <span>Otomatis & Tanpa Formulir</span>
+              </div>
+              <h2 className="font-display text-2xl sm:text-3xl font-normal text-ink">
+                Daftar Sekali, Tier Naik Otomatis Saat Berbelanja
+              </h2>
+              <p className="text-sm text-muted leading-relaxed">
+                Setiap akun terverifikasi langsung aktif sebagai <strong className="text-ink">Member</strong>.
+                Ketika total pesanan terbayar mencapai{' '}
+                <strong className="text-ink">{formatRupiah(threshold)}</strong>, status Anda otomatis
+                meningkat menjadi <strong className="text-ink">Collector VIP</strong>.
+              </p>
             </div>
 
-            <Textarea
-              label="Profil Aroma / Alasan Bergabung"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="Ceritakan profil wewangian yang biasa Anda kenakan atau preferensi aroma Anda..."
-              rows={3}
-            />
+            <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+              <a
+                href="/collection"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-ink text-bg hover:bg-ink/85 text-xs font-semibold uppercase tracking-[0.12em] transition-colors"
+              >
+                <ShoppingBag className="w-4 h-4 text-accent" />
+                <span>Lihat Koleksi</span>
+              </a>
+              <a
+                href="/account/tracker"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 border border-line bg-bg hover:border-ink text-ink text-xs font-semibold uppercase tracking-[0.12em] transition-colors"
+              >
+                <span>Lacak Pesanan</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          </div>
 
-            <Button
-              type="submit"
-              variant="primary"
-              className="w-full mt-2"
-              isLoading={isLoading}
-            >
-              Kirimkan Permohonan Keanggotaan
-            </Button>
-          </form>
+          <div className="border-t border-line pt-4 text-xs text-muted">
+            Sudah memiliki pesanan atau ingin mendaftar akun Member? Klik tombol{' '}
+            <strong className="text-ink uppercase tracking-wider">Akun</strong> pada bilah navigasi di
+            bagian atas halaman untuk masuk atau membuat akun dengan verifikasi email.
+          </div>
+        </div>
+      )}
+
+      {/* Tier Comparison Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div
+          className={`border p-6 space-y-4 ${
+            authenticated && !isVip ? 'border-ink bg-surface/30' : 'border-line bg-surface/15'
+          }`}
+        >
+          <div className="flex items-center justify-between border-b border-line pb-3">
+            <div>
+              <span className="text-[0.62rem] uppercase tracking-[0.14em] text-muted font-semibold">
+                Tier 01
+              </span>
+              <h3 className="font-display text-2xl text-ink font-normal mt-0.5">Member</h3>
+            </div>
+            <span className="px-2.5 py-1 text-[0.62rem] uppercase tracking-[0.1em] border border-line bg-bg text-ink font-semibold">
+              Gratis Setelah Daftar
+            </span>
+          </div>
+          <p className="text-xs text-muted leading-relaxed">
+            Aktif otomatis segera setelah Anda mendaftarkan akun OMOO dengan verifikasi email OTP.
+          </p>
+          <ul className="space-y-2.5 text-xs text-ink">
+            <li className="flex items-start gap-2.5">
+              <CheckCircle2 className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+              <span>Riwayat transaksi & pelacakan resi pengiriman real-time</span>
+            </li>
+            <li className="flex items-start gap-2.5">
+              <CheckCircle2 className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+              <span>Checkout cepat dengan detail penerima tersimpan otomatis</span>
+            </li>
+            <li className="flex items-start gap-2.5">
+              <CheckCircle2 className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+              <span>Akumulasi belanja terhitung otomatis menuju Collector VIP</span>
+            </li>
+          </ul>
+        </div>
+
+        <div
+          className={`border p-6 space-y-4 ${
+            isVip ? 'border-accent bg-accent-fill/15' : 'border-line bg-surface/15'
+          }`}
+        >
+          <div className="flex items-center justify-between border-b border-line pb-3">
+            <div>
+              <span className="text-[0.62rem] uppercase tracking-[0.14em] text-accent font-semibold">
+                Tier 02
+              </span>
+              <h3 className="font-display text-2xl text-ink font-normal mt-0.5">Collector VIP</h3>
+            </div>
+            <span className="px-2.5 py-1 text-[0.62rem] uppercase tracking-[0.1em] border border-accent bg-accent-fill/25 text-ink font-semibold">
+              Belanja &ge; {formatRupiah(threshold)}
+            </span>
+          </div>
+          <p className="text-xs text-muted leading-relaxed">
+            Terbuka otomatis setelah total pesanan Anda yang tervalidasi mencapai{' '}
+            {formatRupiah(threshold)}.
+          </p>
+          <ul className="space-y-2.5 text-xs text-ink">
+            <li className="flex items-start gap-2.5">
+              <Award className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+              <span>Gratis ongkos kirim ke seluruh Indonesia untuk setiap transaksi</span>
+            </li>
+            <li className="flex items-start gap-2.5">
+              <Sparkles className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+              <span>Bonus sampel vial 2 ml pilihan di setiap pemesanan botol 50 ml</span>
+            </li>
+            <li className="flex items-start gap-2.5">
+              <CheckCircle2 className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+              <span>Prioritas reservasi saat batch terbaru dan edisi musiman dirilis</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Live Benefit Status Checklist when logged in */}
+      {authenticated && benefits.length > 0 && (
+        <div className="border border-line bg-surface/15 p-6 space-y-4">
+          <div className="flex items-center justify-between border-b border-line pb-3">
+            <h3 className="font-display text-xl text-ink font-normal">
+              Hak Istimewa Akun Anda
+            </h3>
+            <span className="text-[0.68rem] uppercase tracking-[0.12em] text-muted">
+              {benefits.filter((b) => b.unlocked).length} / {benefits.length} Aktif
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {benefits.map((benefit) => (
+              <div
+                key={benefit.id}
+                className={`p-3.5 border flex items-start gap-3 ${
+                  benefit.unlocked
+                    ? 'border-line bg-bg'
+                    : 'border-line/60 bg-surface/30 opacity-70'
+                }`}
+              >
+                {benefit.unlocked ? (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
+                ) : (
+                  <Lock className="w-4 h-4 text-muted shrink-0 mt-0.5" />
+                )}
+                <div className="space-y-0.5">
+                  <p className="text-xs font-semibold text-ink">{benefit.label}</p>
+                  <p className="text-[0.7rem] text-muted leading-relaxed">
+                    {benefit.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
-  );
-};
-
-export const MemberPortal: React.FC = () => {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <MemberPortalInner />
-    </QueryClientProvider>
   );
 };

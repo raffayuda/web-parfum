@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="6 10 518 96" width="518" height="96">
+  <defs>
+  <linearGradient id="omooGold" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#f2dfa8"/>
+    <stop offset="45%" stop-color="#d7b66b"/>
+    <stop offset="100%" stop-color="#b89242"/>
+  </linearGradient>
+</defs>
+  
+  <g fill="none" stroke="url(#omooGold)" stroke-width="6.5" stroke-linecap="butt" stroke-linejoin="miter">
+    <ellipse cx="58" cy="58" rx="46" ry="43"/>
+    <ellipse cx="402" cy="58" rx="46" ry="43"/>
+    <ellipse cx="470" cy="58" rx="46" ry="43"/>
+  </g>
+  <path d="M 172.8 101 L 172.8 15 L 180.5 15 L 222 92.5 L 263.5 15 L 271.2 15 L 271.2 101 L 264.6 101 L 264.6 28.5 L 225.2 101 L 218.8 101 L 179.4 28.5 L 179.4 101 Z" fill="url(#omooGold)"/>
+  <circle cx="136" cy="94" r="7.4" fill="url(#omooGold)"/>
+  <circle cx="318" cy="94" r="7.4" fill="url(#omooGold)"/>
+</svg>

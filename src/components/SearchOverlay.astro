@@ -2,7 +2,7 @@
 import Media from './ui/Media.astro';
 import ArrowLink from './ui/ArrowLink.astro';
 import { fragrances, priceLabel } from '../data/fragrances';
-import { journal } from '../data/journal';
+import { getGalleryItems } from '../../server/src/utils/gallery';
 
 const normalize = (parts: Array<string | string[]>) =>
   parts
@@ -35,15 +35,17 @@ const fragranceResults = fragrances.map((fragrance) => ({
   ]),
 }));
 
-const journalResults = journal.map((post) => ({
-  slug: post.slug,
-  href: `/journal/${post.slug}/`,
-  title: post.title,
-  meta: `${post.category} / ${post.displayDate}`,
-  detail: post.deck,
-  image: post.image,
-  imageAlt: post.imageAlt,
-  search: normalize([post.title, post.deck, post.category, post.displayDate, ...post.body.map((block) => block.text)]),
+const galleryItems = await getGalleryItems();
+
+const galleryResults = galleryItems.map((item) => ({
+  id: item.id,
+  href: `/gallery/?item=${encodeURIComponent(item.id)}`,
+  title: item.title,
+  meta: `${item.category} / ${item.capturedDate || item.eventOrLocation}`,
+  detail: item.description,
+  image: item.image,
+  imageAlt: item.title,
+  search: normalize([item.title, item.category, item.eventOrLocation, item.capturedDate, item.description]),
 }));
 ---
 
@@ -149,18 +151,18 @@ const journalResults = journal.map((post) => ({
           </ul>
         </section>
 
-        <section data-search-group="journal">
+        <section data-search-group="gallery">
           <div class="flex items-baseline justify-between gap-4 border-b border-line pb-3">
-            <h2 class="font-display text-2xl font-light">Journal</h2>
+            <h2 class="font-display text-2xl font-light">Gallery</h2>
             <span class="text-[0.6rem] uppercase tracking-[0.12em] text-muted">
-              <span data-search-count="journal">{journalResults.length}</span> ditemukan
+              <span data-search-count="gallery">{galleryResults.length}</span> ditemukan
             </span>
           </div>
 
           <ul>
             {
-              journalResults.map((result) => (
-                <li data-search-item data-search-group="journal" data-search-text={result.search}>
+              galleryResults.map((result) => (
+                <li data-search-item data-search-group="gallery" data-search-text={result.search}>
                   <a href={result.href} class="group flex items-center gap-4 border-b border-line py-3">
                     <Media
                       src={result.image}
@@ -245,7 +247,7 @@ const journalResults = journal.map((post) => ({
     const raw = input?.value.trim().toLowerCase() ?? '';
     const tokens = raw.split(/\s+/).filter(Boolean);
     let total = 0;
-    const counts = { compositions: 0, journal: 0 };
+    const counts = { compositions: 0, gallery: 0 };
 
     items.forEach((item) => {
       const haystack = item.dataset.searchText ?? '';
@@ -253,18 +255,18 @@ const journalResults = journal.map((post) => ({
       item.hidden = !visible;
       if (visible) {
         total += 1;
-        const group = item.dataset.searchGroup as 'compositions' | 'journal' | undefined;
+        const group = item.dataset.searchGroup as 'compositions' | 'gallery' | undefined;
         if (group) counts[group] += 1;
       }
     });
 
     groupSections.forEach((section) => {
-      const group = section.dataset.searchGroup as 'compositions' | 'journal' | undefined;
+      const group = section.dataset.searchGroup as 'compositions' | 'gallery' | undefined;
       section.hidden = !group || counts[group] === 0;
     });
 
     counters.forEach((counter) => {
-      const group = counter.dataset.searchCount as 'compositions' | 'journal' | undefined;
+      const group = counter.dataset.searchCount as 'compositions' | 'gallery' | undefined;
       counter.textContent = String(group ? counts[group] : 0);
     });
 
@@ -307,7 +309,7 @@ const journalResults = journal.map((post) => ({
       });
       animate(items.filter((item) => !item.hidden), { opacity: [0, 1], y: [10, 0] }, {
         duration: 0.4,
-        delay: stagger(0.018, { start: 0.1 }),
+        delay: stagger(0.018, { startDelay: 0.1 }),
         ease: [0.16, 1, 0.3, 1],
       });
     }

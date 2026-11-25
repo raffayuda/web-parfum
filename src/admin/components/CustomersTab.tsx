@@ -337,7 +337,7 @@ export const CustomersTab: React.FC = () => {
                   </h3>
                   {selectedUser.memberTier ? (
                     <span className="px-2 py-0.5 text-[0.62rem] uppercase font-semibold bg-accent-fill/20 border border-accent/40 text-ink">
-                      Cercle Privé {selectedUser.memberTier}
+                      {selectedUser.memberTier === 'Collector' ? 'Collector VIP' : selectedUser.memberTier}
                     </span>
                   ) : (
                     <span className="px-2 py-0.5 text-[0.62rem] uppercase font-semibold bg-muted/10 border border-muted/30 text-muted">
@@ -553,7 +553,7 @@ export const CustomersTab: React.FC = () => {
                 label="Tier Member"
                 value={formData.memberTier}
                 onChange={(e) => setFormData({ ...formData, memberTier: e.target.value })}
-                placeholder="e.g. Cercle Privé"
+                placeholder="Member atau Collector"
               />
             </div>
 
@@ -675,7 +675,7 @@ export const CustomersTab: React.FC = () => {
                     <td className="p-3.5">
                       {u.memberTier ? (
                         <span className="px-2 py-0.5 text-[0.6rem] uppercase font-semibold bg-accent-fill/20 border border-accent/40 text-ink">
-                          Cercle Privé {u.memberTier}
+                          {u.memberTier === 'Collector' ? 'Collector VIP' : u.memberTier}
                         </span>
                       ) : u.role === 'ADMIN' ? (
                         <span className="px-2 py-0.5 text-[0.6rem] uppercase font-semibold bg-ink text-bg">
@@ -806,7 +806,7 @@ export const CustomersTab: React.FC = () => {
               label="Tier Member"
               value={formData.memberTier}
               onChange={(e) => setFormData({ ...formData, memberTier: e.target.value })}
-              placeholder="e.g. Cercle Privé"
+              placeholder="Member atau Collector"
             />
           </div>
 

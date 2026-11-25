@@ -11,6 +11,7 @@ import { uploadRoute } from './routes/upload';
 import { authRoute } from './routes/auth';
 import { usersRoute } from './routes/users';
 import { settingsRoute } from './routes/settings';
+import { galleryRoute } from './routes/gallery';
 import { join } from 'path';
 import { mkdir } from 'fs/promises';
 
@@ -56,6 +57,7 @@ export const app = new Elysia()
       .use(uploadRoute)
       .use(usersRoute)
       .use(settingsRoute)
+      .use(galleryRoute)
   )
   .get('/health', () => ({
     status: 'ok',

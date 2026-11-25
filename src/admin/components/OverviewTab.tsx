@@ -102,7 +102,7 @@ export const OverviewTab: React.FC<{ onNavigate: (tab: string) => void }> = ({ o
           <p className="mt-3 font-display text-2xl sm:text-3xl font-light text-ink">
             {completedOrders.length}
           </p>
-          <p className="mt-1 text-[0.68rem] text-muted">{members.length} pengajuan member</p>
+          <p className="mt-1 text-[0.68rem] text-muted">{members.length} member terdaftar</p>
         </div>
       </div>
 

@@ -2,15 +2,74 @@
 interface Props {
   class?: string;
   href?: string;
+  variant?: 'nav' | 'full' | 'footer';
 }
 
-const { class: className, href = '/' } = Astro.props;
+const { class: className, href = '/', variant = 'nav' } = Astro.props;
 ---
 
 <a
   href={href}
-  aria-label="Omoo, home"
-  class:list={['inline-block font-display font-normal leading-none tracking-[0.2em]', className]}
+  aria-label="OMOO, home"
+  class:list={[
+    variant === 'footer'
+      ? 'block w-full'
+      : 'inline-flex items-center gap-3 leading-none shrink-0',
+    className,
+  ]}
 >
-  OMOO
+  {variant === 'footer' ? (
+    <>
+      <img
+        src="/images/omoo-wordmark-black.svg"
+        alt="O.M.OO"
+        class="w-full h-auto block dark:hidden select-none"
+      />
+      <img
+        src="/images/omoo-wordmark-gold.svg"
+        alt="O.M.OO"
+        class="w-full h-auto hidden dark:block select-none"
+      />
+    </>
+  ) : variant === 'full' ? (
+    <>
+      <img
+        src="/images/omoo-full-black.svg"
+        alt="O.M.OO"
+        class="h-12 sm:h-14 w-auto object-contain block dark:hidden"
+      />
+      <img
+        src="/images/omoo-full-gold.svg"
+        alt="O.M.OO"
+        class="h-12 sm:h-14 w-auto object-contain hidden dark:block"
+      />
+    </>
+  ) : (
+    <>
+      {/* Right: OMOO emblem icon */}
+      <img
+        src="/images/omoo-logo-black.svg"
+        alt=""
+        aria-hidden="true"
+        class="h-6 sm:h-[26px] w-auto object-contain block dark:hidden"
+      />
+      <img
+        src="/images/omoo-logo-gold.svg"
+        alt=""
+        aria-hidden="true"
+        class="h-6 sm:h-[26px] w-auto object-contain hidden dark:block"
+      />
+      <img
+        src="/images/omoo-wordmark-black.svg"
+        alt="O.M.OO"
+        class="h-[18px] sm:h-[20px] w-auto object-contain block dark:hidden"
+      />
+      <img
+        src="/images/omoo-wordmark-gold.svg"
+        alt="O.M.OO"
+        class="h-[18px] sm:h-[20px] w-auto object-contain hidden dark:block"
+      />
+      {/* Left: O.M.OO interlocking wordmark */}
+    </>
+  )}
 </a>

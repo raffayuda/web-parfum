@@ -561,7 +561,7 @@ export const PageBuilderTab: React.FC = () => {
             className="inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-ink text-bg hover:bg-ink/90 font-semibold text-xs uppercase tracking-[0.1em] transition-all shadow-xl"
           >
             <Edit className="w-4 h-4 text-accent" />
-            <span>🎨 Buka Visual Live Editor di Landing Page</span>
+            <span>Buka Visual Live Editor di Landing Page</span>
             <ExternalLink className="w-3.5 h-3.5 text-muted ml-1" />
           </a>
 

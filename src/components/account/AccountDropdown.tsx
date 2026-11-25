@@ -163,9 +163,9 @@ export const AccountDropdown: React.FC = () => {
                       <span className="px-1.5 py-0.5 text-[0.58rem] font-bold bg-ink text-bg uppercase tracking-widest">
                         ADMIN
                       </span>
-                    ) : currentUser.memberStatus === 'ACTIVE' ? (
+                    ) : currentUser.memberTier === 'Collector' ? (
                       <span className="px-1.5 py-0.5 text-[0.58rem] font-semibold bg-accent-fill/30 text-ink border border-accent uppercase tracking-wider">
-                        PRIVÉ
+                        COLLECTOR
                       </span>
                     ) : (
                       <span className="px-1.5 py-0.5 text-[0.58rem] font-medium bg-surface text-muted border border-line uppercase">
@@ -195,7 +195,7 @@ export const AccountDropdown: React.FC = () => {
                     >
                       <Edit3 className={`w-4 h-4 ${isEditActive ? 'text-emerald-400' : 'text-accent'}`} />
                       <span>
-                        {isEditActive ? '✓ Editor Visual Aktif' : 'Edit Teks & Foto Halaman'}
+                        {isEditActive ? 'Tutup Editor Visual' : 'Edit Teks & Foto Halaman'}
                       </span>
                     </button>
                   </>
@@ -208,7 +208,7 @@ export const AccountDropdown: React.FC = () => {
                   className="flex items-center gap-2.5 px-3 py-2 text-xs uppercase tracking-wider text-muted hover:text-ink hover:bg-surface transition-colors"
                 >
                   <Package className="w-4 h-4 text-muted" />
-                  <span>Pesanan Saya</span>
+                  <span>My Orders</span>
                 </a>
 
                 <a
@@ -217,7 +217,7 @@ export const AccountDropdown: React.FC = () => {
                   className="flex items-center gap-2.5 px-3 py-2 text-xs uppercase tracking-wider text-muted hover:text-ink hover:bg-surface transition-colors"
                 >
                   <Award className="w-4 h-4 text-muted" />
-                  <span>Membership Privé</span>
+                  <span>Loyalty Membership</span>
                 </a>
 
                 {/* LOGOUT BUTTON */}
@@ -262,7 +262,7 @@ export const AccountDropdown: React.FC = () => {
                   className="flex items-center gap-2.5 px-3 py-2 text-xs uppercase tracking-wider text-muted hover:text-ink hover:bg-surface transition-colors"
                 >
                   <Package className="w-4 h-4 text-muted" />
-                  <span>Pesanan Saya</span>
+                  <span>My Orders</span>
                 </a>
               </>
             )}

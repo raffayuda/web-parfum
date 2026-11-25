@@ -87,6 +87,7 @@ export const CheckoutPage: React.FC = () => {
 
   // Customer Form
   const [loggedInUser, setLoggedInUser] = useState<any>(null);
+  const [loyaltyInfo, setLoyaltyInfo] = useState<any>(null);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -132,7 +133,7 @@ export const CheckoutPage: React.FC = () => {
 
   // 1. Initial Load: Product, Logged-in Customer, and Provinces
   useEffect(() => {
-    // Load logged-in customer if any
+    // Load logged-in customer if any + refresh live loyalty tier
     const cachedUser = localStorage.getItem('omoo_customer_user');
     if (cachedUser) {
       try {
@@ -143,6 +144,20 @@ export const CheckoutPage: React.FC = () => {
         if (u.phone) setPhone(u.phone);
       } catch {}
     }
+
+    api
+      .getMe()
+      .then((res) => {
+        if (res.success && res.user) {
+          setLoggedInUser(res.user);
+          if (res.loyalty) setLoyaltyInfo(res.loyalty);
+          localStorage.setItem('omoo_customer_user', JSON.stringify(res.user));
+          setName((prev) => prev || res.user.name || '');
+          setEmail((prev) => prev || res.user.email || '');
+          setPhone((prev) => prev || res.user.phone || '');
+        }
+      })
+      .catch(() => {});
 
     // Load Product from URL
     const params = new URLSearchParams(window.location.search);
@@ -1064,6 +1079,18 @@ export const CheckoutPage: React.FC = () => {
                     </span>
                   </div>
 
+                  {(loyaltyInfo?.isVip || loggedInUser?.memberTier === 'Collector') && (
+                    <div className="flex justify-between items-center p-2.5 border border-accent bg-accent-fill/20 text-ink">
+                      <span className="flex items-center gap-1.5 font-medium">
+                        <Sparkles className="w-3.5 h-3.5 text-accent" />
+                        <span>Bonus Collector VIP</span>
+                      </span>
+                      <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-accent">
+                        Gratis Sampel Vial 2 ml
+                      </span>
+                    </div>
+                  )}
+
                   <div className="flex justify-between items-baseline pt-4 border-t border-line">
                     <span className="font-display text-lg text-ink font-normal">Total Pembayaran</span>
                     <span className="font-display text-2xl text-ink font-semibold">
@@ -1199,9 +1226,10 @@ export const CheckoutPage: React.FC = () => {
                             setReceiptFile(null);
                             setReceiptPreview('');
                           }}
-                          className="text-xs text-red-600 hover:underline cursor-pointer"
+                          className="inline-flex items-center gap-1 text-xs text-red-600 hover:underline cursor-pointer"
                         >
-                          ✕ Ganti Berkas Lain
+                          <X className="w-3.5 h-3.5" />
+                          <span>Ganti Berkas Lain</span>
                         </button>
                       </div>
                     ) : (

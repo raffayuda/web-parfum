@@ -7,10 +7,10 @@ import Media from '../components/ui/Media.astro';
 import Section from '../components/ui/Section.astro';
 import SectionHeader from '../components/ui/SectionHeader.astro';
 import FragranceCard from '../components/FragranceCard.astro';
-import JournalCard from '../components/JournalCard.astro';
 import DiscoverySet from '../components/DiscoverySet.astro';
+import { GalleryGrid } from '../components/gallery/GalleryGrid';
 import { featured, materials, priceLabel } from '../data/fragrances';
-import { journal } from '../data/journal';
+import { getGalleryItems } from '../../server/src/utils/gallery';
 import { site } from '../data/site';
 import { images, alts } from '../data/images';
 import { prisma } from '../../server/src/db';
@@ -20,6 +20,10 @@ let dbSections: any[] = [];
 let pageId: string | undefined = undefined;
 let dbPerfumes: any[] = [];
 let hiddenSections: string[] = [];
+
+const allGalleryItems = await getGalleryItems();
+const featuredGallery = allGalleryItems.filter((item) => item.featured);
+const galleryPreview = (featuredGallery.length > 0 ? featuredGallery : allGalleryItems).slice(0, 3);
 
 try {
   const page = await prisma.page.findUnique({
@@ -643,18 +647,11 @@ const schema = {
   )}
 
   <Section>
-    <SectionHeader linkHref="/journey/" linkLabel="Buka Galeri & Jurnal" class="mb-[clamp(2.25rem,5vw,4.25rem)]">
-      Catatan &amp; Jurnal
+    <SectionHeader linkHref="/gallery/" linkLabel="Explore Gallery" class="mb-[clamp(2.25rem,5vw,4.25rem)]">
+      Gallery
     </SectionHeader>
 
-    <div class="grid gap-12 lg:grid-cols-12">
-      <JournalCard post={journal[0]} aspect="16 / 10" class="lg:col-span-7" />
-      <JournalCard
-        post={journal[1]}
-        aspect="3 / 4"
-        class="lg:col-span-4 lg:col-start-9"
-      />
-    </div>
+    <GalleryGrid client:load initialItems={galleryPreview} compact />
   </Section>
 
   {showHalal && (

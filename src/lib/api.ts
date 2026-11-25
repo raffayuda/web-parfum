@@ -107,11 +107,23 @@ export const api = {
     fetcher(`/orders/${orderId}`, { method: 'DELETE' }),
   createManualOrder: (data: any) => fetcher('/orders/manual', { method: 'POST', body: JSON.stringify(data) }),
 
-  // Members
-  getMembers: (status?: string) => fetcher(`/members${status ? `?status=${status}` : ''}`),
-  applyMember: (data: any) => fetcher('/members/apply', { method: 'POST', body: JSON.stringify(data) }),
-  validateMember: (id: string, status: string, memberTier?: string, adminNotes?: string) =>
-    fetcher(`/members/${id}/validate`, { method: 'PATCH', body: JSON.stringify({ status, memberTier, adminNotes }) }),
+  // Members & Loyalty
+  getMyLoyalty: () => fetcher('/members/status'),
+  getMembers: (tier?: string) => fetcher(`/members${tier ? `?tier=${encodeURIComponent(tier)}` : ''}`),
+  updateMemberTier: (id: string, memberTier: 'Member' | 'Collector') =>
+    fetcher(`/members/${id}/tier`, { method: 'PATCH', body: JSON.stringify({ memberTier }) }),
+  getLoyaltyConfig: () => fetcher('/members/config'),
+  updateLoyaltyConfig: (data: any) =>
+    fetcher('/members/config', { method: 'PUT', body: JSON.stringify(data) }),
+
+  // Gallery & Dokumentasi
+  getGallery: (category?: string) => fetcher(`/gallery${category ? `?category=${encodeURIComponent(category)}` : ''}`),
+  createGalleryItem: (data: any) =>
+    fetcher('/gallery', { method: 'POST', body: JSON.stringify(data) }),
+  updateGalleryItem: (id: string, data: any) =>
+    fetcher(`/gallery/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteGalleryItem: (id: string) =>
+    fetcher(`/gallery/${id}`, { method: 'DELETE' }),
 
   // Certifications
   getCertificates: (type?: string) => fetcher(`/certificates${type ? `?type=${type}` : ''}`),
