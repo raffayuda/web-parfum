@@ -90,7 +90,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       await api.uploadReceipt(orderResult.id, receiptUrl, 'Bukti bayar diunggah via web checkout');
       setIsReceiptSubmitted(true);
       setStep('success');
-      toast.success('Bukti pembayaran berhasil dikirim!');
+      toast.success('Bukti pembayaran berhasil dikirim! Mengarahkan ke WhatsApp Admin...');
+      if (orderResult.waConfirmationUrl) {
+        setTimeout(() => {
+          window.location.href = orderResult.waConfirmationUrl;
+        }, 900);
+      }
     } catch (err: any) {
       toast.error(err.message || 'Gagal mengirim bukti bayar');
     } finally {

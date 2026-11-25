@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
 import { Button } from '../../components/ui/react/Button';
 import { Input } from '../../components/ui/react/Input';
+import { InteractivePinMap } from '../../components/checkout/InteractivePinMap';
 import { toast } from 'sonner';
 import {
   Save,
@@ -27,9 +28,13 @@ export const SettingsTab: React.FC = () => {
     whatsappNumber: '6281200000000',
     whatsappDisplay: '+62 812 0000 0000',
     email: 'hello@omoo.studio',
+    officeTitle: 'Kantor & Studio OMOO',
     street: 'Jl. Senopati No. 42, Kebayoran Baru',
     city: 'Jakarta Selatan 12190',
     country: 'Indonesia',
+    mapLat: -6.2297,
+    mapLng: 106.8073,
+    googleMapsUrl: '',
     hours: 'Senin - Sabtu: 10:00 - 20:00 WIB | Minggu: Janji Temu',
     visitNote: 'Kunjungan dengan janji temu',
     instagramHandle: '@omoo.parfums',
@@ -189,6 +194,18 @@ export const SettingsTab: React.FC = () => {
         <div className="grid gap-5 md:grid-cols-3">
           <div className="md:col-span-3">
             <label className="text-[0.65rem] uppercase font-semibold tracking-wider text-muted block mb-1.5">
+              Nama Kantor / Judul Lokasi (Ditampilkan di Halaman Contact)
+            </label>
+            <Input
+              value={form.officeTitle}
+              onChange={(e) => handleChange('officeTitle', e.target.value)}
+              placeholder="Kantor & Studio OMOO"
+              required
+            />
+          </div>
+
+          <div className="md:col-span-3">
+            <label className="text-[0.65rem] uppercase font-semibold tracking-wider text-muted block mb-1.5">
               Alamat Lengkap / Jalan
             </label>
             <Input
@@ -243,6 +260,75 @@ export const SettingsTab: React.FC = () => {
               onChange={(e) => handleChange('hours', e.target.value)}
               placeholder="Senin - Sabtu: 10:00 - 20:00 WIB | Minggu: Janji Temu"
             />
+          </div>
+
+          {/* Office Map Pin Selector */}
+          <div className="md:col-span-3 space-y-3 pt-3 border-t border-line/70">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <span className="text-[0.65rem] uppercase font-semibold tracking-wider text-ink block">
+                  Pin Lokasi Peta Kantor (Ditampilkan di Halaman Contact)
+                </span>
+                <span className="text-[0.68rem] text-muted">
+                  Klik atau geser marker di peta untuk mengatur koordinat tepat lokasi kantor perusahaan.
+                </span>
+              </div>
+              <span className="text-[0.68rem] font-mono text-muted">
+                {Number(form.mapLat || -6.2297).toFixed(5)}, {Number(form.mapLng || 106.8073).toFixed(5)}
+              </span>
+            </div>
+
+            <div className="border border-line overflow-hidden h-64">
+              <InteractivePinMap
+                coordinates={{
+                  lat: Number(form.mapLat) || -6.2297,
+                  lng: Number(form.mapLng) || 106.8073,
+                }}
+                onChange={(lat, lng) =>
+                  setForm((prev) => ({ ...prev, mapLat: lat, mapLng: lng }))
+                }
+                className="h-64 w-full"
+              />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div>
+                <label className="text-[0.62rem] uppercase font-semibold tracking-wider text-muted block mb-1">
+                  Latitude
+                </label>
+                <Input
+                  type="number"
+                  step="any"
+                  value={form.mapLat}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, mapLat: parseFloat(e.target.value) || 0 }))
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-[0.62rem] uppercase font-semibold tracking-wider text-muted block mb-1">
+                  Longitude
+                </label>
+                <Input
+                  type="number"
+                  step="any"
+                  value={form.mapLng}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, mapLng: parseFloat(e.target.value) || 0 }))
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-[0.62rem] uppercase font-semibold tracking-wider text-muted block mb-1">
+                  Link Google Maps (Opsional)
+                </label>
+                <Input
+                  value={form.googleMapsUrl}
+                  onChange={(e) => handleChange('googleMapsUrl', e.target.value)}
+                  placeholder="https://maps.app.goo.gl/..."
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>

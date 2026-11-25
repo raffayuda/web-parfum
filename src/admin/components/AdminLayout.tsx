@@ -15,6 +15,7 @@ import {
   HelpCircle,
   Camera,
   UserCog,
+  Database,
 } from 'lucide-react';
 import { Button } from '../../components/ui/react/Button';
 import { Input } from '../../components/ui/react/Input';
@@ -160,6 +161,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       group: 'AKUN ADMIN',
       items: [
         { id: 'profile', label: 'Profil & Kata Sandi', icon: UserCog },
+        { id: 'backups', label: 'Backup Database', icon: Database },
       ],
     },
   ];

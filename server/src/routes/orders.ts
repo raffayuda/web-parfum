@@ -211,9 +211,26 @@ export const ordersRoute = new Elysia({ prefix: '/orders' })
         },
       });
 
-      // Prepare WhatsApp direct confirmation message URL
-      const adminWa = process.env.WHATSAPP_ADMIN_NUMBER || '6281200000000';
-      const waText = `Halo Concierge OMOO, saya telah melakukan pemesanan di web:\n\n*Nomor Pesanan:* ${orderNumber}\n*Nama:* ${order.customerName}\n*Total:* Rp ${order.totalAmount.toLocaleString('id-ID')}\n*Metode:* QRIS\n\nSaya akan segera mengonfirmasi bukti transfer saya. Terima kasih.`;
+      // Prepare WhatsApp direct confirmation message URL using admin site-settings first
+      let adminWa = process.env.WHATSAPP_ADMIN_NUMBER || '6281200000000';
+      try {
+        const settingsPage = await prisma.page.findUnique({
+          where: { slug: 'site-settings' },
+          include: { sections: true },
+        });
+        const configuredWa = (settingsPage?.sections?.[0]?.contentData as any)?.whatsappNumber;
+        if (configuredWa) {
+          const digits = String(configuredWa).replace(/\D/g, '');
+          if (digits) {
+            adminWa = digits.startsWith('0') ? `62${digits.slice(1)}` : digits;
+          }
+        }
+      } catch {}
+
+      const itemsSummary = order.items
+        .map((it) => `- ${it.quantity}x ${it.name} (${it.volume})`)
+        .join('\n');
+      const waText = `Halo Admin OMOO, saya sudah melakukan pemesanan dan mengunggah bukti pembayaran QRIS:\n\n*Nomor Pesanan:* ${orderNumber}\n*Nama:* ${order.customerName}\n*Item:*\n${itemsSummary}\n*Total:* Rp ${order.totalAmount.toLocaleString('id-ID')}\n\nMohon bantu verifikasi pembayaran saya. Terima kasih.`;
       const waConfirmationUrl = `https://wa.me/${adminWa}?text=${encodeURIComponent(waText)}`;
 
       return {

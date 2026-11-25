@@ -6,6 +6,7 @@ import Section from './ui/Section.astro';
 import { images, alts } from '../data/images';
 import { priceLabel } from '../data/fragrances';
 import { whatsappHref } from '../data/site';
+import { AddToCartButton } from './cart/AddToCartButton';
 
 interface Props {
   class?: string;
@@ -63,12 +64,26 @@ const {
           Enam vial 2 ml
         </span>
       </p>
-      <div data-reveal>
+      <div data-reveal class="flex flex-wrap items-center gap-3">
+        <AddToCartButton
+          client:load
+          product={{
+            slug: 'discovery-set',
+            name: 'OMOO Discovery Set',
+            edition: 'SET-06',
+            volume: '6 x 2 ml Vial',
+            price: price,
+            bottleImage: '/images/discovery-set.jpg',
+          }}
+          openDrawerAfterAdd
+          className="px-6 py-4"
+        />
         <Button
           href={whatsappHref(
             `Halo OMOO, saya ingin memesan Discovery Set (${priceLabel(price)}). Mohon info ketersediaan dan pengiriman.`
           )}
           external
+          variant="ghost"
           class="w-full sm:w-auto"
         >
           <span data-editable-id="discovery-cta">{ctaText}</span>

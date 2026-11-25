@@ -134,6 +134,13 @@ export const api = {
   updateCertificate: (id: string, data: any) => fetcher(`/certificates/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteCertificate: (id: string) => fetcher(`/certificates/${id}`, { method: 'DELETE' }),
 
+  // Database Backups (Daily Auto + 7-Day Retention)
+  getBackups: () => fetcher('/backups'),
+  runManualBackup: () => fetcher('/backups/run', { method: 'POST' }),
+  pruneBackups: () => fetcher('/backups/prune', { method: 'POST' }),
+  deleteBackup: (id: string) => fetcher(`/backups/${id}`, { method: 'DELETE' }),
+  getBackupDownloadUrl: (id: string) => `${API_BASE}/backups/${id}/download`,
+
   // Current User Session & Profile
   getMe: () => fetcher('/auth/me'),
   updateProfile: (data: {

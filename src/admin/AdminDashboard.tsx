@@ -13,6 +13,7 @@ import { SettingsTab } from './components/SettingsTab';
 import { FaqTab } from './components/FaqTab';
 import { GalleryTab } from './components/GalleryTab';
 import { AdminProfileTab } from './components/AdminProfileTab';
+import { BackupsTab } from './components/BackupsTab';
 import { Toaster } from 'sonner';
 import { Button } from '../components/ui/react/Button';
 import { Input } from '../components/ui/react/Input';
@@ -33,6 +34,7 @@ import {
   HelpCircle,
   Camera,
   UserCog,
+  Database,
 } from 'lucide-react';
 
 const AdminDashboardInner: React.FC = () => {
@@ -195,6 +197,7 @@ const AdminDashboardInner: React.FC = () => {
       group: 'AKUN ADMIN',
       items: [
         { id: 'profile', label: 'Profil & Kata Sandi', icon: UserCog },
+        { id: 'backups', label: 'Backup Database', icon: Database },
       ],
     },
   ];
@@ -472,6 +475,7 @@ const AdminDashboardInner: React.FC = () => {
           {activeTab === 'profile' && (
             <AdminProfileTab onProfileUpdated={(u) => setAdminUser(u)} />
           )}
+          {activeTab === 'backups' && <BackupsTab />}
           {activeTab === 'manual-order' && <ManualOrderTab />}
         </main>
       </div>

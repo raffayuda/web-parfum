@@ -191,6 +191,7 @@ const schema = {
               volume: fragrance.volume,
               price: fragrance.price,
               edition: fragrance.edition,
+              bottleImage: fragrance.bottle,
               isAvailable,
             }}
             whatsappUrl={productWhatsapp}
@@ -225,7 +226,7 @@ const schema = {
                   {group.label}
                 </h3>
                 <ul class="mt-4 grid gap-2">
-                  {group.items.map((note) => (
+                  {group.items.map((note: string) => (
                     <li class="font-display text-[clamp(1.25rem,1.8vw,1.55rem)] font-light leading-tight">
                       {note}
                     </li>
@@ -302,7 +303,7 @@ const schema = {
 
       <div class="grid gap-10 sm:grid-cols-2 lg:col-span-8 lg:col-start-5">
         {
-          related.map((item) => (
+          related.map((item: any) => (
             <div data-reveal>
               <FragranceCard fragrance={item} aspect="4 / 5" />
             </div>

@@ -392,6 +392,7 @@ export const InlineVisualEditor: React.FC = () => {
       if (path.includes('/about') || path.includes('/maison')) currentSlug = 'about';
       else if (path.includes('/gallery') || path.includes('/journey') || path.includes('/journal')) currentSlug = 'gallery';
       else if (path.includes('/collection')) currentSlug = 'collection';
+      else if (path.includes('/contact')) currentSlug = 'contact';
       else if (path.includes('/find')) currentSlug = 'find';
 
       // Harvest all data-editable-id fields on current page

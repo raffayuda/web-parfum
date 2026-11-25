@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
 import { compressImageFile, MAX_UPLOAD_BYTES } from '../../lib/imageCompression';
+import { type CartItem, getCartItems, clearCart, formatIdr } from '../../lib/cart';
 import { resolvePublicImageUrl } from '../../data/images';
 import { Button } from '../ui/react/Button';
 import { Input, Textarea } from '../ui/react/Input';
@@ -25,6 +26,9 @@ import {
   Clock,
   Search,
   Loader2,
+  Plus,
+  Minus,
+  Trash2,
 } from 'lucide-react';
 
 interface Province {
@@ -75,15 +79,21 @@ export const CheckoutPage: React.FC = () => {
   // Step: 'form' | 'qris'
   const [step, setStep] = useState<'form' | 'qris'>('form');
 
-  // Product Selection (default Vetiver Obscura or from URL ?product=...)
-  const [product, setProduct] = useState<ProductInfo>({
-    name: 'Vetiver Obscura',
-    edition: 'OM-01',
-    volume: '50 ml / Extrait',
-    price: 2450000,
-    bottleImage: '/images/bottle-vetiver.jpg',
-  });
-  const [quantity, setQuantity] = useState(1);
+  // Multi-item Cart / Order Items
+  const [cartItems, setCartItems] = useState<CartItem[]>([
+    {
+      slug: 'vetiver-obscura',
+      name: 'Vetiver Obscura',
+      edition: 'OM-01',
+      volume: '50 ml / Extrait',
+      price: 2450000,
+      bottleImage: '/images/bottle-vetiver.jpg',
+      quantity: 1,
+    },
+  ]);
+  const [catalogPerfumes, setCatalogPerfumes] = useState<any[]>([]);
+  const [adminWaNumber, setAdminWaNumber] = useState<string>('6281200000000');
+  const [isCartMode, setIsCartMode] = useState(false);
   const [isLoadingProduct, setIsLoadingProduct] = useState(false);
 
   // Customer Form
@@ -160,33 +170,74 @@ export const CheckoutPage: React.FC = () => {
       })
       .catch(() => {});
 
-    // Load Product from URL
+    // Load Store Settings (Admin WhatsApp number)
+    api
+      .getSettings()
+      .then((res) => {
+        const wa = res?.data?.whatsappNumber;
+        if (wa) {
+          const digits = String(wa).replace(/\D/g, '');
+          if (digits) {
+            setAdminWaNumber(digits.startsWith('0') ? `62${digits.slice(1)}` : digits);
+          }
+        }
+      })
+      .catch(() => {});
+
+    // Load Catalog & Cart / Product from URL
     const params = new URLSearchParams(window.location.search);
     const productQuery = params.get('product') || params.get('slug') || params.get('id');
+    const storedCart = getCartItems();
 
-    if (productQuery) {
-      setIsLoadingProduct(true);
-      api.getPerfumes().then((res) => {
-        if (res.success && res.data && res.data.length > 0) {
-          const found = res.data.find(
+    setIsLoadingProduct(true);
+    api
+      .getPerfumes()
+      .then((res) => {
+        const list = res.success && Array.isArray(res.data) ? res.data : [];
+        setCatalogPerfumes(list);
+
+        if (productQuery) {
+          setIsCartMode(false);
+          const found = list.find(
             (p: any) =>
               p.slug === productQuery ||
               p.id === productQuery ||
               p.name.toLowerCase().includes(productQuery.toLowerCase())
           );
           if (found) {
-            setProduct({
-              id: found.id,
-              name: found.name,
-              edition: found.edition || 'OM-01',
-              volume: found.volume || '50 ml / Extrait',
-              price: Number(found.price) || 2450000,
-              bottleImage: resolvePublicImageUrl(found.bottleImage),
-            });
+            setCartItems([
+              {
+                id: found.id,
+                slug: found.slug,
+                name: found.name,
+                edition: found.edition || 'OM-01',
+                volume: found.volume || '50 ml / Extrait',
+                price: Number(found.price) || 2450000,
+                bottleImage: resolvePublicImageUrl(found.bottleImage),
+                quantity: 1,
+              },
+            ]);
           }
+        } else if (storedCart.length > 0) {
+          setIsCartMode(true);
+          setCartItems(storedCart);
+        } else if (list.length > 0) {
+          const first = list[0];
+          setCartItems([
+            {
+              id: first.id,
+              slug: first.slug,
+              name: first.name,
+              edition: first.edition || 'OM-01',
+              volume: first.volume || '50 ml / Extrait',
+              price: Number(first.price) || 2450000,
+              bottleImage: resolvePublicImageUrl(first.bottleImage),
+              quantity: 1,
+            },
+          ]);
         }
-      }).finally(() => setIsLoadingProduct(false));
-    }
+      })
+      .finally(() => setIsLoadingProduct(false));
 
     // Load Provinces from Open Source API
     setIsLoadingProvinces(true);
@@ -545,6 +596,12 @@ export const CheckoutPage: React.FC = () => {
         .filter(Boolean)
         .join(', ');
 
+      if (cartItems.length === 0) {
+        toast.error('Keranjang belanja kosong. Tambahkan minimal 1 produk.');
+        setIsSubmittingOrder(false);
+        return;
+      }
+
       const res = await api.createOrder({
         userId: loggedInUser?.id || null,
         customerName: name.trim(),
@@ -556,20 +613,22 @@ export const CheckoutPage: React.FC = () => {
         shippingPostal: postalCode.trim() || '12190',
         postalCode: postalCode.trim() || '12190',
         notes: notes.trim(),
-        items: [
-          {
-            name: product.name,
-            productName: product.name,
-            volume: product.volume,
-            quantity,
-            unitPrice: product.price,
-            fragranceId: product.id,
-          },
-        ],
+        totalAmount,
+        items: cartItems.map((item) => ({
+          name: item.name,
+          productName: item.name,
+          volume: item.volume,
+          quantity: item.quantity,
+          unitPrice: item.price,
+          fragranceId: item.id,
+        })),
       });
 
       if (res.success && res.data) {
         setOrderResult(res.data);
+        if (isCartMode) {
+          clearCart();
+        }
         setStep('qris');
         toast.success(`Pesanan #${res.data.orderNumber} berhasil dibuat!`);
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -634,7 +693,12 @@ export const CheckoutPage: React.FC = () => {
 
       if (attachRes.success) {
         setReceiptSubmitted(true);
-        toast.success('Bukti transfer berhasil dikirim & disimpan!');
+        toast.success('Bukti transfer berhasil dikirim! Mengarahkan ke WhatsApp Admin...');
+        if (whatsappConfirmUrl) {
+          setTimeout(() => {
+            window.location.href = whatsappConfirmUrl;
+          }, 900);
+        }
       } else {
         throw new Error(attachRes.message || 'Gagal menyimpan bukti transfer.');
       }
@@ -645,16 +709,81 @@ export const CheckoutPage: React.FC = () => {
     }
   };
 
-  const totalAmount = product.price * quantity;
-  const formattedTotal = new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    maximumFractionDigits: 0,
-  }).format(totalAmount);
+  const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const totalAmount = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const formattedTotal = formatIdr(totalAmount);
+
+  const updateCheckoutItemQty = (slugOrName: string, delta: number) => {
+    setCartItems((prev) =>
+      prev
+        .map((item) => {
+          const key = item.slug || item.id || item.name;
+          return key === slugOrName ? { ...item, quantity: item.quantity + delta } : item;
+        })
+        .filter((item) => item.quantity > 0)
+    );
+  };
+
+  const handleAddExtraPerfume = (slug: string) => {
+    if (!slug) return;
+    if (slug === 'discovery-set') {
+      setCartItems((prev) => {
+        const idx = prev.findIndex((i) => i.slug === 'discovery-set');
+        if (idx >= 0) {
+          return prev.map((i, k) => (k === idx ? { ...i, quantity: i.quantity + 1 } : i));
+        }
+        return [
+          ...prev,
+          {
+            slug: 'discovery-set',
+            name: 'OMOO Discovery Set',
+            edition: 'SET-06',
+            volume: '6 x 2 ml Vial',
+            price: 450000,
+            bottleImage: '/images/discovery-set.jpg',
+            quantity: 1,
+          },
+        ];
+      });
+      return;
+    }
+
+    const found = catalogPerfumes.find((p: any) => p.slug === slug || p.id === slug);
+    if (!found) return;
+    setCartItems((prev) => {
+      const idx = prev.findIndex((i) => (i.slug || i.id) === (found.slug || found.id));
+      if (idx >= 0) {
+        return prev.map((i, k) => (k === idx ? { ...i, quantity: i.quantity + 1 } : i));
+      }
+      return [
+        ...prev,
+        {
+          id: found.id,
+          slug: found.slug,
+          name: found.name,
+          edition: found.edition || 'OM-01',
+          volume: found.volume || '50 ml / Extrait',
+          price: Number(found.price) || 2450000,
+          bottleImage: resolvePublicImageUrl(found.bottleImage),
+          quantity: 1,
+        },
+      ];
+    });
+  };
+
+  const orderItemsListText = (orderResult?.items || cartItems)
+    .map((item: any) => `- ${item.quantity}x ${item.name} (${item.volume})`)
+    .join('\n');
 
   const whatsappConfirmUrl = orderResult
-    ? `https://wa.me/6282327362728?text=${encodeURIComponent(
-        `Halo Admin OMOO, saya sudah melakukan pembayaran QRIS untuk pesanan #${orderResult.orderNumber} sebesar ${formattedTotal} atas nama ${name}. Mohon segera diverifikasi. Terima kasih.`
+    ? `https://wa.me/${adminWaNumber}?text=${encodeURIComponent(
+        `Halo Admin OMOO, saya sudah melakukan pembayaran QRIS dan mengunggah bukti transfer melalui website:\n\n` +
+          `*Nomor Pesanan:* #${orderResult.orderNumber}\n` +
+          `*Nama:* ${name}\n` +
+          `*No. WhatsApp:* ${phone}\n` +
+          `*Pesanan:*\n${orderItemsListText}\n` +
+          `*Total Pembayaran:* ${formattedTotal}\n\n` +
+          `Mohon bantu verifikasi pembayaran saya. Terima kasih.`
       )}`
     : '';
 
@@ -1024,57 +1153,93 @@ export const CheckoutPage: React.FC = () => {
                   </h3>
                 </div>
 
-                {/* Product Item Card */}
-                <div className="flex gap-4 items-start p-3 bg-bg border border-line">
-                  <div className="w-20 h-24 border border-line bg-surface overflow-hidden shrink-0">
-                    <img
-                      src={product.bottleImage}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+                {/* Multi-Item Product List */}
+                <div className="space-y-3">
+                  {cartItems.map((item) => {
+                    const key = item.slug || item.id || item.name;
+                    return (
+                      <div key={key} className="flex gap-3.5 items-start p-3 bg-bg border border-line">
+                        <div className="w-16 h-20 border border-line bg-surface overflow-hidden shrink-0">
+                          <img
+                            src={item.bottleImage}
+                            alt={item.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
 
-                  <div className="flex-1 min-w-0 space-y-1">
-                    <span className="text-[0.6rem] uppercase tracking-wider text-muted font-semibold">
-                      {product.edition}
-                    </span>
-                    <h4 className="font-display text-lg text-ink font-normal truncate">
-                      {product.name}
-                    </h4>
-                    <p className="text-[0.68rem] text-muted">{product.volume}</p>
-                    <p className="font-display text-base text-ink font-semibold">
-                      {new Intl.NumberFormat('id-ID', {
-                        style: 'currency',
-                        currency: 'IDR',
-                        maximumFractionDigits: 0,
-                      }).format(product.price)}
-                    </p>
-                  </div>
+                        <div className="flex-1 min-w-0 space-y-0.5">
+                          <span className="text-[0.58rem] uppercase tracking-wider text-muted font-semibold block">
+                            {item.edition}
+                          </span>
+                          <h4 className="font-display text-lg text-ink font-normal truncate leading-tight">
+                            {item.name}
+                          </h4>
+                          <p className="text-[0.65rem] text-muted">{item.volume}</p>
+                          <p className="font-display text-base text-ink font-semibold pt-0.5">
+                            {formatIdr(item.price)}
+                          </p>
+                        </div>
 
-                  {/* Quantity Counter */}
-                  <div className="flex flex-col items-center gap-1 border border-line bg-surface/40 p-1">
-                    <button
-                      type="button"
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="w-6 h-6 flex items-center justify-center text-xs text-muted hover:text-ink font-bold"
+                        <div className="flex flex-col items-end gap-2 shrink-0">
+                          <div className="inline-flex items-center border border-line bg-surface/40">
+                            <button
+                              type="button"
+                              onClick={() => updateCheckoutItemQty(key, -1)}
+                              aria-label="Kurangi"
+                              className="w-6 h-6 flex items-center justify-center text-muted hover:text-ink cursor-pointer"
+                            >
+                              <Minus className="w-3 h-3" />
+                            </button>
+                            <span className="text-xs font-semibold px-2">{item.quantity}</span>
+                            <button
+                              type="button"
+                              onClick={() => updateCheckoutItemQty(key, 1)}
+                              aria-label="Tambah"
+                              className="w-6 h-6 flex items-center justify-center text-muted hover:text-ink cursor-pointer"
+                            >
+                              <Plus className="w-3 h-3" />
+                            </button>
+                          </div>
+
+                          {cartItems.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => updateCheckoutItemQty(key, -item.quantity)}
+                              className="text-[0.62rem] text-muted hover:text-red-600 inline-flex items-center gap-1 cursor-pointer"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                              <span>Hapus</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {/* Quick Add Another Product right inside checkout */}
+                  <div className="pt-1">
+                    <select
+                      value=""
+                      onChange={(e) => handleAddExtraPerfume(e.target.value)}
+                      className="w-full bg-bg border border-line px-3 py-2 text-xs text-ink focus:outline-none focus:border-ink cursor-pointer"
                     >
-                      -
-                    </button>
-                    <span className="text-xs font-semibold px-2">{quantity}</span>
-                    <button
-                      type="button"
-                      onClick={() => setQuantity(quantity + 1)}
-                      className="w-6 h-6 flex items-center justify-center text-xs text-muted hover:text-ink font-bold"
-                    >
-                      +
-                    </button>
+                      <option value="">+ Tambah parfum lain ke pesanan ini...</option>
+                      {catalogPerfumes
+                        .filter((p: any) => p.isAvailable !== false)
+                        .map((p: any) => (
+                          <option key={p.id || p.slug} value={p.slug}>
+                            {p.name} — {formatIdr(Number(p.price))}
+                          </option>
+                        ))}
+                      <option value="discovery-set">OMOO Discovery Set (6 x 2 ml) — Rp 450.000</option>
+                    </select>
                   </div>
                 </div>
 
                 {/* Pricing Breakdown */}
                 <div className="space-y-2.5 pt-3 border-t border-line text-xs">
                   <div className="flex justify-between text-muted">
-                    <span>Subtotal ({quantity} botol)</span>
+                    <span>Subtotal ({totalQuantity} item)</span>
                     <span className="text-ink font-medium">{formattedTotal}</span>
                   </div>
 
@@ -1225,7 +1390,7 @@ export const CheckoutPage: React.FC = () => {
                     Bukti Pembayaran Berhasil Diterima!
                   </p>
                   <p className="text-xs text-emerald-300">
-                    Admin kami sedang memvalidasi pembayaran Anda. Anda juga dapat konfirmasi langsung ke WhatsApp admin kami di bawah ini.
+                    Sedang mengarahkan Anda otomatis ke WhatsApp Admin OMOO dengan pesan konfirmasi pesanan...
                   </p>
                 </div>
               ) : (

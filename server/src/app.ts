@@ -12,6 +12,7 @@ import { authRoute } from './routes/auth';
 import { usersRoute } from './routes/users';
 import { settingsRoute } from './routes/settings';
 import { galleryRoute } from './routes/gallery';
+import { backupsRoute } from './routes/backups';
 import { join } from 'path';
 import { existsSync } from 'fs';
 
@@ -61,6 +62,7 @@ export const app = baseApp
       .use(usersRoute)
       .use(settingsRoute)
       .use(galleryRoute)
+      .use(backupsRoute)
   )
   .get('/health', () => ({
     status: 'ok',

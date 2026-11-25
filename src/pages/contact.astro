@@ -3,62 +3,89 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHeader from '../components/ui/PageHeader.astro';
 import Button from '../components/ui/Button.astro';
 import ArrowLink from '../components/ui/ArrowLink.astro';
-import Media from '../components/ui/Media.astro';
 import Section from '../components/ui/Section.astro';
 import SocialLinks from '../components/ui/SocialLinks.astro';
 import Faq from '../components/ui/Faq.astro';
 import { Icon } from 'astro-icon/components';
-import { images, alts } from '../data/images';
 import { site, whatsappHref } from '../data/site';
 import { prisma } from '../../server/src/db';
+import { defaultSettings } from '../../server/src/routes/settings';
+
+export const prerender = false;
 
 let dbSections: any[] = [];
+let dbElements: Record<string, string> = {};
+let settings: any = { ...defaultSettings };
+
 try {
-  const page = await prisma.page.findUnique({
-    where: { slug: 'contact' },
-    include: {
-      sections: {
-        orderBy: { order: 'asc' },
+  const [contactPage, settingsPage] = await Promise.all([
+    prisma.page.findUnique({
+      where: { slug: 'contact' },
+      include: {
+        sections: {
+          orderBy: { order: 'asc' },
+        },
       },
-    },
-  });
-  if (page) dbSections = page.sections;
+    }),
+    prisma.page.findUnique({
+      where: { slug: 'site-settings' },
+      include: { sections: true },
+    }),
+  ]);
+
+  if (contactPage) {
+    dbSections = contactPage.sections;
+    for (const sec of contactPage.sections) {
+      const c = (sec.contentData as any) || {};
+      if (c.elements) dbElements = { ...dbElements, ...c.elements };
+    }
+  }
+
+  if (settingsPage && settingsPage.sections.length > 0) {
+    const c = (settingsPage.sections[0].contentData as any) || {};
+    settings = { ...defaultSettings, ...c };
+  }
 } catch (e) {}
 
 const contactHero = dbSections.find((s) => s.template === 'HERO_SPLIT');
 const contactFaqSec = dbSections.find((s) => s.template === 'FAQ_ACCORDION');
 
-const headerDeck = contactHero?.subtitle || 'Toko kami buka dengan janji temu. Untuk pertanyaan tentang koleksi parfum, ketersediaan stok, atau pemesanan langsung, hubungi kami via WhatsApp atau email.';
-const headerTitle = contactHero?.title || 'Kunjungi, Hubungi & Pesan.';
+const headerDeck =
+  dbElements['contact-deck'] ||
+  contactHero?.subtitle ||
+  'Kantor dan studio kami buka dengan janji temu. Untuk pertanyaan tentang koleksi parfum, ketersediaan stok, atau pemesanan langsung, hubungi kami via WhatsApp atau email.';
+const headerTitle = dbElements['contact-title'] || contactHero?.title || '';
 
-const stockists = [
-  {
-    city: 'Jakarta',
-    name: 'Ruang Wangi',
-    address: 'Jl. Cipete Raya No. 8\nJakarta Selatan',
-  },
-  {
-    city: 'Bandung',
-    name: 'Niskala',
-    address: 'Jl. Braga No. 18\nBandung',
-  },
-  {
-    city: 'Bali',
-    name: 'Hening',
-    address: 'Jl. Raya Seminyak No. 9\nBadung, Bali',
-  },
-];
+const officeTitle = dbElements['contact-office-title'] || settings.officeTitle || 'Kantor & Studio OMOO';
+const street = dbElements['contact-street'] || settings.street || site.address.street;
+const city = dbElements['contact-city'] || settings.city || site.address.city;
+const country = dbElements['contact-country'] || settings.country || site.address.country;
+const hours = dbElements['contact-hours'] || settings.hours || 'Senin - Sabtu: 10.00 - 20.00 WIB';
+const visitNote = dbElements['contact-visit-note'] || settings.visitNote || 'Dengan janji temu';
+const email = dbElements['contact-email'] || settings.email || site.email;
+const whatsappDisplay = settings.whatsappDisplay || site.whatsapp.display;
+const whatsappRaw = String(settings.whatsappNumber || site.whatsapp.number).replace(/\D/g, '');
+const whatsappNum = whatsappRaw.startsWith('0') ? `62${whatsappRaw.slice(1)}` : whatsappRaw;
+const dynamicWhatsappHref = (text: string) =>
+  `https://wa.me/${whatsappNum}?text=${encodeURIComponent(text)}`;
+
+const mapLat = Number(settings.mapLat) || -6.2297;
+const mapLng = Number(settings.mapLng) || 106.8073;
+const mapEmbedUrl = `https://maps.google.com/maps?q=${mapLat},${mapLng}&z=16&output=embed`;
+const googleMapsExternalUrl =
+  settings.googleMapsUrl?.trim() ||
+  `https://www.google.com/maps/search/?api=1&query=${mapLat},${mapLng}`;
 
 const faq = [
   {
-    question: 'Bisakah saya berkunjung langsung ke toko / butik OMOO?',
+    question: 'Bisakah saya berkunjung langsung ke kantor / studio OMOO?',
     answer:
-      'Tentu bisa. Kunjungan dibuka Selasa sampai Jumat dengan konfirmasi terlebih dahulu. Anda bisa chat ke WhatsApp kami atau email hello@omoo.studio untuk mencocokkan jadwal kedatangan.',
+      `Tentu bisa. Kunjungan dapat dijadwalkan terlebih dahulu via WhatsApp atau email ${email} untuk mencocokkan waktu kedatangan.`,
   },
   {
     question: 'Bagaimana cara memesan parfum?',
     answer:
-      'Pemesanan dapat dilakukan langsung di website ini dengan memilih produk dan checkout via QRIS/Transfer, atau bisa juga langsung memesan secara praktis melalui WhatsApp resmi OMOO.',
+      'Pemesanan dapat dilakukan langsung di website ini dengan memilih produk, menambahkannya ke keranjang, dan checkout via QRIS, atau langsung memesan melalui WhatsApp resmi OMOO.',
   },
   {
     question: 'Berapa lama estimasi pengiriman pesanan?',
@@ -91,14 +118,14 @@ const allFaqs = dynamicFaqs.length > 0 ? dynamicFaqs : faq;
 
 <BaseLayout
   title="Kontak"
-  description="Kunjungi studio OMOO di Jakarta, atau hubungi kami lewat WhatsApp dan email untuk informasi koleksi dan pemesanan."
+  description="Lokasi kantor & studio OMOO di peta, atau hubungi kami lewat WhatsApp dan email untuk informasi koleksi dan pemesanan."
 >
   <PageHeader deck={headerDeck}>
     <Fragment slot="title">
-      {contactHero?.title ? (
-        <span>{headerTitle}</span>
+      {headerTitle ? (
+        <span data-editable-id="contact-title">{headerTitle}</span>
       ) : (
-        <>Kunjungi, Hubungi <span class="italic">&amp; Pesan.</span></>
+        <span data-editable-id="contact-title">Kunjungi, Hubungi <span class="italic">&amp; Pesan.</span></span>
       )}
     </Fragment>
     <div class="mt-8 flex flex-wrap items-center gap-4">
@@ -111,45 +138,66 @@ const allFaqs = dynamicFaqs.length > 0 ? dynamicFaqs : faq;
 
   <Section spacing="tight" class="pt-0">
     <div class="grid gap-10 lg:grid-cols-12 lg:items-start">
-      <Media
-        src={images.atelierDoor}
-        alt={alts.atelierDoor}
-        aspect="4 / 5"
-        widths={[400, 600, 800, 1000]}
-        sizes="(max-width: 1024px) 100vw, 48vw"
-        class="lg:col-span-5"
-        priority
-        reveal
-      />
+      {/* Peta Lokasi Kantor Perusahaan */}
+      <div class="lg:col-span-5 border border-line bg-surface/20 flex flex-col">
+        <div class="relative w-full aspect-[4/5] min-h-[380px] bg-surface overflow-hidden">
+          <iframe
+            title={`Peta Lokasi ${officeTitle}`}
+            src={mapEmbedUrl}
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            class="w-full h-full border-0"
+            allowfullscreen
+          />
+        </div>
+        <div class="p-4 border-t border-line bg-bg flex items-center justify-between gap-3 text-xs">
+          <div class="min-w-0">
+            <span class="text-[0.6rem] uppercase tracking-[0.14em] text-accent font-semibold block">
+              Peta Kantor Perusahaan
+            </span>
+            <p class="text-muted truncate mt-0.5">{street}, {city}</p>
+          </div>
+          <a
+            href={googleMapsExternalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 border border-line hover:border-ink text-[0.65rem] uppercase tracking-wider font-semibold text-ink transition-colors"
+          >
+            <span>Google Maps</span>
+            <span aria-hidden="true">&rarr;</span>
+          </a>
+        </div>
+      </div>
 
       <div data-reveal class="lg:col-span-6 lg:col-start-7 lg:pt-4">
         <h2
           data-reveal-title
-          class="max-w-[10ch] pb-1 font-display text-[clamp(2.35rem,4.4vw,4.25rem)] font-light leading-[0.98] tracking-[-0.02em]"
+          data-editable-id="contact-office-title"
+          class="max-w-[14ch] pb-1 font-display text-[clamp(2.35rem,4.4vw,4.25rem)] font-light leading-[0.98] tracking-[-0.02em]"
         >
-          Studio Jakarta
+          {officeTitle}
         </h2>
 
         <address class="mt-7 text-[1.05rem] leading-[1.8] not-italic">
-          {site.address.street}<br />
-          {site.address.city}<br />
-          {site.address.country}
+          <span data-editable-id="contact-street">{street}</span><br />
+          <span data-editable-id="contact-city">{city}</span><br />
+          <span data-editable-id="contact-country">{country}</span>
         </address>
 
         <dl class="mt-8 grid gap-0 border-t border-line">
           <div class="flex items-baseline justify-between gap-6 border-b border-line py-3">
             <dt class="text-[0.65rem] uppercase tracking-[0.12em] text-muted">Jam</dt>
-            <dd class="text-right text-[0.9rem]">Selasa sampai Jumat, 10.00 sampai 18.00 WIB</dd>
+            <dd class="text-right text-[0.9rem]" data-editable-id="contact-hours">{hours}</dd>
           </div>
           <div class="flex items-baseline justify-between gap-6 border-b border-line py-3">
-            <dt class="text-[0.65rem] uppercase tracking-[0.12em] text-muted">Sabtu</dt>
-            <dd class="text-right text-[0.9rem]">Dengan janji temu</dd>
+            <dt class="text-[0.65rem] uppercase tracking-[0.12em] text-muted">Kunjungan</dt>
+            <dd class="text-right text-[0.9rem]" data-editable-id="contact-visit-note">{visitNote}</dd>
           </div>
           <div class="flex items-baseline justify-between gap-6 border-b border-line py-3">
             <dt class="text-[0.65rem] uppercase tracking-[0.12em] text-muted">Email</dt>
             <dd class="text-right text-[0.9rem]">
-              <a class="underline underline-offset-4 transition-colors hover:text-accent" href={`mailto:${site.email}`}>
-                {site.email}
+              <a class="underline underline-offset-4 transition-colors hover:text-accent" href={`mailto:${email}`} data-editable-id="contact-email">
+                {email}
               </a>
             </dd>
           </div>
@@ -158,11 +206,11 @@ const allFaqs = dynamicFaqs.length > 0 ? dynamicFaqs : faq;
             <dd class="text-right text-[0.9rem]">
               <a
                 class="underline underline-offset-4 transition-colors hover:text-accent"
-                href={whatsappHref('Halo OMOO, saya ingin bertanya tentang koleksi dan pemesanan.')}
+                href={dynamicWhatsappHref('Halo OMOO, saya ingin bertanya tentang koleksi dan pemesanan.')}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {site.whatsapp.display}
+                {whatsappDisplay}
               </a>
             </dd>
           </div>
@@ -170,7 +218,7 @@ const allFaqs = dynamicFaqs.length > 0 ? dynamicFaqs : faq;
 
         <div class="mt-8 flex flex-col items-start gap-4">
           <Button
-            href={whatsappHref('Halo OMOO, saya ingin bertanya tentang koleksi dan pemesanan.')}
+            href={dynamicWhatsappHref('Halo OMOO, saya ingin bertanya tentang koleksi dan pemesanan.')}
             external
             class="w-full sm:w-auto"
           >
@@ -179,7 +227,7 @@ const allFaqs = dynamicFaqs.length > 0 ? dynamicFaqs : faq;
               Chat via WhatsApp
             </span>
           </Button>
-          <ArrowLink href={`mailto:${site.email}`}>Kirim Email</ArrowLink>
+          <ArrowLink href={`mailto:${email}`}>Kirim Email</ArrowLink>
           <p class="max-w-[40ch] text-[0.75rem] leading-relaxed text-muted">
             Janji temu dikonfirmasi lewat email atau WhatsApp dalam 1-2 hari kerja.
           </p>

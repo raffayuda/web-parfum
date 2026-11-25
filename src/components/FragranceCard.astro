@@ -1,6 +1,7 @@
 ---
 import Media from './ui/Media.astro';
 import { priceLabel, type Fragrance } from '../data/fragrances';
+import { AddToCartButton } from './cart/AddToCartButton';
 
 interface Props {
   fragrance: Fragrance;
@@ -10,58 +11,78 @@ interface Props {
 }
 
 const { fragrance, aspect = '4 / 5', loading = 'lazy', class: className } = Astro.props;
+const cardImage = (fragrance as any).bottleImage || fragrance.card || fragrance.bottle;
 ---
 
-<a
-  class:list={['group flex flex-col gap-5 [perspective:1100px]', className]}
-  href={`/collection/${fragrance.slug}/`}
-  data-reveal
-  data-tilt
->
-  <Media
-    src={fragrance.bottleImage || fragrance.card || fragrance.bottle}
-    alt={fragrance.cardAlt || fragrance.name}
-    aspect={aspect}
-    widths={[360, 540, 720, 920]}
-    sizes="(max-width: 720px) 100vw, (max-width: 1080px) 50vw, 34vw"
-    priority={loading === 'eager'}
-    tiltTarget
-  />
+<div class:list={['flex flex-col gap-3', className]}>
+  <a
+    class="group flex flex-col gap-5 [perspective:1100px]"
+    href={`/collection/${fragrance.slug}/`}
+    data-reveal
+    data-tilt
+  >
+    <Media
+      src={cardImage}
+      alt={fragrance.cardAlt || fragrance.name}
+      aspect={aspect}
+      widths={[360, 540, 720, 920]}
+      sizes="(max-width: 720px) 100vw, (max-width: 1080px) 50vw, 34vw"
+      priority={loading === 'eager'}
+      tiltTarget
+    />
 
-  <div class="grid gap-1.5">
-    <div
-      class="flex items-baseline justify-between gap-4 border-t border-line pt-3 text-[0.65rem] font-medium uppercase leading-none tracking-[0.13em] text-muted"
-    >
-      <span>{fragrance.edition}</span>
-      <div class="flex items-center gap-2">
-        <span>{fragrance.family}</span>
-        {fragrance.isAvailable === false && (
-          <span class="text-[0.55rem] px-1.5 py-0.5 bg-muted/20 border border-muted/30 text-muted line-through tracking-normal">
-            Stok Habis
-          </span>
-        )}
+    <div class="grid gap-1.5">
+      <div
+        class="flex items-baseline justify-between gap-4 border-t border-line pt-3 text-[0.65rem] font-medium uppercase leading-none tracking-[0.13em] text-muted"
+      >
+        <span>{fragrance.edition}</span>
+        <div class="flex items-center gap-2">
+          <span>{fragrance.family}</span>
+          {fragrance.isAvailable === false && (
+            <span class="text-[0.55rem] px-1.5 py-0.5 bg-muted/20 border border-muted/30 text-muted line-through tracking-normal">
+              Stok Habis
+            </span>
+          )}
+        </div>
+      </div>
+
+      <h3
+        class="flex items-baseline justify-between gap-4 font-display text-[clamp(1.55rem,2.3vw,2.2rem)] font-normal leading-[1.05] tracking-[-0.01em] transition-colors duration-300 ease-luxe group-hover:text-accent"
+      >
+        {fragrance.name}
+        <span
+          aria-hidden="true"
+          class="flex-none font-sans text-[0.9rem] text-muted transition-all duration-300 ease-luxe group-hover:translate-x-1 group-hover:text-accent"
+        >
+          &#8594;
+        </span>
+      </h3>
+
+      <p class="text-[0.88rem] leading-[1.5] text-muted">{fragrance.tagline}</p>
+
+      <div
+        class="mt-1 flex justify-between gap-4 text-[0.7rem] uppercase tracking-[0.06em] text-muted"
+      >
+        <span>{fragrance.volume} / Extrait</span>
+        <span>{priceLabel(fragrance.price)}</span>
       </div>
     </div>
+  </a>
 
-    <h3
-      class="flex items-baseline justify-between gap-4 font-display text-[clamp(1.55rem,2.3vw,2.2rem)] font-normal leading-[1.05] tracking-[-0.01em] transition-colors duration-300 ease-luxe group-hover:text-accent"
-    >
-      {fragrance.name}
-      <span
-        aria-hidden="true"
-        class="flex-none font-sans text-[0.9rem] text-muted transition-all duration-300 ease-luxe group-hover:translate-x-1 group-hover:text-accent"
-      >
-        &#8594;
-      </span>
-    </h3>
-
-    <p class="text-[0.88rem] leading-[1.5] text-muted">{fragrance.tagline}</p>
-
-    <div
-      class="mt-1 flex justify-between gap-4 text-[0.7rem] uppercase tracking-[0.06em] text-muted"
-    >
-      <span>{fragrance.volume} / Extrait</span>
-      <span>{priceLabel(fragrance.price)}</span>
-    </div>
-  </div>
-</a>
+  {fragrance.isAvailable !== false && (
+    <AddToCartButton
+      client:load
+      product={{
+        id: (fragrance as any).id,
+        slug: fragrance.slug,
+        name: fragrance.name,
+        edition: fragrance.edition,
+        volume: fragrance.volume,
+        price: Number(fragrance.price),
+        bottleImage: typeof cardImage === 'string' ? cardImage : '/images/bottle-vetiver.jpg',
+        isAvailable: fragrance.isAvailable,
+      }}
+      className="w-full"
+    />
+  )}
+</div>

@@ -3,6 +3,7 @@ import Wordmark from './ui/Wordmark.astro';
 import ThemeToggle from './ui/ThemeToggle.astro';
 import SocialLinks from './ui/SocialLinks.astro';
 import { AccountDropdown } from './account/AccountDropdown';
+import { CartDrawer } from './cart/CartDrawer';
 import { site } from '../data/site';
 
 const path = Astro.url.pathname;
@@ -49,6 +50,7 @@ const actionLink =
 
     <div class="flex items-center gap-3.5 nav:gap-5">
       <ThemeToggle />
+      <CartDrawer client:load />
       <AccountDropdown client:load />
       <button
         class="flex items-center justify-center p-1.5 text-muted hover:text-ink transition-colors nav:hidden cursor-pointer"
