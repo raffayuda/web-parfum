@@ -58,6 +58,10 @@ export const auth = betterAuth({
     enabled: true,
     requireEmailVerification: false,
   },
+  session: {
+    expiresIn: 60 * 60 * 24 * 30, // 30 days
+    updateAge: 60 * 60 * 24, // auto-extend session every 24h on activity
+  },
   user: {
     additionalFields: {
       role: {

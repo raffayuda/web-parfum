@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   LayoutDashboard,
   Sparkles,
@@ -16,7 +16,11 @@ import {
   Camera,
   UserCog,
   Database,
+  Bell,
+  BellRing,
+  BellOff,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '../../components/ui/react/Button';
 import { Input } from '../../components/ui/react/Input';
 import { ForgotPasswordPanel } from '../../components/auth/ForgotPasswordPanel';
@@ -43,6 +47,11 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   const [loginError, setLoginError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
+
+  const [notifPermission, setNotifPermission] = useState<string>('default');
+  const [awaitingCount, setAwaitingCount] = useState<number>(0);
+  const seenOrderIdsRef = useRef<Set<string>>(new Set());
+  const isFirstPollRef = useRef<boolean>(true);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -72,6 +81,166 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 
     checkSession();
   }, []);
+
+  // Sync browser notification permission & load previously notified order IDs
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!('Notification' in window)) {
+      setNotifPermission('unsupported');
+    } else {
+      setNotifPermission(Notification.permission);
+    }
+
+    try {
+      const saved = localStorage.getItem('omoo_notified_payment_orders');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          seenOrderIdsRef.current = new Set(parsed);
+        }
+      }
+    } catch {}
+  }, []);
+
+  const playNotificationChime = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(660, ctx.currentTime);
+      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.12);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.36);
+    } catch {}
+  };
+
+  const triggerPaymentNotification = (order: any) => {
+    const amountText = `Rp ${Number(order.totalAmount || 0).toLocaleString('id-ID')}`;
+    const title = `Bukti Pembayaran Baru — #${order.orderNumber}`;
+    const body = `${order.customerName || 'Pelanggan'} mengirim bukti bayar (${amountText}). Klik untuk validasi.`;
+
+    playNotificationChime();
+    toast.info(title, {
+      description: body,
+      duration: 8000,
+      action: {
+        label: 'Lihat Pesanan',
+        onClick: () => {
+          window.location.href = `/admin/orders/${order.id}`;
+        },
+      },
+    });
+
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+      try {
+        const notif = new Notification(title, {
+          body,
+          icon: '/favicon.svg',
+          tag: `omoo-payment-${order.id}`,
+        });
+        notif.onclick = () => {
+          window.focus();
+          window.location.href = `/admin/orders/${order.id}`;
+          notif.close();
+        };
+      } catch {}
+    }
+  };
+
+  const handleRequestNotificationPermission = async () => {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      toast.error('Browser Anda tidak mendukung notifikasi desktop.');
+      return;
+    }
+    if (Notification.permission === 'denied') {
+      toast.error('Izin notifikasi diblokir browser. Aktifkan di pengaturan situs (ikon gembok di address bar).');
+      return;
+    }
+    if (Notification.permission === 'granted') {
+      if (awaitingCount > 0) {
+        window.location.href = '/admin?tab=orders';
+      } else {
+        toast.success('Notifikasi browser sudah aktif untuk bukti pembayaran baru.');
+      }
+      return;
+    }
+
+    try {
+      const result = await Notification.requestPermission();
+      setNotifPermission(result);
+      if (result === 'granted') {
+        toast.success('Notifikasi browser diaktifkan!');
+        new Notification('Notifikasi Admin OMOO Aktif', {
+          body: 'Anda akan mendapat pemberitahuan otomatis saat pembeli mengunggah bukti pembayaran.',
+          icon: '/favicon.svg',
+        });
+      } else {
+        toast.error('Izin notifikasi tidak diberikan.');
+      }
+    } catch {
+      toast.error('Gagal meminta izin notifikasi browser.');
+    }
+  };
+
+  // Poll every 15s for newly submitted payment proofs (AWAITING_VALIDATION)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let cancelled = false;
+
+    const checkIncomingPayments = async () => {
+      try {
+        const res = await api.getOrders({ status: 'AWAITING_VALIDATION' });
+        if (cancelled || !res?.success || !Array.isArray(res.data)) return;
+
+        const awaitingOrders = res.data;
+        setAwaitingCount(awaitingOrders.length);
+
+        const newOnes = awaitingOrders.filter((o: any) => !seenOrderIdsRef.current.has(o.id));
+        if (newOnes.length > 0) {
+          for (const o of newOnes) {
+            seenOrderIdsRef.current.add(o.id);
+            // Notify on new arrivals (or on first poll if it's genuinely unseen in localStorage)
+            if (!isFirstPollRef.current || awaitingOrders.length > 0) {
+              triggerPaymentNotification(o);
+            }
+          }
+          try {
+            const arr = Array.from(seenOrderIdsRef.current).slice(-100);
+            localStorage.setItem('omoo_notified_payment_orders', JSON.stringify(arr));
+          } catch {}
+        }
+        isFirstPollRef.current = false;
+      } catch {}
+    };
+
+    checkIncomingPayments();
+    const intervalId = setInterval(checkIncomingPayments, 15000);
+    // Keep admin session alive (triggers BetterAuth sliding updateAge) and verify session validity every 15 minutes
+    const sessionKeepAliveId = setInterval(async () => {
+      try {
+        const res = await api.getMe();
+        if (!res?.success || res.user?.role !== 'ADMIN') {
+          setIsAuthenticated(false);
+          setAdminUser(null);
+          localStorage.removeItem('omoo_admin_session');
+          localStorage.removeItem('omoo_customer_user');
+        }
+      } catch {}
+    }, 15 * 60 * 1000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+      clearInterval(sessionKeepAliveId);
+    };
+  }, [isAuthenticated]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -352,6 +521,11 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                     >
                       <Icon className="w-4 h-4 shrink-0" />
                       <span className="flex-1 truncate">{item.label}</span>
+                      {item.id === 'orders' && awaitingCount > 0 && (
+                        <span className="px-1.5 py-0.5 text-[0.6rem] font-bold rounded-full bg-amber-500 text-black leading-none">
+                          {awaitingCount}
+                        </span>
+                      )}
                       {isActive && <ChevronRight className="w-3.5 h-3.5 shrink-0 opacity-70" />}
                     </a>
                   );
@@ -417,7 +591,48 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            {notifPermission !== 'unsupported' && (
+              <button
+                type="button"
+                onClick={handleRequestNotificationPermission}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 border text-xs font-medium transition-colors cursor-pointer ${
+                  notifPermission === 'granted'
+                    ? 'border-line bg-surface/40 hover:border-accent text-ink'
+                    : notifPermission === 'denied'
+                    ? 'border-line bg-surface/20 text-muted'
+                    : 'border-amber-500/50 bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300'
+                }`}
+                title={
+                  notifPermission === 'granted'
+                    ? 'Notifikasi browser aktif untuk bukti pembayaran baru'
+                    : notifPermission === 'denied'
+                    ? 'Notifikasi diblokir browser'
+                    : 'Klik untuk mengaktifkan notifikasi browser'
+                }
+              >
+                {notifPermission === 'granted' ? (
+                  <BellRing className="w-3.5 h-3.5 text-emerald-500" />
+                ) : notifPermission === 'denied' ? (
+                  <BellOff className="w-3.5 h-3.5 text-muted" />
+                ) : (
+                  <Bell className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+                )}
+                <span className="hidden md:inline">
+                  {notifPermission === 'granted'
+                    ? 'Notif Aktif'
+                    : notifPermission === 'denied'
+                    ? 'Notif Diblokir'
+                    : 'Aktifkan Notif'}
+                </span>
+                {awaitingCount > 0 && (
+                  <span className="px-1.5 py-0.5 text-[0.6rem] font-bold rounded-full bg-amber-500 text-black leading-none">
+                    {awaitingCount}
+                  </span>
+                )}
+              </button>
+            )}
+
             <div className="hidden sm:flex items-center gap-2 text-xs text-muted">
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>Toko Online</span>
