@@ -15,6 +15,100 @@ function hashOtp(email: string, otp: string): string {
   return createHash('sha256').update(`${email}:${otp}:${secret}`).digest('hex');
 }
 
+async function issueOtpCode(params: {
+  identifier: string;
+  email: string;
+  name: string;
+  purpose: 'register' | 'reset-password';
+}) {
+  const existingOtp = await prisma.verification.findFirst({
+    where: { identifier: params.identifier },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  if (existingOtp && Date.now() - existingOtp.createdAt.getTime() < OTP_COOLDOWN_MS) {
+    const waitSec = Math.ceil(
+      (OTP_COOLDOWN_MS - (Date.now() - existingOtp.createdAt.getTime())) / 1000
+    );
+    return {
+      ok: false as const,
+      status: 429,
+      message: `Tunggu ${waitSec} detik sebelum meminta kode OTP baru.`,
+    };
+  }
+
+  const otp = String(randomInt(100000, 1000000));
+  const otpHash = hashOtp(params.email, otp);
+
+  await prisma.verification.deleteMany({ where: { identifier: params.identifier } });
+  await prisma.verification.create({
+    data: {
+      identifier: params.identifier,
+      value: JSON.stringify({ otpHash, attempts: 0 }),
+      expiresAt: new Date(Date.now() + OTP_TTL_MS),
+    },
+  });
+
+  const delivery = await sendBrevoOtpEmail({
+    toEmail: params.email,
+    toName: params.name,
+    otp,
+    purpose: params.purpose,
+  });
+
+  return {
+    ok: true as const,
+    mode: delivery.mode,
+    cooldownSeconds: Math.floor(OTP_COOLDOWN_MS / 1000),
+  };
+}
+
+async function verifyOtpCode(identifier: string, email: string, otp: string) {
+  const record = await prisma.verification.findFirst({
+    where: { identifier },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  if (!record) {
+    return { ok: false as const, message: 'Kode OTP tidak ditemukan. Silakan minta kode baru.' };
+  }
+
+  if (record.expiresAt < new Date()) {
+    await prisma.verification.delete({ where: { id: record.id } }).catch(() => {});
+    return { ok: false as const, message: 'Kode OTP sudah kedaluwarsa. Silakan kirim ulang kode baru.' };
+  }
+
+  let payload: { otpHash: string; attempts: number } = { otpHash: '', attempts: 0 };
+  try {
+    payload = JSON.parse(record.value);
+  } catch {}
+
+  if (payload.attempts >= OTP_MAX_ATTEMPTS) {
+    await prisma.verification.delete({ where: { id: record.id } }).catch(() => {});
+    return {
+      ok: false as const,
+      message: 'Terlalu banyak percobaan salah. Silakan minta kode OTP baru.',
+    };
+  }
+
+  const expectedHash = hashOtp(email, otp);
+  if (expectedHash !== payload.otpHash) {
+    await prisma.verification.update({
+      where: { id: record.id },
+      data: {
+        value: JSON.stringify({
+          otpHash: payload.otpHash,
+          attempts: payload.attempts + 1,
+        }),
+      },
+    });
+    return { ok: false as const, message: 'Kode OTP tidak sesuai. Periksa kembali email Anda.' };
+  }
+
+  await prisma.verification.deleteMany({ where: { identifier } });
+  return { ok: true as const };
+}
+
 export const authRoute = new Elysia({ prefix: '/auth' })
   // Current user helper (MUST be defined before /* wildcard handler)
   .get('/me', async ({ request, set }) => {
@@ -204,48 +298,25 @@ export const authRoute = new Elysia({ prefix: '/auth' })
           return { success: false, message: 'Email sudah terdaftar. Silakan masuk ke akun Anda.' };
         }
 
-        const identifier = `register-otp:${normalizedEmail}`;
-        const existingOtp = await prisma.verification.findFirst({
-          where: { identifier },
-          orderBy: { createdAt: 'desc' },
+        const result = await issueOtpCode({
+          identifier: `register-otp:${normalizedEmail}`,
+          email: normalizedEmail,
+          name,
+          purpose: 'register',
         });
 
-        if (existingOtp && Date.now() - existingOtp.createdAt.getTime() < OTP_COOLDOWN_MS) {
-          const waitSec = Math.ceil(
-            (OTP_COOLDOWN_MS - (Date.now() - existingOtp.createdAt.getTime())) / 1000
-          );
-          set.status = 429;
-          return {
-            success: false,
-            message: `Tunggu ${waitSec} detik sebelum meminta kode OTP baru.`,
-          };
+        if (!result.ok) {
+          set.status = result.status;
+          return { success: false, message: result.message };
         }
-
-        const otp = String(randomInt(100000, 1000000));
-        const otpHash = hashOtp(normalizedEmail, otp);
-
-        await prisma.verification.deleteMany({ where: { identifier } });
-        await prisma.verification.create({
-          data: {
-            identifier,
-            value: JSON.stringify({ otpHash, attempts: 0 }),
-            expiresAt: new Date(Date.now() + OTP_TTL_MS),
-          },
-        });
-
-        const delivery = await sendBrevoOtpEmail({
-          toEmail: normalizedEmail,
-          toName: name,
-          otp,
-        });
 
         return {
           success: true,
           message:
-            delivery.mode === 'brevo'
+            result.mode === 'brevo'
               ? `Kode OTP 6 digit telah dikirim ke ${normalizedEmail}.`
               : `Mode lokal: kode OTP dicetak di log server (${normalizedEmail}).`,
-          cooldownSeconds: Math.floor(OTP_COOLDOWN_MS / 1000),
+          cooldownSeconds: result.cooldownSeconds,
         };
       } catch (e: any) {
         set.status = 500;
@@ -272,60 +343,11 @@ export const authRoute = new Elysia({ prefix: '/auth' })
         const name = body.name.trim();
         const phone = body.phone.trim();
 
-        const identifier = `register-otp:${normalizedEmail}`;
-        const record = await prisma.verification.findFirst({
-          where: { identifier },
-          orderBy: { createdAt: 'desc' },
-        });
-
-        if (!record) {
+        const verifiedOtp = await verifyOtpCode(`register-otp:${normalizedEmail}`, normalizedEmail, otp);
+        if (!verifiedOtp.ok) {
           set.status = 400;
-          return {
-            success: false,
-            message: 'Kode OTP tidak ditemukan. Silakan minta kode baru.',
-          };
+          return { success: false, message: verifiedOtp.message };
         }
-
-        if (record.expiresAt < new Date()) {
-          await prisma.verification.delete({ where: { id: record.id } }).catch(() => {});
-          set.status = 400;
-          return {
-            success: false,
-            message: 'Kode OTP sudah kedaluwarsa. Silakan kirim ulang kode baru.',
-          };
-        }
-
-        let payload: { otpHash: string; attempts: number } = { otpHash: '', attempts: 0 };
-        try {
-          payload = JSON.parse(record.value);
-        } catch {}
-
-        if (payload.attempts >= OTP_MAX_ATTEMPTS) {
-          await prisma.verification.delete({ where: { id: record.id } }).catch(() => {});
-          set.status = 400;
-          return {
-            success: false,
-            message: 'Terlalu banyak percobaan salah. Silakan minta kode OTP baru.',
-          };
-        }
-
-        const expectedHash = hashOtp(normalizedEmail, otp);
-        if (expectedHash !== payload.otpHash) {
-          await prisma.verification.update({
-            where: { id: record.id },
-            data: {
-              value: JSON.stringify({
-                otpHash: payload.otpHash,
-                attempts: payload.attempts + 1,
-              }),
-            },
-          });
-          set.status = 400;
-          return { success: false, message: 'Kode OTP tidak sesuai. Periksa kembali email Anda.' };
-        }
-
-        // Valid OTP: clean up verification entry and register user via Better Auth
-        await prisma.verification.deleteMany({ where: { identifier } });
 
         const signUpResponse = await auth.api.signUpEmail({
           body: {
@@ -391,6 +413,138 @@ export const authRoute = new Elysia({ prefix: '/auth' })
         email: t.String(),
         password: t.String(),
         otp: t.String(),
+      }),
+    }
+  )
+
+  // Forgot Password Step 1: Send 6-digit OTP via Brevo
+  .post(
+    '/forgot-password/send-otp',
+    async ({ body, set }) => {
+      try {
+        const normalizedEmail = body.email.trim().toLowerCase();
+        if (!normalizedEmail) {
+          set.status = 400;
+          return { success: false, message: 'Masukkan alamat email akun Anda.' };
+        }
+
+        const user = await prisma.user.findUnique({
+          where: { email: normalizedEmail },
+          select: { id: true, name: true },
+        });
+
+        if (!user) {
+          set.status = 404;
+          return { success: false, message: 'Email belum terdaftar di sistem OMOO.' };
+        }
+
+        const result = await issueOtpCode({
+          identifier: `reset-otp:${normalizedEmail}`,
+          email: normalizedEmail,
+          name: user.name,
+          purpose: 'reset-password',
+        });
+
+        if (!result.ok) {
+          set.status = result.status;
+          return { success: false, message: result.message };
+        }
+
+        return {
+          success: true,
+          message:
+            result.mode === 'brevo'
+              ? `Kode OTP reset kata sandi telah dikirim ke ${normalizedEmail}.`
+              : `Mode lokal: kode OTP reset dicetak di log server (${normalizedEmail}).`,
+          cooldownSeconds: result.cooldownSeconds,
+        };
+      } catch (e: any) {
+        set.status = 500;
+        return { success: false, message: e.message || 'Gagal mengirim kode OTP reset.' };
+      }
+    },
+    {
+      body: t.Object({
+        email: t.String(),
+      }),
+    }
+  )
+
+  // Forgot Password Step 2: Verify OTP & update password
+  .post(
+    '/forgot-password/reset',
+    async ({ body, set }) => {
+      try {
+        const normalizedEmail = body.email.trim().toLowerCase();
+        const otp = body.otp.trim();
+        const newPassword = body.newPassword;
+
+        if (!normalizedEmail || !otp) {
+          set.status = 400;
+          return { success: false, message: 'Email dan kode OTP wajib diisi.' };
+        }
+        if (newPassword.length < 8) {
+          set.status = 400;
+          return { success: false, message: 'Kata sandi baru minimal 8 karakter.' };
+        }
+
+        const verified = await verifyOtpCode(`reset-otp:${normalizedEmail}`, normalizedEmail, otp);
+        if (!verified.ok) {
+          set.status = 400;
+          return { success: false, message: verified.message };
+        }
+
+        const user = await prisma.user.findUnique({
+          where: { email: normalizedEmail },
+          select: { id: true },
+        });
+
+        if (!user) {
+          set.status = 404;
+          return { success: false, message: 'Akun tidak ditemukan.' };
+        }
+
+        const hashedPassword = await hashPassword(newPassword);
+        const credentialAccount = await prisma.account.findFirst({
+          where: { userId: user.id, providerId: 'credential' },
+          select: { id: true },
+        });
+
+        if (credentialAccount) {
+          await prisma.account.update({
+            where: { id: credentialAccount.id },
+            data: { password: hashedPassword },
+          });
+        } else {
+          await prisma.account.create({
+            data: {
+              userId: user.id,
+              accountId: user.id,
+              providerId: 'credential',
+              password: hashedPassword,
+            },
+          });
+        }
+
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { emailVerified: true },
+        });
+
+        return {
+          success: true,
+          message: 'Kata sandi berhasil direset. Silakan masuk dengan kata sandi baru Anda.',
+        };
+      } catch (e: any) {
+        set.status = 500;
+        return { success: false, message: e.message || 'Gagal mereset kata sandi.' };
+      }
+    },
+    {
+      body: t.Object({
+        email: t.String(),
+        otp: t.String(),
+        newPassword: t.String(),
       }),
     }
   )

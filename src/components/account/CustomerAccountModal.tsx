@@ -4,7 +4,8 @@ import { Button } from '../ui/react/Button';
 import { Input } from '../ui/react/Input';
 import { api, API_BASE } from '../../lib/api';
 import { toast } from 'sonner';
-import { User, Package, LogOut, Shield, Award, ArrowLeft, MailCheck } from 'lucide-react';
+import { User, Package, LogOut, Shield, Award, ArrowLeft, MailCheck, Eye, EyeOff } from 'lucide-react';
+import { ForgotPasswordPanel } from '../auth/ForgotPasswordPanel';
 
 export interface CustomerAccountModalProps {
   forceOpen?: boolean;
@@ -44,6 +45,9 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
   // Form states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPasswords, setShowPasswords] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [quickOrderNumber, setQuickOrderNumber] = useState('');
@@ -154,9 +158,20 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
 
   const handleSendRegisterOtp = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    setIsSubmitting(true);
     setFormError(null);
     setFormSuccess(null);
+
+    if (!name.trim() || !phone.trim() || !email.trim() || password.length < 8) {
+      setFormError('Lengkapi nama, WhatsApp, email, dan password minimal 8 karakter.');
+      return;
+    }
+
+    if (registerStep === 'form' && password !== confirmPassword) {
+      setFormError('Konfirmasi password tidak cocok dengan password Anda.');
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
       const res = await fetch(`${API_BASE}/auth/register/send-otp`, {
@@ -373,6 +388,7 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
                 type="button"
                 onClick={() => {
                   setActiveTab('login');
+                  setIsForgotPassword(false);
                   setFormError(null);
                   setFormSuccess(null);
                 }}
@@ -416,7 +432,24 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
               </button>
             </div>
 
-            {activeTab === 'login' && (
+            {activeTab === 'login' && isForgotPassword && (
+              <ForgotPasswordPanel
+                initialEmail={email}
+                onCancel={() => {
+                  setIsForgotPassword(false);
+                  setFormError(null);
+                }}
+                onSuccess={(resetEmail) => {
+                  setEmail(resetEmail);
+                  setPassword('');
+                  setIsForgotPassword(false);
+                  setFormError(null);
+                  setFormSuccess('Kata sandi berhasil direset. Silakan masuk dengan sandi baru.');
+                }}
+              />
+            )}
+
+            {activeTab === 'login' && !isForgotPassword && (
               <form onSubmit={handleLogin} className="space-y-4">
                 <Input
                   label="Email"
@@ -426,14 +459,50 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
                   placeholder="nama@email.com"
                   required
                 />
-                <Input
-                  label="Password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                />
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[0.68rem] uppercase tracking-[0.14em] text-muted font-medium">
+                      Password
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowPasswords((v) => !v)}
+                      className="inline-flex items-center gap-1 text-[0.62rem] uppercase tracking-wider text-muted hover:text-ink cursor-pointer"
+                    >
+                      {showPasswords ? (
+                        <>
+                          <EyeOff className="w-3 h-3" />
+                          <span>Tutup</span>
+                        </>
+                      ) : (
+                        <>
+                          <Eye className="w-3 h-3" />
+                          <span>Lihat</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <Input
+                    type={showPasswords ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                  />
+                  <div className="flex justify-end pt-0.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsForgotPassword(true);
+                        setFormError(null);
+                        setFormSuccess(null);
+                      }}
+                      className="text-[0.68rem] text-accent hover:text-ink transition-colors cursor-pointer"
+                    >
+                      Lupa kata sandi?
+                    </button>
+                  </div>
+                </div>
 
                 {formError && <p className="text-xs text-red-600">{formError}</p>}
                 {formSuccess && (
@@ -475,15 +544,47 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
                   placeholder="nama@email.com"
                   required
                 />
-                <Input
-                  label="Password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Minimal 8 karakter"
-                  minLength={8}
-                  required
-                />
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[0.68rem] uppercase tracking-[0.14em] text-muted font-medium">
+                      Password Akun
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowPasswords((v) => !v)}
+                      className="inline-flex items-center gap-1 text-[0.62rem] uppercase tracking-wider text-muted hover:text-ink cursor-pointer"
+                    >
+                      {showPasswords ? (
+                        <>
+                          <EyeOff className="w-3 h-3" />
+                          <span>Sembunyikan</span>
+                        </>
+                      ) : (
+                        <>
+                          <Eye className="w-3 h-3" />
+                          <span>Lihat</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <Input
+                    type={showPasswords ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Minimal 8 karakter"
+                    minLength={8}
+                    required
+                  />
+                  <Input
+                    label="Konfirmasi Password"
+                    type={showPasswords ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Ulangi password Anda"
+                    minLength={8}
+                    required
+                  />
+                </div>
 
                 {formError && <p className="text-xs text-red-600">{formError}</p>}
 

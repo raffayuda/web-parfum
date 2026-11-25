@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../../components/ui/react/Button';
 import { Input } from '../../components/ui/react/Input';
+import { ForgotPasswordPanel } from '../../components/auth/ForgotPasswordPanel';
 import { api, API_BASE } from '../../lib/api';
 
 interface AdminLayoutProps {
@@ -40,6 +41,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -195,38 +197,65 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             </p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">
-            <Input
-              label="Email Administrator"
-              type="email"
-              value={loginEmail}
-              onChange={(e) => setLoginEmail(e.target.value)}
-              placeholder="nama@email.com"
-              required
+          {isForgotPassword ? (
+            <ForgotPasswordPanel
+              initialEmail={loginEmail}
+              onCancel={() => setIsForgotPassword(false)}
+              onSuccess={(resetEmail) => {
+                setLoginEmail(resetEmail);
+                setLoginPassword('');
+                setLoginError('');
+                setIsForgotPassword(false);
+              }}
             />
+          ) : (
+            <form onSubmit={handleLogin} className="space-y-4">
+              <Input
+                label="Email Administrator"
+                type="email"
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
+                placeholder="nama@email.com"
+                required
+              />
 
-            <Input
-              label="Password"
-              type="password"
-              value={loginPassword}
-              onChange={(e) => setLoginPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-            />
+              <div className="space-y-1">
+                <Input
+                  label="Password"
+                  type="password"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                />
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsForgotPassword(true);
+                      setLoginError('');
+                    }}
+                    className="text-[0.68rem] text-accent hover:text-ink transition-colors cursor-pointer"
+                  >
+                    Lupa kata sandi?
+                  </button>
+                </div>
+              </div>
 
-            {loginError && (
-              <p className="text-xs text-red-600 tracking-wide">{loginError}</p>
-            )}
+              {loginError && (
+                <p className="text-xs text-red-600 tracking-wide">{loginError}</p>
+              )}
 
-            <Button
-              type="submit"
-              variant="primary"
-              className="w-full mt-2"
-              isLoading={isLoggingIn}
-            >
-              Masuk ke Dashboard
-            </Button>
-          </form>
+              <Button
+                type="submit"
+                variant="primary"
+                className="w-full mt-2"
+                isLoading={isLoggingIn}
+              >
+                Masuk ke Dashboard
+              </Button>
+            </form>
+          )}
 
           <div className="pt-4 border-t border-line text-center">
             <a

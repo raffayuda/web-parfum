@@ -141,6 +141,10 @@ export const api = {
     currentPassword?: string;
     newPassword?: string;
   }) => fetcher('/auth/profile', { method: 'PUT', body: JSON.stringify(data) }),
+  sendForgotPasswordOtp: (email: string) =>
+    fetcher('/auth/forgot-password/send-otp', { method: 'POST', body: JSON.stringify({ email }) }),
+  resetPasswordWithOtp: (data: { email: string; otp: string; newPassword: string }) =>
+    fetcher('/auth/forgot-password/reset', { method: 'POST', body: JSON.stringify(data) }),
 
   // Direct File Upload
   uploadFile: async (file: File, category: string = 'perfumes'): Promise<{ success: boolean; url: string; message?: string }> => {

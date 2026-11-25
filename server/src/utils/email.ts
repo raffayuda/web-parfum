@@ -1,22 +1,37 @@
 /**
- * Send transactional emails via Brevo (v3 SMTP/Email REST API).
+ * Send transactional OTP emails via Brevo (v3 SMTP/Email REST API).
  */
 export async function sendBrevoOtpEmail(params: {
   toEmail: string;
   toName: string;
   otp: string;
+  purpose?: 'register' | 'reset-password';
 }): Promise<{ sent: boolean; mode: 'brevo' | 'dev-log' }> {
   const apiKey = process.env.BREVO_API_KEY;
   const senderEmail = process.env.BREVO_SENDER_EMAIL || 'noreply@omoo.web.id';
   const senderName = process.env.BREVO_SENDER_NAME || 'OMOO';
+  const isReset = params.purpose === 'reset-password';
 
   if (!apiKey) {
     if (process.env.NODE_ENV === 'production') {
       throw new Error('Konfigurasi email OTP (BREVO_API_KEY) belum diatur di server.');
     }
-    console.info(`[DEV OTP] Verification code for ${params.toEmail}: ${params.otp}`);
+    console.info(
+      `[DEV OTP:${isReset ? 'RESET' : 'REGISTER'}] Verification code for ${params.toEmail}: ${params.otp}`
+    );
     return { sent: true, mode: 'dev-log' };
   }
+
+  const eyebrowText = isReset ? 'Reset Kata Sandi' : 'Verifikasi Pendaftaran Akun';
+  const bodyText = isReset
+    ? 'Masukkan kode verifikasi 6 digit di bawah ini untuk mengatur ulang kata sandi akun OMOO Anda. Kode berlaku selama 10 menit.'
+    : 'Masukkan kode verifikasi 6 digit di bawah ini untuk menyelesaikan pendaftaran akun OMOO Anda. Kode berlaku selama 10 menit.';
+  const ignoreText = isReset
+    ? 'Jangan bagikan kode ini kepada siapa pun. Jika Anda tidak meminta pengaturan ulang kata sandi di OMOO, abaikan email ini.'
+    : 'Jangan bagikan kode ini kepada siapa pun. Jika Anda tidak merasa melakukan pendaftaran di OMOO, abaikan email ini.';
+  const emailSubject = isReset
+    ? `${params.otp} — Kode Reset Kata Sandi OMOO`
+    : `${params.otp} — Kode Verifikasi Akun OMOO`;
 
   const htmlContent = `
 <!DOCTYPE html>
@@ -37,13 +52,13 @@ export async function sendBrevoOtpEmail(params: {
     <tr>
       <td style="padding:36px;">
         <p style="margin:0 0 8px;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#5d6356;">
-          Verifikasi Pendaftaran Akun
+          ${eyebrowText}
         </p>
         <h1 style="margin:0 0 18px;font-size:24px;font-weight:400;color:#141710;">
           Halo, ${escapeHtml(params.toName || 'Pelanggan')}
         </h1>
         <p style="margin:0 0 24px;font-size:14px;line-height:1.6;color:#5d6356;">
-          Masukkan kode verifikasi 6 digit di bawah ini untuk menyelesaikan pendaftaran akun OMOO Anda. Kode berlaku selama 10 menit.
+          ${bodyText}
         </p>
         <div style="margin:0 0 24px;padding:18px 24px;background-color:#e9eae3;border:1px solid #c4c7b9;text-align:center;">
           <span style="font-family:'Courier New',monospace;font-size:32px;letter-spacing:0.35em;font-weight:700;color:#141710;">
@@ -51,7 +66,7 @@ export async function sendBrevoOtpEmail(params: {
           </span>
         </div>
         <p style="margin:0;font-size:12px;line-height:1.6;color:#5d6356;">
-          Jangan bagikan kode ini kepada siapa pun. Jika Anda tidak merasa melakukan pendaftaran di OMOO, abaikan email ini.
+          ${ignoreText}
         </p>
       </td>
     </tr>
@@ -77,9 +92,9 @@ export async function sendBrevoOtpEmail(params: {
     body: JSON.stringify({
       sender: { name: senderName, email: senderEmail },
       to: [{ email: params.toEmail, name: params.toName || params.toEmail }],
-      subject: `${params.otp} — Kode Verifikasi Akun OMOO`,
+      subject: emailSubject,
       htmlContent,
-      textContent: `Halo ${params.toName || ''},\n\nKode OTP verifikasi pendaftaran akun OMOO Anda adalah: ${params.otp}\n\nKode berlaku selama 10 menit. Jangan bagikan kode ini kepada siapa pun.`,
+      textContent: `Halo ${params.toName || ''},\n\n${eyebrowText} — Kode OTP OMOO Anda adalah: ${params.otp}\n\nKode berlaku selama 10 menit. Jangan bagikan kode ini kepada siapa pun.`,
     }),
   });
 
