@@ -1,5 +1,6 @@
 import { Elysia, t } from 'elysia';
 import { randomInt, createHash } from 'crypto';
+import { hashPassword, verifyPassword } from 'better-auth/crypto';
 import { auth } from '../auth';
 import { prisma } from '../db';
 import { sendBrevoOtpEmail } from '../utils/email';
@@ -53,6 +54,128 @@ export const authRoute = new Elysia({ prefix: '/auth' })
       return { success: false, message: e.message };
     }
   })
+
+  // Update currently logged-in user's profile & password (Admin / User)
+  .put(
+    '/profile',
+    async ({ request, body, set }) => {
+      try {
+        const session = await auth.api.getSession({
+          headers: request.headers,
+        });
+
+        if (!session) {
+          set.status = 401;
+          return { success: false, message: 'Sesi tidak ditemukan. Silakan login ulang.' };
+        }
+
+        const name = body.name.trim();
+        const normalizedEmail = body.email.trim().toLowerCase();
+        const phone = body.phone?.trim() || null;
+
+        if (!name || !normalizedEmail) {
+          set.status = 400;
+          return { success: false, message: 'Nama dan email wajib diisi.' };
+        }
+
+        // Check email collision if changed
+        const existingOther = await prisma.user.findFirst({
+          where: {
+            email: normalizedEmail,
+            id: { not: session.user.id },
+          },
+          select: { id: true },
+        });
+
+        if (existingOther) {
+          set.status = 409;
+          return { success: false, message: 'Email tersebut sudah digunakan oleh akun lain.' };
+        }
+
+        // Handle optional password update
+        const newPassword = body.newPassword?.trim() || '';
+        const currentPassword = body.currentPassword?.trim() || '';
+
+        if (newPassword) {
+          if (newPassword.length < 6) {
+            set.status = 400;
+            return { success: false, message: 'Kata sandi baru minimal 6 karakter.' };
+          }
+          if (!currentPassword) {
+            set.status = 400;
+            return { success: false, message: 'Masukkan kata sandi saat ini untuk konfirmasi.' };
+          }
+
+          const credentialAccount = await prisma.account.findFirst({
+            where: {
+              userId: session.user.id,
+              providerId: 'credential',
+            },
+          });
+
+          if (!credentialAccount?.password) {
+            set.status = 400;
+            return { success: false, message: 'Akun kredensial tidak ditemukan.' };
+          }
+
+          const isValidCurrent = await verifyPassword({
+            hash: credentialAccount.password,
+            password: currentPassword,
+          });
+
+          if (!isValidCurrent) {
+            set.status = 400;
+            return { success: false, message: 'Kata sandi saat ini tidak sesuai.' };
+          }
+
+          const hashedNewPassword = await hashPassword(newPassword);
+          await prisma.account.update({
+            where: { id: credentialAccount.id },
+            data: { password: hashedNewPassword },
+          });
+        }
+
+        const updatedUser = await prisma.user.update({
+          where: { id: session.user.id },
+          data: {
+            name,
+            email: normalizedEmail,
+            phone,
+          },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            phone: true,
+            memberStatus: true,
+            memberTier: true,
+            memberSince: true,
+          },
+        });
+
+        return {
+          success: true,
+          message: newPassword
+            ? 'Profil dan kata sandi berhasil diperbarui.'
+            : 'Profil berhasil diperbarui.',
+          user: updatedUser,
+        };
+      } catch (e: any) {
+        set.status = 500;
+        return { success: false, message: e.message || 'Gagal memperbarui profil.' };
+      }
+    },
+    {
+      body: t.Object({
+        name: t.String(),
+        email: t.String(),
+        phone: t.Optional(t.String()),
+        currentPassword: t.Optional(t.String()),
+        newPassword: t.Optional(t.String()),
+      }),
+    }
+  )
 
   // Step 1: Send 6-digit email OTP via Brevo before completing registration
   .post(

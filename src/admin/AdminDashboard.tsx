@@ -12,6 +12,7 @@ import { CertificatesTab } from './components/CertificatesTab';
 import { SettingsTab } from './components/SettingsTab';
 import { FaqTab } from './components/FaqTab';
 import { GalleryTab } from './components/GalleryTab';
+import { AdminProfileTab } from './components/AdminProfileTab';
 import { Toaster } from 'sonner';
 import { Button } from '../components/ui/react/Button';
 import { Input } from '../components/ui/react/Input';
@@ -30,6 +31,7 @@ import {
   Sliders,
   HelpCircle,
   Camera,
+  UserCog,
 } from 'lucide-react';
 
 const AdminDashboardInner: React.FC = () => {
@@ -185,6 +187,12 @@ const AdminDashboardInner: React.FC = () => {
       group: 'LEGALITAS & TRUST',
       items: [
         { id: 'certificates', label: 'Cetak Sertifikat Halal & BPOM', icon: ShieldCheck },
+      ],
+    },
+    {
+      group: 'AKUN ADMIN',
+      items: [
+        { id: 'profile', label: 'Profil & Kata Sandi', icon: UserCog },
       ],
     },
   ];
@@ -432,6 +440,9 @@ const AdminDashboardInner: React.FC = () => {
           {activeTab === 'customers' && <CustomersTab />}
           {activeTab === 'members' && <MembersTab />}
           {activeTab === 'certificates' && <CertificatesTab />}
+          {activeTab === 'profile' && (
+            <AdminProfileTab onProfileUpdated={(u) => setAdminUser(u)} />
+          )}
           {activeTab === 'manual-order' && <ManualOrderTab />}
         </main>
       </div>

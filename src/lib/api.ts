@@ -132,8 +132,15 @@ export const api = {
   updateCertificate: (id: string, data: any) => fetcher(`/certificates/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteCertificate: (id: string) => fetcher(`/certificates/${id}`, { method: 'DELETE' }),
 
-  // Current User Session
+  // Current User Session & Profile
   getMe: () => fetcher('/auth/me'),
+  updateProfile: (data: {
+    name: string;
+    email: string;
+    phone?: string;
+    currentPassword?: string;
+    newPassword?: string;
+  }) => fetcher('/auth/profile', { method: 'PUT', body: JSON.stringify(data) }),
 
   // Direct File Upload
   uploadFile: async (file: File, category: string = 'perfumes'): Promise<{ success: boolean; url: string; message?: string }> => {

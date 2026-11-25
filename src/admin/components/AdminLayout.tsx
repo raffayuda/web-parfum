@@ -14,6 +14,7 @@ import {
   Sliders,
   HelpCircle,
   Camera,
+  UserCog,
 } from 'lucide-react';
 import { Button } from '../../components/ui/react/Button';
 import { Input } from '../../components/ui/react/Input';
@@ -151,6 +152,12 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       group: 'LEGALITAS & TRUST',
       items: [
         { id: 'certificates', label: 'Cetak Sertifikat Halal & BPOM', icon: ShieldCheck },
+      ],
+    },
+    {
+      group: 'AKUN ADMIN',
+      items: [
+        { id: 'profile', label: 'Profil & Kata Sandi', icon: UserCog },
       ],
     },
   ];
