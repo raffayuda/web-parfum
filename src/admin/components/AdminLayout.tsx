@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
-  Layers,
   Sparkles,
   ShoppingBag,
   Users,
@@ -17,7 +16,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../../components/ui/react/Button';
 import { Input } from '../../components/ui/react/Input';
-import { API_BASE } from '../../lib/api';
+import { api, API_BASE } from '../../lib/api';
 
 interface AdminLayoutProps {
   activeTab?: string;
@@ -31,19 +30,42 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   children,
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [adminUser, setAdminUser] = useState<any>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Login states for gate
-  const [loginEmail, setLoginEmail] = useState('admin@omoo.studio');
-  const [loginPassword, setLoginPassword] = useState('admin123456');
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   useEffect(() => {
-    const savedAuth = localStorage.getItem('omoo_admin_session');
-    if (savedAuth === 'active') {
-      setIsAuthenticated(true);
-    }
+    const checkSession = async () => {
+      try {
+        const cachedUser = localStorage.getItem('omoo_customer_user');
+        if (cachedUser) {
+          const parsed = JSON.parse(cachedUser);
+          if (parsed?.role === 'ADMIN') {
+            setAdminUser(parsed);
+            setIsAuthenticated(true);
+          }
+        }
+      } catch {}
+
+      try {
+        const res = await api.getMe();
+        if (res?.success && res.user?.role === 'ADMIN') {
+          setAdminUser(res.user);
+          setIsAuthenticated(true);
+          localStorage.setItem('omoo_admin_session', 'active');
+          localStorage.setItem('omoo_customer_user', JSON.stringify(res.user));
+        }
+      } catch {} finally {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    checkSession();
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -59,40 +81,44 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         body: JSON.stringify({ email: loginEmail.trim(), password: loginPassword }),
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        if (data.user?.role === 'ADMIN' || loginEmail.includes('admin')) {
-          localStorage.setItem('omoo_admin_session', 'active');
-          localStorage.setItem('omoo_customer_user', JSON.stringify(data.user));
-          setIsAuthenticated(true);
-          return;
-        }
+      const rawText = await res.text();
+      let data: any = null;
+      try {
+        data = rawText ? JSON.parse(rawText) : null;
+      } catch {}
+
+      if (!res.ok) {
+        throw new Error(data?.message || rawText || 'Email atau password administrator tidak sesuai.');
       }
 
-      if (
-        (loginEmail.trim() === 'admin@omoo.studio' && loginPassword === 'admin123456') ||
-        loginPassword === 'admin123456'
-      ) {
-        localStorage.setItem('omoo_admin_session', 'active');
-        setIsAuthenticated(true);
-      } else {
-        setLoginError('Email atau password admin tidak valid. Gunakan admin@omoo.studio / admin123456');
+      if (data?.user?.role !== 'ADMIN') {
+        throw new Error('Akun ini tidak memiliki akses administrator.');
       }
-    } catch {
-      if (loginEmail.trim() === 'admin@omoo.studio' && loginPassword === 'admin123456') {
-        localStorage.setItem('omoo_admin_session', 'active');
-        setIsAuthenticated(true);
-      } else {
-        setLoginError('Kredensial tidak valid. Gunakan admin@omoo.studio / admin123456');
-      }
+
+      localStorage.setItem('omoo_admin_session', 'active');
+      localStorage.setItem('omoo_customer_user', JSON.stringify(data.user));
+      window.dispatchEvent(new Event('omoo:auth-changed'));
+      setAdminUser(data.user);
+      setIsAuthenticated(true);
+    } catch (err: any) {
+      setLoginError(err.message || 'Gagal masuk. Periksa kembali email dan password Anda.');
     } finally {
       setIsLoggingIn(false);
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch(`${API_BASE}/auth/sign-out`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch {}
     setIsAuthenticated(false);
+    setAdminUser(null);
     localStorage.removeItem('omoo_admin_session');
+    localStorage.removeItem('omoo_customer_user');
+    window.dispatchEvent(new Event('omoo:auth-changed'));
     window.location.href = '/admin';
   };
 
@@ -104,9 +130,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       ],
     },
     {
-      group: 'MANAJEMEN KONTEN & CMS',
+      group: 'PRODUK & TOKO',
       items: [
-        { id: 'builder', label: 'Layout & CMS Seksi', icon: Layers },
         { id: 'catalog', label: 'Katalog Parfum & Stok', icon: Sparkles },
         { id: 'faq', label: 'Kelola FAQ (Tanya Jawab)', icon: HelpCircle },
         { id: 'settings', label: 'Pengaturan Toko & Kontak', icon: Sliders },
@@ -131,6 +156,16 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   const currentTabItem = navigationGroups.flatMap((g) => g.items).find((i) => i.id === activeTab);
   const currentTabLabel = currentTabItem?.label || 'Manajemen Pesanan';
 
+  if (isCheckingAuth && !isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-bg flex items-center justify-center p-4">
+        <p className="text-xs uppercase tracking-[0.14em] text-muted animate-pulse">
+          Memeriksa sesi admin...
+        </p>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-bg flex items-center justify-center p-4">
@@ -140,7 +175,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
               <Lock className="w-5 h-5" />
             </div>
             <h1 className="font-display text-3xl font-light text-ink tracking-[0.1em] uppercase">
-              OMOO OFFICIAL
+              OMOO ADMIN
             </h1>
             <p className="text-[0.68rem] uppercase tracking-[0.15em] text-muted font-medium">
               Portal Manajemen Administrator
@@ -153,7 +188,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
               type="email"
               value={loginEmail}
               onChange={(e) => setLoginEmail(e.target.value)}
-              placeholder="admin@omoo.studio"
+              placeholder="nama@email.com"
               required
             />
 
@@ -185,7 +220,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
               href="/"
               className="text-xs text-muted hover:text-ink transition-colors uppercase tracking-[0.08em]"
             >
-              &larr; Kembali ke Website Publik
+              &larr; Kembali ke Website Utama
             </a>
           </div>
         </div>
@@ -193,9 +228,16 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     );
   }
 
+  const adminName = adminUser?.name || 'Administrator';
+  const adminInitials = adminName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p: string) => p[0]?.toUpperCase())
+    .join('') || 'AD';
+
   return (
     <div className="min-h-screen bg-bg text-ink flex">
-      {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-ink/50 backdrop-blur-sm z-40 lg:hidden"
@@ -203,13 +245,11 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         />
       )}
 
-      {/* Left Sidebar */}
       <aside
         className={`fixed lg:sticky top-0 left-0 h-screen w-72 bg-surface/80 border-r border-line flex flex-col justify-between z-50 transition-transform duration-300 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
-        {/* Sidebar Header */}
         <div>
           <div className="h-16 px-6 border-b border-line flex items-center justify-between">
             <a href="/admin?tab=overview" className="flex items-center gap-2.5">
@@ -228,7 +268,6 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             </button>
           </div>
 
-          {/* Navigation Items Grouped */}
           <nav className="p-4 space-y-6 overflow-y-auto max-h-[calc(100vh-140px)]">
             {navigationGroups.map((group, gIdx) => (
               <div key={gIdx} className="space-y-1.5">
@@ -259,15 +298,14 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           </nav>
         </div>
 
-        {/* Sidebar Footer: Profile & Logout */}
         <div className="p-4 border-t border-line bg-surface/40">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-8 h-8 rounded-full border border-line bg-bg flex items-center justify-center font-display font-medium text-xs text-ink shrink-0">
-                CA
+                {adminInitials}
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-semibold text-ink truncate">Camille Aumont</p>
+                <p className="text-xs font-semibold text-ink truncate">{adminName}</p>
                 <p className="text-[0.62rem] text-accent tracking-wide uppercase">Store Manager</p>
               </div>
             </div>
@@ -283,9 +321,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
         </div>
       </aside>
 
-      {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Navbar */}
         <header className="h-16 border-b border-line bg-bg/90 backdrop-blur sticky top-0 z-30 px-4 sm:px-8 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
@@ -296,7 +332,6 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
               <Menu className="w-5 h-5" />
             </button>
 
-            {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-xs flex-wrap">
               <a href="/admin" className="text-muted hover:text-ink uppercase tracking-[0.1em] transition-colors">
                 Admin OMOO
@@ -319,7 +354,6 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             </div>
           </div>
 
-          {/* Right Header Actions */}
           <div className="flex items-center gap-4">
             <div className="hidden sm:flex items-center gap-2 text-xs text-muted">
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -338,7 +372,6 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           </div>
         </header>
 
-        {/* Dynamic Tab Content Body */}
         <main className="p-4 sm:p-8 flex-1 overflow-y-auto">
           {children}
         </main>

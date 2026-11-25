@@ -25,8 +25,8 @@ export const InlineVisualEditor: React.FC = () => {
 
   // Quick Admin Login modal if not authenticated
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [adminEmail, setAdminEmail] = useState('admin@omoo.studio');
-  const [adminPassword, setAdminPassword] = useState('admin123456');
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
@@ -55,18 +55,18 @@ export const InlineVisualEditor: React.FC = () => {
     }
   };
 
-  // Preset atelier images for quick selection
+  // Preset gallery images for quick selection
   const presetPhotos = [
-    { label: 'Botol Sel Brut', url: '/src/assets/images/bottle-sel.jpg' },
-    { label: 'Botol Vetiver Obscur', url: '/src/assets/images/bottle-vetiver.jpg' },
-    { label: 'Botol Iris Cendre', url: '/src/assets/images/bottle-iris.jpg' },
-    { label: 'Botol Fig Nocturne', url: '/src/assets/images/bottle-fig.jpg' },
-    { label: 'Botol Oud Intime', url: '/src/assets/images/bottle-oud.jpg' },
-    { label: 'Atelier Maceration Room', url: '/src/assets/images/atelier.jpg' },
-    { label: 'Pintu Masuk Atelier', url: '/src/assets/images/corridor.jpg' },
-    { label: 'Makro Oud Gaharu', url: '/src/assets/images/macro-oud.jpg' },
-    { label: 'Makro Vetiver Root', url: '/src/assets/images/macro-vetiver.jpg' },
-    { label: 'Discovery Set Box', url: '/src/assets/images/bottle-ambrette.jpg' },
+    { label: 'Botol Sel Marin', url: '/images/bottle-sel.jpg' },
+    { label: 'Botol Vetiver Obscura', url: '/images/bottle-vetiver.jpg' },
+    { label: 'Botol Iris Cendre', url: '/images/bottle-iris.jpg' },
+    { label: 'Botol Fig Nocturne', url: '/images/bottle-fig.jpg' },
+    { label: 'Botol Oud Intime', url: '/images/bottle-oud.jpg' },
+    { label: 'Ruang Racik OMOO', url: '/images/atelier.jpg' },
+    { label: 'Koridor Studio OMOO', url: '/images/corridor.jpg' },
+    { label: 'Makro Oud Gaharu', url: '/images/macro-oud.jpg' },
+    { label: 'Makro Vetiver Root', url: '/images/macro-vetiver.jpg' },
+    { label: 'Botol Ambrette 12', url: '/images/bottle-ambrette.jpg' },
   ];
 
   // Check admin session and URL query parameter ?edit=true
@@ -180,7 +180,7 @@ export const InlineVisualEditor: React.FC = () => {
           itemEl.setAttribute('data-timeline-id', newId);
           itemEl.innerHTML = `
             <span class="font-display text-3xl font-light text-accent shrink-0 w-24 timeline-year outline-dashed outline-1 outline-accent/70 hover:bg-accent/10 cursor-text" contenteditable="true" data-editable-id="${newId}-year">2027</span>
-            <p class="text-sm text-ink leading-relaxed flex-1 pt-1 timeline-copy outline-dashed outline-1 outline-accent/70 hover:bg-accent/10 cursor-text" contenteditable="true" data-editable-id="${newId}-copy">Deskripsi catatan atelier baru...</p>
+            <p class="text-sm text-ink leading-relaxed flex-1 pt-1 timeline-copy outline-dashed outline-1 outline-accent/70 hover:bg-accent/10 cursor-text" contenteditable="true" data-editable-id="${newId}-copy">Deskripsi catatan baru...</p>
             <button type="button" class="timeline-del-btn opacity-80 hover:opacity-100 text-xs text-red-400 hover:text-red-300 px-2 py-1 border border-red-500/30 hover:border-red-400 rounded transition-all ml-2 self-start">✕ Hapus</button>
           `;
           const delBtn = itemEl.querySelector<HTMLButtonElement>('.timeline-del-btn');
@@ -567,14 +567,14 @@ export const InlineVisualEditor: React.FC = () => {
       <Modal
         isOpen={isPhotoModalOpen}
         onClose={() => setIsPhotoModalOpen(false)}
-        title="Ganti Foto Wewangian / Atelier"
-        subtitle="Pilih foto dari galeri atelier atau masukkan URL foto gambar Anda sendiri."
+        title="Ganti Foto Produk & Galeri"
+        subtitle="Pilih foto dari galeri OMOO atau unggah gambar baru."
         maxWidth="lg"
       >
         <div className="space-y-5">
           <div>
             <label className="text-[0.65rem] font-semibold tracking-[0.1em] uppercase text-muted block mb-2">
-              1. Pilih dari Galeri Foto Atelier Tersedia
+              1. Pilih dari Galeri Foto Tersedia
             </label>
             <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
               {presetPhotos.map((p, i) => (
@@ -649,64 +649,47 @@ export const InlineVisualEditor: React.FC = () => {
       </Modal>
 
       {/* MODAL: Quick Admin Login if not authenticated */}
-      {showLoginModal && (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
-          <div
-            className="fixed inset-0 bg-[#070906]/70 backdrop-blur-sm"
-            onClick={() => setShowLoginModal(false)}
+      <Modal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        title="Autentikasi Admin"
+        subtitle="Masuk untuk mengedit langsung di website"
+        maxWidth="sm"
+      >
+        <form onSubmit={handleAdminLogin} className="space-y-4">
+          <Input
+            label="Email Admin"
+            type="email"
+            value={adminEmail}
+            onChange={(e) => setAdminEmail(e.target.value)}
+            placeholder="nama@email.com"
+            required
           />
-          <div className="relative w-full max-w-sm bg-bg border border-line p-6 shadow-2xl z-10 animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between pb-4 border-b border-line mb-4">
-              <div>
-                <h4 className="font-display text-lg text-ink font-normal">
-                  Autentikasi Admin
-                </h4>
-                <p className="text-[0.62rem] text-muted uppercase tracking-wider">
-                  Masuk untuk mengedit langsung di Landing Page
-                </p>
-              </div>
-              <button
-                onClick={() => setShowLoginModal(false)}
-                className="text-muted hover:text-ink cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+          <Input
+            label="Password Admin"
+            type="password"
+            value={adminPassword}
+            onChange={(e) => setAdminPassword(e.target.value)}
+            placeholder="••••••••"
+            required
+          />
 
-            <form onSubmit={handleAdminLogin} className="space-y-4">
-              <Input
-                label="Email Admin"
-                type="email"
-                value={adminEmail}
-                onChange={(e) => setAdminEmail(e.target.value)}
-                required
-              />
-              <Input
-                label="Password Admin"
-                type="password"
-                value={adminPassword}
-                onChange={(e) => setAdminPassword(e.target.value)}
-                required
-              />
+          {loginError && <p className="text-xs text-red-600">{loginError}</p>}
 
-              {loginError && <p className="text-xs text-red-600">{loginError}</p>}
-
-              <div className="flex justify-end gap-2 pt-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => setShowLoginModal(false)}
-                >
-                  Batal
-                </Button>
-                <Button type="submit" variant="primary" isLoading={isLoggingIn}>
-                  Masuk & Mulai Edit
-                </Button>
-              </div>
-            </form>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setShowLoginModal(false)}
+            >
+              Batal
+            </Button>
+            <Button type="submit" variant="primary" isLoading={isLoggingIn}>
+              Masuk & Mulai Edit
+            </Button>
           </div>
-        </div>
-      )}
+        </form>
+      </Modal>
     </>
   );
 };

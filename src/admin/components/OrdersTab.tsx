@@ -564,7 +564,7 @@ export const OrdersTab: React.FC = () => {
             {selectedOrder.status === 'AWAITING_VALIDATION' && (
               <div className="p-4 border border-amber-600/30 bg-amber-950/20 text-amber-300 space-y-3">
                 <p className="text-xs">
-                  Customer telah mengunggah bukti transfer. Silakan periksa kebenaran mutasi rekening atau QRIS atelier sebelum memvalidasi.
+                  Customer telah mengunggah bukti transfer. Silakan periksa mutasi rekening atau QRIS sebelum memvalidasi.
                 </p>
                 <Button
                   variant="primary"

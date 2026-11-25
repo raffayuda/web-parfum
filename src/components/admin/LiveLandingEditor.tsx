@@ -40,8 +40,8 @@ export const LiveLandingEditor: React.FC<LiveLandingEditorProps> = ({
   // Form edit state for currently selected section
   const [editData, setEditData] = useState<any>({});
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [adminEmail, setAdminEmail] = useState('admin@omoo.studio');
-  const [adminPassword, setAdminPassword] = useState('admin123456');
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
   const [loginError, setLoginError] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 

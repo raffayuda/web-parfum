@@ -40,7 +40,7 @@ const PublicLegalityVerifyInner: React.FC<PublicLegalityVerifyProps> = ({ code }
       <div className="min-h-[50vh] flex flex-col items-center justify-center p-6 text-center">
         <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin mb-4" />
         <p className="font-display text-xl text-ink">Memverifikasi Dokumen Legalitas...</p>
-        <p className="text-xs text-muted mt-1">Menghubungkan ke basis data sertifikasi OMOO Atelier.</p>
+        <p className="text-xs text-muted mt-1">Menghubungkan ke basis data sertifikasi OMOO.</p>
       </div>
     );
   }
@@ -169,7 +169,7 @@ const PublicLegalityVerifyInner: React.FC<PublicLegalityVerifyProps> = ({ code }
           className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.1em] font-medium text-muted hover:text-ink transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Kunjungi Atelier OMOO Online</span>
+          <span>Kunjungi Website OMOO</span>
         </a>
       </div>
     </div>

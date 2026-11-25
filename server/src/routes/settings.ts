@@ -21,8 +21,8 @@ export const defaultSettings = {
   pinterestHandle: 'omoo parfums',
   pinterestUrl: 'https://www.pinterest.com/omoo.parfums/',
   footerHeadline: 'Perfume made in small batches.\nDiracik perlahan di Jakarta, dari material pilihan.',
-  footerEmailNote: 'Kami membalas dalam dua hari kerja.',
-  footerSocialHeading: 'Catatan harian dari atelier.',
+  footerEmailNote: 'Kami membalas dalam 1-2 hari kerja.',
+  footerSocialHeading: 'Kabar terbaru dan catatan aroma OMOO.',
   copyright: '© 2026 Omoo Parfums. Jakarta, Indonesia. All rights reserved.',
 };
 
@@ -66,7 +66,7 @@ export const settingsRoute = new Elysia({ prefix: '/settings' })
         page = await prisma.page.create({
           data: {
             slug: 'site-settings',
-            title: 'Atelier Site Settings & Contact',
+            title: 'Site Settings & Contact',
             description: 'Global settings for address, contacts, social media, and footer.',
             isActive: true,
             sections: {
@@ -110,7 +110,7 @@ export const settingsRoute = new Elysia({ prefix: '/settings' })
 
       return {
         success: true,
-        message: 'Pengaturan atelier dan toko berhasil diperbarui.',
+        message: 'Pengaturan toko berhasil diperbarui.',
         data: payload,
       };
     } catch (e: any) {

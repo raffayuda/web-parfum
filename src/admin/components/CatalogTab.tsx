@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api';
+import { resolvePublicImageUrl } from '../../data/images';
 import { Button } from '../../components/ui/react/Button';
 import { Input, Textarea } from '../../components/ui/react/Input';
 import { Badge } from '../../components/ui/react/Badge';
@@ -57,8 +58,8 @@ export const CatalogTab: React.FC = () => {
   const [isAvailable, setIsAvailable] = useState(true);
 
   // Visual Photos
-  const [bottleImage, setBottleImage] = useState('/src/assets/images/bottle-vetiver.jpg');
-  const [macroImage, setMacroImage] = useState('/src/assets/images/macro-vetiver.jpg');
+  const [bottleImage, setBottleImage] = useState('/images/bottle-vetiver.jpg');
+  const [macroImage, setMacroImage] = useState('/images/macro-vetiver.jpg');
 
   // Composition Notes (comma separated)
   const [notesTop, setNotesTop] = useState('Grapefruit peel, Pink pepper');
@@ -84,21 +85,21 @@ export const CatalogTab: React.FC = () => {
 
   // Preset photo options
   const presetBottlePhotos = [
-    { label: 'Botol Vetiver Obscura', url: '/src/assets/images/bottle-vetiver.jpg' },
-    { label: 'Botol Iris Cendre', url: '/src/assets/images/bottle-iris.jpg' },
-    { label: 'Botol Fig Nocturne', url: '/src/assets/images/bottle-fig.jpg' },
-    { label: 'Botol Sel Brut', url: '/src/assets/images/bottle-sel.jpg' },
-    { label: 'Botol Oud Intime', url: '/src/assets/images/bottle-oud.jpg' },
-    { label: 'Botol Ambrette 12', url: '/src/assets/images/bottle-ambrette.jpg' },
+    { label: 'Botol Vetiver Obscura', url: '/images/bottle-vetiver.jpg' },
+    { label: 'Botol Iris Cendre', url: '/images/bottle-iris.jpg' },
+    { label: 'Botol Fig Nocturne', url: '/images/bottle-fig.jpg' },
+    { label: 'Botol Sel Marin', url: '/images/bottle-sel.jpg' },
+    { label: 'Botol Oud Intime', url: '/images/bottle-oud.jpg' },
+    { label: 'Botol Ambrette 12', url: '/images/bottle-ambrette.jpg' },
   ];
 
   const presetMacroPhotos = [
-    { label: 'Makro Vetiver Root', url: '/src/assets/images/macro-vetiver.jpg' },
-    { label: 'Makro Iris Rhizome', url: '/src/assets/images/macro-iris.jpg' },
-    { label: 'Makro Fig Leaf', url: '/src/assets/images/macro-fig.jpg' },
-    { label: 'Makro Mineral Salt', url: '/src/assets/images/macro-sel.jpg' },
-    { label: 'Makro Oud Wood', url: '/src/assets/images/macro-oud.jpg' },
-    { label: 'Makro Ambrette Seed', url: '/src/assets/images/macro-ambrette.jpg' },
+    { label: 'Makro Vetiver Root', url: '/images/macro-vetiver.jpg' },
+    { label: 'Makro Iris Rhizome', url: '/images/macro-iris.jpg' },
+    { label: 'Makro Fig Leaf', url: '/images/macro-fig.jpg' },
+    { label: 'Makro Mineral Salt', url: '/images/macro-sel.jpg' },
+    { label: 'Makro Oud Wood', url: '/images/macro-oud.jpg' },
+    { label: 'Makro Ambrette Seed', url: '/images/macro-ambrette.jpg' },
   ];
 
   const [isUploadingBottle, setIsUploadingBottle] = useState(false);
@@ -207,8 +208,8 @@ export const CatalogTab: React.FC = () => {
     setConcentration('Extrait de parfum, 20%');
     setStockCount('24');
     setIsAvailable(true);
-    setBottleImage('/src/assets/images/bottle-vetiver.jpg');
-    setMacroImage('/src/assets/images/macro-vetiver.jpg');
+    setBottleImage('/images/bottle-vetiver.jpg');
+    setMacroImage('/images/macro-vetiver.jpg');
     setNotesTop('');
     setNotesHeart('');
     setNotesBase('');
@@ -235,8 +236,8 @@ export const CatalogTab: React.FC = () => {
     setConcentration(p.concentration || 'Extrait de parfum, 20%');
     setStockCount(String(p.stockCount ?? 24));
     setIsAvailable(p.isAvailable ?? true);
-    setBottleImage(p.bottleImage || '/src/assets/images/bottle-vetiver.jpg');
-    setMacroImage(p.macroImage || '/src/assets/images/macro-vetiver.jpg');
+    setBottleImage((p.bottleImage || '/images/bottle-vetiver.jpg').replace(/^\/src\/assets\/images\//, '/images/'));
+    setMacroImage((p.macroImage || '/images/macro-vetiver.jpg').replace(/^\/src\/assets\/images\//, '/images/'));
 
     // Notes
     const n = p.notes || {};
@@ -815,7 +816,7 @@ export const CatalogTab: React.FC = () => {
             <div className="md:col-span-5 space-y-4">
               <div className="aspect-[4/5] border border-line bg-surface overflow-hidden">
                 <img
-                  src={p.bottleImage || '/src/assets/images/bottle-vetiver.jpg'}
+                  src={resolvePublicImageUrl(p.bottleImage)}
                   alt={p.name}
                   className="w-full h-full object-cover"
                 />
@@ -825,7 +826,7 @@ export const CatalogTab: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="aspect-square border border-line bg-surface overflow-hidden">
                     <img
-                      src={p.macroImage}
+                      src={resolvePublicImageUrl(p.macroImage, '/images/macro-vetiver.jpg')}
                       alt="Makro Bahan"
                       className="w-full h-full object-cover"
                     />
@@ -1012,7 +1013,7 @@ export const CatalogTab: React.FC = () => {
               {/* Card Image Header */}
               <div className="relative aspect-[4/5] bg-surface overflow-hidden border-b border-line">
                 <img
-                  src={p.bottleImage || '/src/assets/images/bottle-vetiver.jpg'}
+                  src={resolvePublicImageUrl(p.bottleImage)}
                   alt={p.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
@@ -1126,7 +1127,7 @@ export const CatalogTab: React.FC = () => {
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-12 border border-line bg-surface overflow-hidden shrink-0">
                           <img
-                            src={p.bottleImage || '/src/assets/images/bottle-vetiver.jpg'}
+                            src={resolvePublicImageUrl(p.bottleImage)}
                             alt={p.name}
                             className="w-full h-full object-cover"
                           />

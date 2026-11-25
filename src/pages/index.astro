@@ -67,23 +67,23 @@ const showHalal = !hiddenSections.includes('HALAL_BPOM_BADGE') && (halalSec ? ha
 const showDiscovery = !hiddenSections.includes('DISCOVERY_BANNER') && (discoverySec ? discoverySec.isActive : dbSections.length === 0);
 
 // 1. Hero Section texts
-const heroEyebrow = heroSec?.eyebrow || 'Maison de parfum, Jakarta';
+const heroEyebrow = heroSec?.eyebrow || 'Parfum Independen, Jakarta';
 const heroTitle = heroSec?.title || 'Wear what cannot be seen.';
 const heroSubtitle =
   heroSec?.subtitle ||
-  'Enam komposisi dengan material pilihan, diracik perlahan di Jakarta. Tinggal di kulit, lebih lama dari yang Anda kira.';
+  'Enam komposisi dengan bahan pilihan, diracik dalam batch kecil di Jakarta. Tahan lama di kulit.';
 const heroCtaText = heroSec?.contentData?.ctaText || 'Explore the collection';
 const heroCtaLink = heroSec?.contentData?.ctaLink || '/collection/';
 const heroSecondaryText = heroSec?.contentData?.secondaryText || 'Find your scent';
 const heroSecondaryLink = heroSec?.contentData?.secondaryLink || '/find/';
 
 // 2. Showcase Catalog Section texts
-const showcaseEyebrow = showcaseSec?.eyebrow || 'Six compositions.';
-const showcaseTitle = showcaseSec?.title || 'Satu material, satu arah.';
-const showcaseSubtitle = showcaseSec?.subtitle || 'View all fragrances';
+const showcaseEyebrow = showcaseSec?.eyebrow || 'Enam Komposisi';
+const showcaseTitle = showcaseSec?.title || 'Satu bahan utama, satu karakter.';
+const showcaseSubtitle = showcaseSec?.subtitle || 'Lihat semua parfum';
 const showcaseFooterQuote =
   showcaseSec?.contentData?.footerQuote ||
-  'The collection stays at six. Komposisi baru menggantikan yang lama, tidak pernah menumpuk di sampingnya.';
+  'Koleksi kami selalu terjaga enam varian. Formula baru hadir menggantikan yang lama agar kualitas tetap fokus.';
 
 // Enrich Perfumes dynamically from DB
 const enrichedFromDb = dbPerfumes.map((dbFrag) => {
@@ -135,29 +135,29 @@ const quizCtaLink = quizSec?.contentData?.ctaLink || '/find/';
 // 5. Quote Section texts
 const quoteText =
   quoteSec?.title ||
-  'The house is small on purpose. Hanya dengan begitu saya bisa mencium setiap batch sebelum ia meninggalkan atelier.';
+  'Kami sengaja memproduksi dalam skala kecil, agar setiap batch bisa dicek langsung aromanya sebelum dikirim.';
 const quoteAuthor = quoteSec?.subtitle || 'Camille Aumont';
-const quoteRole = quoteSec?.contentData?.authorRole || 'Founder and perfumer';
-const quoteCtaText = quoteSec?.contentData?.ctaText || 'Inside the maison';
+const quoteRole = quoteSec?.contentData?.authorRole || 'Founder & Perfumer';
+const quoteCtaText = quoteSec?.contentData?.ctaText || 'Tentang OMOO';
 const quoteCtaLink = quoteSec?.contentData?.ctaLink || '/about/';
 
 // 6. Process Section texts
-const processTitle = processSec?.title || 'Slow is a material.';
+const processTitle = processSec?.title || 'Diracik perlahan.';
 const processSubtitle =
   processSec?.subtitle ||
-  'Tidak ada yang selesai karena jadwal. Formula yang menentukan kapan ia siap.';
-const step1Title = processSec?.contentData?.step1Title || 'Compose';
+  'Tidak terburu-buru mengejar jadwal pasar. Setiap batch baru dikemas saat aromanya benar-benar matang.';
+const step1Title = processSec?.contentData?.step1Title || 'Peracikan';
 const step1Copy =
   processSec?.contentData?.step1Copy ||
-  'Satu material memimpin. Catatan lain ditulis mengelilinginya, tidak pernah menutupinya.';
-const step2Title = processSec?.contentData?.step2Title || 'Macerate';
+  'Satu bahan utama menjadi pusat aroma, dipadukan dengan catatan pendukung yang seimbang.';
+const step2Title = processSec?.contentData?.step2Title || 'Pematangan';
 const step2Copy =
   processSec?.contentData?.step2Copy ||
-  'Konsentrat beristirahat di baja, lalu kaca. Minggu-minggu berlalu dan tepinya melembut.';
-const step3Title = processSec?.contentData?.step3Title || 'Bottle';
+  'Konsentrat didiamkan beberapa minggu dalam botol kaca gelap agar seluruh aroma menyatu halus.';
+const step3Title = processSec?.contentData?.step3Title || 'Pembotolan';
 const step3Copy =
   processSec?.contentData?.step3Copy ||
-  'Setiap flacon diisi, disegel, dan diberi nomor di atelier Jakarta.';
+  'Setiap botol diisi, disegel, dan diberi nomor batch secara teliti di studio Jakarta.';
 
 const process = [
   {
@@ -643,8 +643,8 @@ const schema = {
   )}
 
   <Section>
-    <SectionHeader linkHref="/journey/" linkLabel="Buka Galeri & Tulisan" class="mb-[clamp(2.25rem,5vw,4.25rem)]">
-      From the atelier
+    <SectionHeader linkHref="/journey/" linkLabel="Buka Galeri & Jurnal" class="mb-[clamp(2.25rem,5vw,4.25rem)]">
+      Catatan &amp; Jurnal
     </SectionHeader>
 
     <div class="grid gap-12 lg:grid-cols-12">

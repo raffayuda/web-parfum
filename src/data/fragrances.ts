@@ -155,7 +155,7 @@ export const fragrances: Fragrance[] = [
       phrase: 'Getah hijau, buah pekat, daun.',
     },
     story: [
-      'Ada pohon fig di belakang atelier. Pada bulan Agustus, buahnya matang lebih cepat daripada kemampuan kami menghabiskannya, dan seluruh halaman berbau getah serta daun yang hangat.',
+      'Ada pohon ara di halaman belakang studio kami. Pada bulan Agustus, buahnya matang lebih cepat daripada kemampuan kami memanennya, dan seluruh halaman berbau getah serta daun yang hangat.',
       'Kami ingin bagian hijaunya, bukan selainya. Fig leaf dan galbanum membawa bagian atas. Buahnya duduk di bawah, gelap dan tenang, sementara cedar dan lumut menjaganya agar tidak berubah manis.',
     ],
     quote: {

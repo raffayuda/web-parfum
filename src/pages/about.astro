@@ -50,7 +50,7 @@ const sources = [
     name: 'Vetiver',
     origin: 'Haiti',
     copy: 'Akar diangkat dengan tangan, dikeringkan di bawah naungan, lalu disuling dekat ladang.',
-    image: getImg('source-vetiver-img', '/src/assets/images/macro-vetiver.jpg'),
+    image: getImg('source-vetiver-img', '/images/macro-vetiver.jpg'),
     alt: 'Akar Vetiver Asli Haiti',
     aspect: '3 / 4',
   },
@@ -59,7 +59,7 @@ const sources = [
     name: 'Iris Pallida',
     origin: 'Tuscany',
     copy: 'Rizom dibiarkan beristirahat bertahun-tahun sebelum disuling. Bedaknya adalah tujuannya.',
-    image: getImg('source-iris-img', '/src/assets/images/macro-iris.jpg'),
+    image: getImg('source-iris-img', '/images/macro-iris.jpg'),
     alt: 'Rizom Iris Asli Tuscany',
     aspect: '1 / 1',
   },
@@ -68,7 +68,7 @@ const sources = [
     name: 'Wild Oud',
     origin: 'Kalimantan',
     copy: 'Kayu resin murni, dipanen etis dalam lot kecil. Tidak ada yang diencerkan dengan bahan sintetis.',
-    image: getImg('source-oud-img', '/src/assets/images/macro-oud.jpg'),
+    image: getImg('source-oud-img', '/images/macro-oud.jpg'),
     alt: 'Kayu Gaharu Alami Kalimantan',
     aspect: '3 / 4',
   },
@@ -118,8 +118,8 @@ const timeline = dbTimeline && dbTimeline.length > 0 ? dbTimeline : defaultTimel
       <div class="lg:col-span-7">
         <div data-editable-img="about-hero-img">
           <Media
-            src={getImg('about-hero-img', '/src/assets/images/atelier.jpg')}
-            alt="Ruang Peracikan dan Maserasi Atelier Omoo"
+            src={getImg('about-hero-img', '/images/atelier.jpg')}
+            alt="Ruang Peracikan Studio OMOO"
             aspect="16 / 10"
             widths={[640, 960, 1280]}
             sizes="(max-width: 1024px) 100vw, 58vw"
@@ -204,9 +204,9 @@ const timeline = dbTimeline && dbTimeline.length > 0 ? dbTimeline : defaultTimel
   </div>
   )}
 
-  {/* Atelier History & Timeline */}
+  {/* Studio History & Timeline */}
   {showAboutTimeline && (
-  <div data-section-template="about-timeline" data-section-name="Jejak Langkah Atelier">
+  <div data-section-template="about-timeline" data-section-name="Perjalanan OMOO">
   <Section>
     <div class="grid gap-12 lg:grid-cols-12">
       <div class="lg:col-span-4">

@@ -112,7 +112,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
       onClose={handleReset}
       title={
         step === 'form'
-          ? 'Pemesanan Flacon Atelier'
+          ? 'Pemesanan Parfum'
           : step === 'qris'
           ? 'Pembayaran via QRIS'
           : 'Konfirmasi Diterima'
@@ -122,7 +122,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           ? `${product.edition ? `${product.edition} — ` : ''}${product.name} (${product.volume})`
           : step === 'qris'
           ? `Pesanan #${orderResult?.orderNumber} — Total Rp ${totalAmount.toLocaleString('id-ID')}`
-          : 'Terima kasih, pesanan Anda sedang kami proses di atelier.'
+          : 'Terima kasih, pesanan Anda sedang kami proses.'
       }
       maxWidth="md"
     >
@@ -274,7 +274,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               Bukti Pembayaran Diterima!
             </h4>
             <p className="text-xs text-muted mt-1 max-w-sm mx-auto leading-relaxed">
-              Pesanan #{orderResult.orderNumber} telah kami jadwalkan untuk proses maceration & pembotolan di atelier.
+              Pesanan #{orderResult.orderNumber} telah masuk ke antrean proses dan pengemasan kami.
             </p>
           </div>
 
@@ -285,7 +285,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             </div>
             <div className="flex justify-between">
               <span className="text-muted">Status:</span>
-              <span className="text-accent font-medium">Menunggu Verifikasi Concierge</span>
+              <span className="text-accent font-medium">Menunggu Verifikasi Admin</span>
             </div>
           </div>
 

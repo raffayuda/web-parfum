@@ -4,11 +4,21 @@ import { Button } from '../ui/react/Button';
 import { Input } from '../ui/react/Input';
 import { api, API_BASE } from '../../lib/api';
 import { toast } from 'sonner';
-import { User, LogIn, UserPlus, Package, LogOut, Shield, Award, CheckCircle2 } from 'lucide-react';
+import { User, Package, LogOut, Shield, Award } from 'lucide-react';
 
 export interface CustomerAccountModalProps {
   forceOpen?: boolean;
   onClose?: () => void;
+}
+
+/** Safely read a Fetch Response body once and parse JSON if possible. */
+async function readJsonSafely(res: Response): Promise<{ data: any; rawText: string }> {
+  const rawText = await res.text();
+  try {
+    return { data: rawText ? JSON.parse(rawText) : null, rawText };
+  } catch {
+    return { data: null, rawText };
+  }
 }
 
 export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
@@ -27,11 +37,9 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
     setIsOpen(false);
     if (onClose) onClose();
   };
-  const [activeTab, setActiveTab] = useState<'login' | 'register' | 'quick-track'>('login');
 
-  // Auth state
+  const [activeTab, setActiveTab] = useState<'login' | 'register' | 'quick-track'>('login');
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [isLoadingUser, setIsLoadingUser] = useState(false);
 
   // Form states
   const [email, setEmail] = useState('');
@@ -46,7 +54,6 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
 
   // Check login state on mount & listen for global trigger
   useEffect(() => {
-    // 1. Immediately hydrate from localStorage to prevent flash of unauthenticated state
     const cachedUser = localStorage.getItem('omoo_customer_user');
     if (cachedUser) {
       try {
@@ -54,15 +61,29 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
       } catch {}
     }
 
-    // 2. Concurrently check server session
     checkUser();
 
     const handleOpenAccount = () => {
       setIsOpen(true);
     };
+    const handleAuthChanged = () => {
+      const updated = localStorage.getItem('omoo_customer_user');
+      if (updated) {
+        try {
+          setCurrentUser(JSON.parse(updated));
+        } catch {
+          setCurrentUser(null);
+        }
+      } else {
+        setCurrentUser(null);
+      }
+    };
+
     window.addEventListener('omoo:open-account-modal', handleOpenAccount);
+    window.addEventListener('omoo:auth-changed', handleAuthChanged);
     return () => {
       window.removeEventListener('omoo:open-account-modal', handleOpenAccount);
+      window.removeEventListener('omoo:auth-changed', handleAuthChanged);
     };
   }, []);
 
@@ -72,8 +93,9 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
       if (res && res.success && res.user) {
         setCurrentUser(res.user);
         localStorage.setItem('omoo_customer_user', JSON.stringify(res.user));
-      } else {
-        // If server explicitly returns no session, only keep if cached
+        if (res.user.role === 'ADMIN') {
+          localStorage.setItem('omoo_admin_session', 'active');
+        }
       }
     } catch {
       // Keep cached user if offline
@@ -94,16 +116,10 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
         body: JSON.stringify({ email: email.trim(), password }),
       });
 
-      let data: any = null;
-      try {
-        data = await res.json();
-      } catch {
-        const rawText = await res.text();
-        throw new Error(rawText || 'Format respon server tidak valid.');
-      }
+      const { data, rawText } = await readJsonSafely(res);
 
       if (!res.ok) {
-        throw new Error(data?.message || 'Email atau password tidak sesuai.');
+        throw new Error(data?.message || rawText || 'Email atau password tidak sesuai.');
       }
 
       if (data?.user) {
@@ -112,9 +128,10 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
         if (data.user.role === 'ADMIN') {
           localStorage.setItem('omoo_admin_session', 'active');
         }
+        window.dispatchEvent(new Event('omoo:auth-changed'));
         setFormSuccess(`Selamat datang kembali, ${data.user.name}!`);
         toast.success(`Selamat datang kembali, ${data.user.name}!`);
-        setTimeout(() => handleClose(), 900);
+        setTimeout(() => handleClose(), 800);
       }
     } catch (err: any) {
       setFormError(err.message || 'Gagal masuk. Periksa kembali email dan password Anda.');
@@ -143,24 +160,19 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
         }),
       });
 
-      let data: any = null;
-      try {
-        data = await res.json();
-      } catch {
-        const rawText = await res.text();
-        throw new Error(rawText || 'Gagal memproses pendaftaran akun.');
-      }
+      const { data, rawText } = await readJsonSafely(res);
 
       if (!res.ok) {
-        throw new Error(data?.message || 'Gagal mendaftar. Email mungkin sudah digunakan.');
+        throw new Error(data?.message || rawText || 'Gagal mendaftar. Email mungkin sudah digunakan.');
       }
 
       if (data?.user) {
         setCurrentUser(data.user);
         localStorage.setItem('omoo_customer_user', JSON.stringify(data.user));
+        window.dispatchEvent(new Event('omoo:auth-changed'));
         setFormSuccess(`Akun berhasil dibuat! Selamat datang di OMOO, ${data.user.name}.`);
         toast.success(`Akun berhasil dibuat! Selamat datang di OMOO, ${data.user.name}.`);
-        setTimeout(() => handleClose(), 900);
+        setTimeout(() => handleClose(), 800);
       }
     } catch (err: any) {
       setFormError(err.message || 'Gagal mendaftar akun.');
@@ -179,11 +191,12 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
     } catch {}
 
     localStorage.removeItem('omoo_customer_user');
-    localStorage.removeItem('omoo_customer_demo');
     localStorage.removeItem('omoo_admin_session');
+    localStorage.removeItem('omoo_visual_edit_mode');
     setCurrentUser(null);
     setFormSuccess(null);
     setFormError(null);
+    window.dispatchEvent(new Event('omoo:auth-changed'));
   };
 
   const handleQuickTrack = (e: React.FormEvent) => {
@@ -195,7 +208,6 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
 
   return (
     <>
-      {/* Discreet Trigger Button in Header Action Bar (only if not forced) */}
       {forceOpen === undefined && (
         <button
           type="button"
@@ -205,27 +217,24 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
         >
           <User className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">
-            {currentUser ? currentUser.name.split(' ')[0] : 'Account'}
+            {currentUser ? currentUser.name.split(' ')[0] : 'Akun'}
           </span>
         </button>
       )}
 
-      {/* Account Modal */}
       <Modal
         isOpen={isOpen}
         onClose={handleClose}
-        title={currentUser ? 'Akun Saya' : 'Atelier OMOO'}
+        title={currentUser ? 'Akun Saya' : 'Akun OMOO'}
         subtitle={
           currentUser
             ? `Masuk sebagai ${currentUser.email}`
-            : 'Masuk, daftarkan akun, atau lacak pesanan wewangian Anda.'
+            : 'Masuk, daftar akun, atau lacak status pesanan Anda.'
         }
         maxWidth="md"
       >
         {currentUser ? (
-          /* LOGGED IN VIEW */
           <div className="space-y-6">
-            {/* User Profile Card */}
             <div className="border border-line bg-surface/30 p-5 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
@@ -238,13 +247,12 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
                   </span>
                 ) : (
                   <span className="px-2.5 py-1 text-[0.62rem] uppercase tracking-[0.1em] font-medium bg-surface text-muted border border-line">
-                    Customer
+                    Member
                   </span>
                 )}
               </div>
             </div>
 
-            {/* User Action Links */}
             <div className="space-y-2">
               <a
                 href="/account/tracker"
@@ -252,7 +260,7 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
               >
                 <div className="flex items-center gap-2.5">
                   <Package className="w-4 h-4 text-accent" />
-                  <span>Lacak Pesanan Saya (Tracker)</span>
+                  <span>Lacak Pesanan Saya</span>
                 </div>
                 <span>&rarr;</span>
               </a>
@@ -263,7 +271,7 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
               >
                 <div className="flex items-center gap-2.5">
                   <Award className="w-4 h-4 text-accent" />
-                  <span>Membership Cercle Privé</span>
+                  <span>Membership Privé</span>
                 </div>
                 <span>&rarr;</span>
               </a>
@@ -275,7 +283,7 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
                 >
                   <div className="flex items-center gap-2.5">
                     <Shield className="w-4 h-4 text-accent" />
-                    <span>Portal Dashboard Admin Atelier</span>
+                    <span>Dashboard Admin OMOO</span>
                   </div>
                   <span>&rarr;</span>
                 </a>
@@ -294,9 +302,7 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
             </div>
           </div>
         ) : (
-          /* NOT LOGGED IN: TABS (Login, Register, Quick Track) */
           <div className="space-y-6">
-            {/* Tabs Selector */}
             <div className="flex border-b border-line">
               <button
                 type="button"
@@ -342,7 +348,6 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
               </button>
             </div>
 
-            {/* TAB 1: LOGIN */}
             {activeTab === 'login' && (
               <form onSubmit={handleLogin} className="space-y-4">
                 <Input
@@ -350,7 +355,7 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="customer@omoo.studio"
+                  placeholder="nama@email.com"
                   required
                 />
                 <Input
@@ -375,16 +380,9 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
                 >
                   Masuk ke Akun
                 </Button>
-
-                <div className="pt-2 text-center">
-                  <p className="text-[0.68rem] text-muted">
-                    Akun Demo: <code>customer@omoo.studio</code> / <code>customer123</code>
-                  </p>
-                </div>
               </form>
             )}
 
-            {/* TAB 2: REGISTER */}
             {activeTab === 'register' && (
               <form onSubmit={handleRegister} className="space-y-4">
                 <Input
@@ -406,7 +404,7 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="email@anda.com"
+                  placeholder="nama@email.com"
                   required
                 />
                 <Input
@@ -434,11 +432,10 @@ export const CustomerAccountModal: React.FC<CustomerAccountModalProps> = ({
               </form>
             )}
 
-            {/* TAB 3: QUICK ORDER TRACKER */}
             {activeTab === 'quick-track' && (
               <form onSubmit={handleQuickTrack} className="space-y-4">
                 <p className="text-xs text-muted leading-relaxed">
-                  Pesan lewat WhatsApp dan tidak punya akun? Masukkan nomor pesanan Anda untuk langsung melihat status peracikan dan pengiriman.
+                  Pesan lewat WhatsApp tanpa akun? Masukkan nomor pesanan Anda untuk melihat status pengemasan dan pengiriman.
                 </p>
                 <Input
                   label="Nomor Pesanan"

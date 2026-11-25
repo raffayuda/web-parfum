@@ -39,8 +39,8 @@ export const SettingsTab: React.FC = () => {
     pinterestHandle: 'omoo parfums',
     pinterestUrl: 'https://www.pinterest.com/omoo.parfums/',
     footerHeadline: 'Perfume made in small batches.\nDiracik perlahan di Jakarta, dari material pilihan.',
-    footerEmailNote: 'Kami membalas dalam dua hari kerja.',
-    footerSocialHeading: 'Catatan harian dari atelier.',
+    footerEmailNote: 'Kami membalas dalam 1-2 hari kerja.',
+    footerSocialHeading: 'Kabar terbaru dan catatan aroma OMOO.',
     copyright: '© 2026 Omoo Parfums. Jakarta, Indonesia. All rights reserved.',
   });
 
@@ -71,7 +71,7 @@ export const SettingsTab: React.FC = () => {
     try {
       const res = await api.updateSettings(form);
       if (res.success) {
-        toast.success('Pengaturan atelier, kontak, dan footer berhasil diperbarui!');
+        toast.success('Pengaturan toko, kontak, dan footer berhasil diperbarui!');
       } else {
         toast.error(res.message || 'Gagal menyimpan pengaturan');
       }
@@ -85,7 +85,7 @@ export const SettingsTab: React.FC = () => {
   if (isLoading) {
     return (
       <div className="py-16 text-center text-muted text-sm animate-pulse">
-        Memuat konfigurasi toko dan atelier OMOO...
+        Memuat konfigurasi toko OMOO...
       </div>
     );
   }
@@ -99,7 +99,7 @@ export const SettingsTab: React.FC = () => {
             PENGATURAN TOKO & IDENTITAS
           </span>
           <h2 className="font-display text-3xl font-light text-ink mt-1">
-            Atelier, Kontak & Media Sosial
+            Toko, Kontak & Media Sosial
           </h2>
           <p className="text-xs text-muted mt-1">
             Data ini ditampilkan secara otomatis pada seluruh footer halaman, kontak pesanan, dan tautan sosial media web.
@@ -128,7 +128,7 @@ export const SettingsTab: React.FC = () => {
         <div className="grid gap-5 md:grid-cols-2">
           <div>
             <label className="text-[0.65rem] uppercase font-semibold tracking-wider text-muted block mb-1.5">
-              Email Resmi Atelier
+              Email Resmi Toko
             </label>
             <Input
               value={form.email}
@@ -140,7 +140,7 @@ export const SettingsTab: React.FC = () => {
 
           <div>
             <label className="text-[0.65rem] uppercase font-semibold tracking-wider text-muted block mb-1.5">
-              Telepon Kantor Atelier
+              Telepon Resmi
             </label>
             <Input
               value={form.phone}
@@ -182,7 +182,7 @@ export const SettingsTab: React.FC = () => {
         <div className="flex items-center gap-2.5 pb-2 border-b border-line">
           <MapPin className="w-4 h-4 text-accent" />
           <h3 className="font-display text-lg font-light text-ink">
-            2. Lokasi Fisik Atelier & Jam Operasional
+            2. Lokasi Studio & Jam Operasional
           </h3>
         </div>
 
@@ -252,7 +252,7 @@ export const SettingsTab: React.FC = () => {
         <div className="flex items-center gap-2.5 pb-2 border-b border-line">
           <Share2 className="w-4 h-4 text-accent" />
           <h3 className="font-display text-lg font-light text-ink">
-            3. Akun Media Sosial Atelier
+            3. Akun Media Sosial OMOO
           </h3>
         </div>
 
@@ -367,7 +367,7 @@ export const SettingsTab: React.FC = () => {
               <Input
                 value={form.footerSocialHeading}
                 onChange={(e) => handleChange('footerSocialHeading', e.target.value)}
-                placeholder="Catatan harian dari atelier."
+                placeholder="Kabar terbaru dan catatan aroma OMOO."
               />
             </div>
           </div>
@@ -394,7 +394,7 @@ export const SettingsTab: React.FC = () => {
           icon={<Save className="w-4 h-4" />}
           className="bg-accent text-bg hover:bg-accent/90"
         >
-          Simpan Semua Pengaturan Atelier
+          Simpan Semua Pengaturan
         </Button>
       </div>
     </form>

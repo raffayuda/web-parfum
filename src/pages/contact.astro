@@ -90,20 +90,20 @@ const allFaqs = dynamicFaqs.length > 0 ? dynamicFaqs : faq;
 ---
 
 <BaseLayout
-  title="Contact"
-  description="Kunjungi atelier Omoo di Jakarta, temukan stockist di Indonesia, atau hubungi kami lewat WhatsApp dan email untuk koleksi serta pemesanan."
+  title="Kontak"
+  description="Kunjungi studio OMOO di Jakarta, atau hubungi kami lewat WhatsApp dan email untuk informasi koleksi dan pemesanan."
 >
   <PageHeader deck={headerDeck}>
     <Fragment slot="title">
       {contactHero?.title ? (
         <span>{headerTitle}</span>
       ) : (
-        <>Visit, write,<br /><span class="italic">smell.</span></>
+        <>Kunjungi, Hubungi <span class="italic">&amp; Pesan.</span></>
       )}
     </Fragment>
     <div class="mt-8 flex flex-wrap items-center gap-4">
       <p class="text-[0.62rem] font-medium uppercase tracking-[0.14em] text-muted">
-        Follow the house
+        Media Sosial
       </p>
       <SocialLinks variant="icons" whatsapp />
     </div>
@@ -127,7 +127,7 @@ const allFaqs = dynamicFaqs.length > 0 ? dynamicFaqs : faq;
           data-reveal-title
           class="max-w-[10ch] pb-1 font-display text-[clamp(2.35rem,4.4vw,4.25rem)] font-light leading-[0.98] tracking-[-0.02em]"
         >
-          The atelier
+          Studio Jakarta
         </h2>
 
         <address class="mt-7 text-[1.05rem] leading-[1.8] not-italic">
@@ -158,7 +158,7 @@ const allFaqs = dynamicFaqs.length > 0 ? dynamicFaqs : faq;
             <dd class="text-right text-[0.9rem]">
               <a
                 class="underline underline-offset-4 transition-colors hover:text-accent"
-                href={whatsappHref('Halo OMOO, saya ingin bertanya tentang atelier dan koleksi.')}
+                href={whatsappHref('Halo OMOO, saya ingin bertanya tentang koleksi dan pemesanan.')}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -170,18 +170,18 @@ const allFaqs = dynamicFaqs.length > 0 ? dynamicFaqs : faq;
 
         <div class="mt-8 flex flex-col items-start gap-4">
           <Button
-            href={whatsappHref('Halo OMOO, saya ingin bertanya tentang atelier dan koleksi.')}
+            href={whatsappHref('Halo OMOO, saya ingin bertanya tentang koleksi dan pemesanan.')}
             external
             class="w-full sm:w-auto"
           >
             <span class="inline-flex items-center gap-2">
               <Icon name="ph:whatsapp-logo" size={16} aria-hidden="true" />
-              WhatsApp the atelier
+              Chat via WhatsApp
             </span>
           </Button>
-          <ArrowLink href={`mailto:${site.email}`}>Write to us</ArrowLink>
+          <ArrowLink href={`mailto:${site.email}`}>Kirim Email</ArrowLink>
           <p class="max-w-[40ch] text-[0.75rem] leading-relaxed text-muted">
-            Janji temu dikonfirmasi lewat email atau WhatsApp. Mohon tunggu dua hari kerja.
+            Janji temu dikonfirmasi lewat email atau WhatsApp dalam 1-2 hari kerja.
           </p>
         </div>
 
@@ -196,10 +196,10 @@ const allFaqs = dynamicFaqs.length > 0 ? dynamicFaqs : faq;
           data-reveal-title
           class="max-w-[9ch] pb-1 font-display text-[clamp(2.35rem,4.4vw,4.25rem)] font-light leading-[0.98] tracking-[-0.02em]"
         >
-          Questions
+          Tanya Jawab
         </h2>
         <p class="mt-5 max-w-[32ch] text-[0.9rem] leading-[1.7] text-muted">
-          Jawaban singkat untuk hal-hal yang paling sering kami dengar.
+          Jawaban singkat untuk pertanyaan yang paling sering diajukan.
         </p>
       </div>
 

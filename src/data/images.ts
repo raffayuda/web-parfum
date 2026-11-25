@@ -40,23 +40,75 @@ export const images: Record<string, ImageMetadata> = {
   atelierDoor,
 };
 
+const assetMap: Record<string, ImageMetadata> = {
+  '/src/assets/images/bottle-vetiver.jpg': bottleVetiver,
+  '/images/bottle-vetiver.jpg': bottleVetiver,
+  '/src/assets/images/bottle-iris.jpg': bottleIris,
+  '/images/bottle-iris.jpg': bottleIris,
+  '/src/assets/images/bottle-fig.jpg': bottleFig,
+  '/images/bottle-fig.jpg': bottleFig,
+  '/src/assets/images/bottle-sel.jpg': bottleSel,
+  '/images/bottle-sel.jpg': bottleSel,
+  '/src/assets/images/bottle-oud.jpg': bottleOud,
+  '/images/bottle-oud.jpg': bottleOud,
+  '/src/assets/images/bottle-ambrette.jpg': bottleAmbrette,
+  '/images/bottle-ambrette.jpg': bottleAmbrette,
+  '/src/assets/images/macro-vetiver.jpg': macroVetiver,
+  '/images/macro-vetiver.jpg': macroVetiver,
+  '/src/assets/images/macro-iris.jpg': macroIris,
+  '/images/macro-iris.jpg': macroIris,
+  '/src/assets/images/macro-fig.jpg': macroFig,
+  '/images/macro-fig.jpg': macroFig,
+  '/src/assets/images/macro-sel.jpg': macroSel,
+  '/images/macro-sel.jpg': macroSel,
+  '/src/assets/images/macro-oud.jpg': macroOud,
+  '/images/macro-oud.jpg': macroOud,
+  '/src/assets/images/macro-ambrette.jpg': macroAmbrette,
+  '/images/macro-ambrette.jpg': macroAmbrette,
+  '/src/assets/images/atelier.jpg': atelier,
+  '/images/atelier.jpg': atelier,
+  '/src/assets/images/perfumer.jpg': perfumer,
+  '/images/perfumer.jpg': perfumer,
+  '/src/assets/images/maceration.jpg': maceration,
+  '/images/maceration.jpg': maceration,
+  '/src/assets/images/corridor.jpg': corridor,
+  '/images/corridor.jpg': corridor,
+  '/src/assets/images/discovery-set.jpg': discoverySet,
+  '/images/discovery-set.jpg': discoverySet,
+  '/src/assets/images/atelier-door.jpg': atelierDoor,
+  '/images/atelier-door.jpg': atelierDoor,
+};
+
+/** Resolve legacy /src/assets/images/... or /images/... paths to optimized Astro ImageMetadata when available. */
+export function resolveImage(src: ImageMetadata | string | undefined | null, fallback: ImageMetadata = bottleVetiver): ImageMetadata | string {
+  if (!src) return fallback;
+  if (typeof src !== 'string') return src;
+  return assetMap[src] || src.replace(/^\/src\/assets\/images\//, '/images/');
+}
+
+/** Normalize image URLs for client-side <img> elements so legacy /src/assets/images/* paths never 404. */
+export function resolvePublicImageUrl(src: string | undefined | null, fallback = '/images/bottle-vetiver.jpg'): string {
+  if (!src) return fallback;
+  return src.replace(/^\/src\/assets\/images\//, '/images/');
+}
+
 export const alts: Record<string, string> = {
-  bottleVetiver: 'Smoked glass flacon of vetiver perfume with dried roots on dark stone.',
-  bottleIris: 'Frosted flacon of pale iris perfume with an iris flower and rhizome on stone.',
-  bottleFig: 'A single green fig leaf in a glass vessel beside a pale bottle.',
-  bottleSel: 'Clear flacon of salt perfume with sea salt and driftwood on wet stone.',
-  bottleOud: 'Smoked amber flacon of oud perfume with oud wood and a dried rose.',
-  bottleAmbrette: 'Ivory flacon of ambrette perfume with seed pods and linen.',
-  macroVetiver: 'Dried vetiver grass in a pale vessel, lit from the side.',
-  macroIris: 'Close view of a pale iris petal and cut rhizome on cold stone.',
-  macroFig: 'Close view of green fig leaves in soft window light.',
-  macroSel: 'A crystal-capped flacon on wet grey stone.',
-  macroOud: 'A dark amber flacon with a dried rose on wood.',
-  macroAmbrette: 'A pale, gourd-shaped flacon on ivory linen.',
-  atelier: 'Glass vessels and green bottles on a sunlit sill in the Omoo atelier.',
-  perfumer: 'Camille Aumont, perfumer, standing at a worktable in the Omoo atelier.',
-  maceration: 'Rows of green glass bottles resting on wooden shelves in the maceration room.',
-  corridor: 'A long, dim corridor with tall windows and a single hanging light.',
-  discoverySet: 'Six small perfume vials with silver caps arranged in a green linen case.',
-  atelierDoor: 'A quiet chalk corridor with tall windows and deep green doors.',
+  bottleVetiver: 'Botol kaca gelap Vetiver Obscura dengan akar vetiver kering di atas batu hitam.',
+  bottleIris: 'Botol kaca Iris Cendre bersama bunga iris pucat dan rimpang kering.',
+  bottleFig: 'Sehelai daun ara hijau dalam wadah kaca di samping botol parfum.',
+  bottleSel: 'Botol kaca bening Sel Marin dengan kristal garam laut dan kayu apung.',
+  bottleOud: 'Botol kaca amber Oud Intime bersama kayu gaharu dan mawar kering.',
+  bottleAmbrette: 'Botol kaca pucat Ambrette 12 di atas kain linen.',
+  macroVetiver: 'Rumput dan akar vetiver kering dalam wadah pucat.',
+  macroIris: 'Detail kelopak iris pucat dan rimpang di atas batu.',
+  macroFig: 'Detail daun ara hijau segar terkena cahaya jendela.',
+  macroSel: 'Botol parfum bertutup kristal di atas batu abu-abu.',
+  macroOud: 'Botol amber gelap dengan mawar kering di atas kayu.',
+  macroAmbrette: 'Botol kaca pucat di atas linen gading.',
+  atelier: 'Wadah kaca dan botol hijau di meja peracikan studio OMOO.',
+  perfumer: 'Peracik parfum berdiri di meja kerja studio OMOO.',
+  maceration: 'Deretan botol kaca hijau di rak kayu ruang pematangan.',
+  corridor: 'Koridor tenang dengan jendela tinggi dan pintu hijau tua.',
+  discoverySet: 'Enam vial parfum 2 ml tertata dalam kotak linen hijau.',
+  atelierDoor: 'Koridor tenang dengan jendela tinggi menuju ruang konsultasi OMOO.',
 };

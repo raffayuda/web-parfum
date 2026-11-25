@@ -51,7 +51,7 @@ export const ProductOrderActions: React.FC<ProductOrderActionsProps> = ({
             Stok Habis Sementara
           </p>
           <p className="text-[0.72rem] text-muted">
-            Batch berikutnya sedang menjalani masa maserasi di atelier kami. Hubungi concierge kami untuk reservasi flacon.
+            Batch berikutnya sedang disiapkan. Hubungi kami via WhatsApp untuk reservasi atau info ketersediaan.
           </p>
           <div className="pt-2">
             <a
@@ -60,7 +60,7 @@ export const ProductOrderActions: React.FC<ProductOrderActionsProps> = ({
               rel="noopener noreferrer"
               className="text-[0.68rem] text-accent uppercase font-medium tracking-[0.1em] hover:underline"
             >
-              Hubungi Concierge via WhatsApp &rarr;
+              Hubungi via WhatsApp &rarr;
             </a>
           </div>
         </div>

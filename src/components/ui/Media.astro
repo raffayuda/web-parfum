@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import { resolveImage } from '../../data/images';
 
 interface Props {
   src: ImageMetadata | string;
@@ -19,7 +20,7 @@ interface Props {
 }
 
 const {
-  src,
+  src: rawSrc,
   alt,
   aspect = '4 / 5',
   class: className,
@@ -33,6 +34,8 @@ const {
   tiltTarget = false,
   reveal = false,
 } = Astro.props;
+
+const src = resolveImage(rawSrc);
 ---
 
 <div

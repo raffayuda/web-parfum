@@ -68,7 +68,7 @@ export const journal: JournalPost[] = [
     slug: 'inside-the-maceration-room',
     title: 'Inside the maceration room',
     deck: 'Mengapa sebuah parfum dibiarkan beristirahat sebelum dikemas.',
-    category: 'Atelier',
+    category: 'Proses',
     date: '2026-02-03',
     displayDate: 'Februari 2026',
     readingTime: '5 menit baca',
@@ -77,7 +77,7 @@ export const journal: JournalPost[] = [
     body: [
       {
         type: 'p',
-        text: 'Ruang maceration adalah bagian paling tidak dramatis di atelier. Tidak ada bunga di atas meja, tidak ada gelas kimia yang menangkap cahaya. Yang ada hanya rak, botol, termometer, dan sebagian besar waktu yang dipakai untuk menunggu.',
+        text: 'Ruang pematangan adalah bagian paling tenang di studio kami. Tidak ada bunga di atas meja, tidak ada alat yang dibuat untuk pamer. Yang ada hanya rak, botol kaca gelap, termometer, dan waktu untuk menunggu.',
       },
       {
         type: 'p',

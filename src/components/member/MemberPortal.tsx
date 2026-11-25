@@ -87,7 +87,7 @@ const MemberPortalInner: React.FC = () => {
           OMOO Cercle Privé
         </h3>
         <p className="text-xs text-muted max-w-md mx-auto leading-relaxed">
-          Lingkaran keanggotaan eksklusif bagi para penikmat wewangian lambat. Anggota terdaftar menikmati akses prioritas ke batch formula terbatas, undangan penciuman pribadi di atelier Jakarta, dan layanan concierge khusus.
+          Program keanggotaan eksklusif OMOO. Anggota terdaftar mendapatkan akses awal ke rilisan edisi terbatas, undangan sesi tester privat di Jakarta, dan pengiriman prioritas.
         </p>
       </div>
 
@@ -140,7 +140,7 @@ const MemberPortalInner: React.FC = () => {
               </li>
               <li className="flex items-center gap-2">
                 <Sparkles className="w-3.5 h-3.5 text-accent shrink-0" />
-                <span>Undangan sesi privat mencium minyak atsiri murni di atelier Jakarta Selatan.</span>
+                <span>Undangan sesi privat mencoba aroma terbaru di studio Jakarta Selatan.</span>
               </li>
               <li className="flex items-center gap-2">
                 <Sparkles className="w-3.5 h-3.5 text-accent shrink-0" />
@@ -167,10 +167,10 @@ const MemberPortalInner: React.FC = () => {
             Permohonan Keanggotaan Sedang Ditinjau
           </h4>
           <span className="inline-block px-3 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-300 text-xs font-semibold uppercase tracking-[0.1em]">
-            Status: Menunggu Validasi Atelier
+            Status: Menunggu Persetujuan
           </span>
           <p className="text-xs text-muted max-w-sm mx-auto leading-relaxed">
-            Concierge atelier kami sedang memverifikasi data pendaftaran Anda ({email || currentUser?.email}).
+            Tim kami sedang memverifikasi data pendaftaran Anda ({email || currentUser?.email}).
             Setelah disetujui oleh admin, status keanggotaan Cercle Privé Anda akan aktif secara otomatis.
           </p>
         </div>
@@ -183,7 +183,7 @@ const MemberPortalInner: React.FC = () => {
           <p className="text-xs text-muted mb-6 leading-relaxed">
             {currentUser
               ? `Anda sedang masuk sebagai ${currentUser.email}. Silakan lengkapi formulir di bawah ini.`
-              : 'Silakan isi formulir di bawah ini untuk mengajukan permohonan keanggotaan ke atelier kami.'}
+              : 'Silakan isi formulir di bawah ini untuk mengajukan permohonan keanggotaan OMOO.'}
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">

@@ -132,14 +132,14 @@ export const CertificatesTab: React.FC = () => {
             >
               {/* Decorative Corner Borders */}
               <div className="absolute top-2 left-2 text-[0.6rem] text-muted tracking-widest uppercase">
-                OMOO ATELIER VERIFICATION
+                OMOO VERIFICATION
               </div>
               <div className="absolute top-2 right-2 text-[0.6rem] text-muted tracking-widest uppercase">
                 OFFICIAL SEAL
               </div>
 
               {/* Header */}
-              <p className="font-display italic text-base text-muted">Atelier de Haute Parfumerie</p>
+              <p className="font-display italic text-base text-muted">OMOO Parfums</p>
               <h2 className="font-display text-3xl font-light text-ink uppercase tracking-[0.1em] mt-1">
                 OMOO JAKARTA
               </h2>

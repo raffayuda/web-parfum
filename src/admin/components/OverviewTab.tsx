@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../lib/api';
-import { ShoppingBag, Clock, CheckCircle2, Award, Users, AlertTriangle, ArrowRight } from 'lucide-react';
+import { ShoppingBag, Clock, CheckCircle2, Award, AlertTriangle, ArrowRight } from 'lucide-react';
 import { Button } from '../../components/ui/react/Button';
 
 export const OverviewTab: React.FC<{ onNavigate: (tab: string) => void }> = ({ onNavigate }) => {
@@ -20,17 +20,12 @@ export const OverviewTab: React.FC<{ onNavigate: (tab: string) => void }> = ({ o
     queryFn: () => api.getMembers(),
   });
 
-  const { data: pagesData } = useQuery({
-    queryKey: ['admin-pages'],
-    queryFn: () => api.getPages(),
-  });
-
   const orders = ordersData?.data || [];
   const perfumes = perfumesData?.data || [];
   const members = membersData?.data || [];
-  const pages = pagesData?.data || [];
 
   const pendingValidations = orders.filter((o: any) => o.status === 'AWAITING_VALIDATION');
+  const completedOrders = orders.filter((o: any) => o.status === 'DELIVERED' || o.status === 'SHIPPED');
   const totalRevenue = orders
     .filter((o: any) => o.status !== 'CANCELLED' && o.status !== 'PENDING_PAYMENT')
     .reduce((acc: number, curr: any) => acc + (curr.totalAmount || 0), 0);
@@ -46,10 +41,10 @@ export const OverviewTab: React.FC<{ onNavigate: (tab: string) => void }> = ({ o
             <AlertTriangle className="w-5 h-5 text-amber-700 dark:text-amber-400 shrink-0" />
             <div>
               <p className="text-sm font-medium text-ink">
-                Ada {pendingValidations.length} pesanan baru yang menunggu validasi transfer QRIS!
+                Ada {pendingValidations.length} pesanan baru yang menunggu validasi pembayaran QRIS!
               </p>
               <p className="text-xs text-muted mt-0.5">
-                Segera periksa bukti bayar agar flacon pesanan dapat segera diracik di atelier.
+                Segera periksa bukti bayar agar pesanan dapat segera dikemas dan dikirim.
               </p>
             </div>
           </div>
@@ -96,18 +91,18 @@ export const OverviewTab: React.FC<{ onNavigate: (tab: string) => void }> = ({ o
           <p className="mt-3 font-display text-2xl sm:text-3xl font-light text-ink">
             {availablePerfumesCount} <span className="text-sm font-sans text-muted">/ {perfumes.length}</span>
           </p>
-          <p className="mt-1 text-[0.68rem] text-accent">Status ketersediaan flacon</p>
+          <p className="mt-1 text-[0.68rem] text-accent">Status ketersediaan produk</p>
         </div>
 
         <div className="border border-line bg-surface/30 p-5">
           <div className="flex items-center justify-between text-muted text-xs font-medium uppercase tracking-[0.08em]">
-            <span>Halaman & Seksi CMS</span>
+            <span>Dikirim / Selesai</span>
             <CheckCircle2 className="w-4 h-4 text-ink" />
           </div>
           <p className="mt-3 font-display text-2xl sm:text-3xl font-light text-ink">
-            {pages.length} Halaman
+            {completedOrders.length}
           </p>
-          <p className="mt-1 text-[0.68rem] text-muted">Dikelola dinamis di dashboard</p>
+          <p className="mt-1 text-[0.68rem] text-muted">{members.length} pengajuan member</p>
         </div>
       </div>
 
@@ -116,23 +111,23 @@ export const OverviewTab: React.FC<{ onNavigate: (tab: string) => void }> = ({ o
         <h4 className="font-display text-xl text-ink mb-4">Aksi Cepat Manajemen</h4>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <button
-            onClick={() => onNavigate('manual-order')}
+            onClick={() => onNavigate('orders')}
             className="text-left p-4 border border-line bg-bg hover:border-ink transition-colors flex items-center justify-between group cursor-pointer"
           >
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink">Buat Order Customer WA</p>
-              <p className="text-[0.68rem] text-muted mt-1">Daftarkan pembeli via WhatsApp & bikin akun instan</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink">Validasi Pesanan</p>
+              <p className="text-[0.68rem] text-muted mt-1">Cek bukti transfer & buat pesanan manual</p>
             </div>
             <ArrowRight className="w-4 h-4 text-muted group-hover:text-ink transition-colors" />
           </button>
 
           <button
-            onClick={() => onNavigate('builder')}
+            onClick={() => onNavigate('catalog')}
             className="text-left p-4 border border-line bg-bg hover:border-ink transition-colors flex items-center justify-between group cursor-pointer"
           >
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink">Atur Layout Seksi Halaman</p>
-              <p className="text-[0.68rem] text-muted mt-1">Tambah, hapus & pilih template layout UI</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink">Kelola Katalog & Stok</p>
+              <p className="text-[0.68rem] text-muted mt-1">Ubah harga, stok, deskripsi & foto parfum</p>
             </div>
             <ArrowRight className="w-4 h-4 text-muted group-hover:text-ink transition-colors" />
           </button>

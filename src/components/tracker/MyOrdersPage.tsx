@@ -329,7 +329,7 @@ const MyOrdersInner: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-[0.62rem] uppercase font-bold tracking-[0.16em] text-accent">
-                Customer Atelier Portal
+                Portal Pelanggan OMOO
               </span>
               {currentUser && (
                 <span className="px-2 py-0.5 text-[0.58rem] font-bold uppercase tracking-wider bg-accent-fill/20 border border-accent/40 text-ink">
@@ -342,8 +342,8 @@ const MyOrdersInner: React.FC = () => {
             </h2>
             <p className="text-xs text-muted mt-1 max-w-xl leading-relaxed">
               {currentUser
-                ? `Selamat datang, ${currentUser.name}. Berikut adalah seluruh riwayat pesanan flacon dan faktur resmi wewangian Anda.`
-                : 'Pantau status peracikan, bukti bayar QRIS, rute GPS pengantaran kurir, serta unduh faktur invoice resmi wewangian Anda.'}
+                ? `Selamat datang, ${currentUser.name}. Berikut adalah riwayat pesanan dan faktur resmi Anda.`
+                : 'Pantau status pengemasan, bukti bayar QRIS, rute pengiriman, serta unduh invoice resmi Anda.'}
             </p>
           </div>
 
@@ -423,9 +423,9 @@ const MyOrdersInner: React.FC = () => {
           ) : myOrders.length === 0 ? (
             <div className="border border-line bg-surface/10 p-10 text-center space-y-3">
               <Package className="w-10 h-10 text-muted mx-auto opacity-50" />
-              <h4 className="font-display text-lg text-ink font-normal">Belum Ada Pesanan Flacon</h4>
+              <h4 className="font-display text-lg text-ink font-normal">Belum Ada Pesanan</h4>
               <p className="text-xs text-muted max-w-md mx-auto">
-                Anda belum pernah memesan wewangian di Atelier OMOO. Jelajahi enam karya extrait de parfum kami di halaman koleksi.
+                Anda belum memiliki riwayat pesanan di OMOO. Jelajahi enam varian parfum kami di halaman koleksi.
               </p>
               <div className="pt-2">
                 <a

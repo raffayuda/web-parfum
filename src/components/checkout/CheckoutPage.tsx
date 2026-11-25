@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../lib/api';
+import { resolvePublicImageUrl } from '../../data/images';
 import { Button } from '../ui/react/Button';
 import { Input, Textarea } from '../ui/react/Input';
 import { SearchableSelect } from '../ui/react/SearchableSelect';
@@ -79,7 +80,7 @@ export const CheckoutPage: React.FC = () => {
     edition: 'OM-01',
     volume: '50 ml / Extrait',
     price: 2450000,
-    bottleImage: '/src/assets/images/bottle-vetiver.jpg',
+    bottleImage: '/images/bottle-vetiver.jpg',
   });
   const [quantity, setQuantity] = useState(1);
   const [isLoadingProduct, setIsLoadingProduct] = useState(false);
@@ -164,7 +165,7 @@ export const CheckoutPage: React.FC = () => {
               edition: found.edition || 'OM-01',
               volume: found.volume || '50 ml / Extrait',
               price: Number(found.price) || 2450000,
-              bottleImage: found.bottleImage || '/src/assets/images/bottle-vetiver.jpg',
+              bottleImage: resolvePublicImageUrl(found.bottleImage),
             });
           }
         }

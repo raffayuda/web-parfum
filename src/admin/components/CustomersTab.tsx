@@ -595,7 +595,7 @@ export const CustomersTab: React.FC = () => {
             Data User & Customer
           </h2>
           <p className="text-xs text-muted mt-0.5">
-            Daftar pengguna terdaftar di Atelier OMOO, riwayat transaksi, dan tracker pesanan.
+            Daftar pengguna terdaftar di OMOO, riwayat transaksi, dan status pesanan.
           </p>
         </div>
 

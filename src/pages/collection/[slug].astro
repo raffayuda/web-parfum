@@ -56,9 +56,9 @@ const fragrance = {
   ...(staticFrag || {}),
   ...(dbFrag || {}),
   price: dbFrag ? Number(dbFrag.price) : staticFrag?.price,
-  bottle: dbFrag?.bottleImage || staticFrag?.bottle || '/src/assets/images/bottle-vetiver.jpg',
-  card: dbFrag?.bottleImage || staticFrag?.card || '/src/assets/images/bottle-vetiver.jpg',
-  macro: dbFrag?.macroImage || staticFrag?.macro || '/src/assets/images/macro-vetiver.jpg',
+  bottle: dbFrag?.bottleImage || staticFrag?.bottle || '/images/bottle-vetiver.jpg',
+  card: dbFrag?.bottleImage || staticFrag?.card || '/images/bottle-vetiver.jpg',
+  macro: dbFrag?.macroImage || staticFrag?.macro || '/images/macro-vetiver.jpg',
   notes: dbFrag?.notes ? (dbFrag.notes as any) : (staticFrag?.notes || { top: [], heart: [], base: [] }),
   material: dbFrag?.material ? (dbFrag.material as any) : (staticFrag?.material || { name: 'Raw Material', origin: 'Grasse', phrase: 'Murni dari alam' }),
   story: dbFrag?.story
