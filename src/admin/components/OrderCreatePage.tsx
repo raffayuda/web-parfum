@@ -70,7 +70,7 @@ const OrderCreateContent: React.FC = () => {
   const [customerPhone, setCustomerPhone] = useState('');
 
   // Form State: Product
-  const [perfumeSlug, setPerfumeSlug] = useState('vetiver-obscura');
+  const [perfumeSlug, setPerfumeSlug] = useState('emerald');
   const [quantity, setQuantity] = useState(1);
 
   // Form State: Shipping & Regions

@@ -23,9 +23,9 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   isOpen,
   onClose,
   product = {
-    name: 'Vetiver Obscura Extrait de Parfum',
-    volume: '50 ml',
-    price: 2450000,
+    name: 'Emerald Eau de Parfum',
+    volume: '30 ml',
+    price: 485000,
     edition: 'OM-01',
   },
 }) => {

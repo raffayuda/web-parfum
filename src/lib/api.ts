@@ -157,12 +157,20 @@ export const api = {
   resetPasswordWithOtp: (data: { email: string; otp: string; newPassword: string }) =>
     fetcher('/auth/forgot-password/reset', { method: 'POST', body: JSON.stringify(data) }),
 
-  // Direct File Upload (auto-compressed + 2 MB max)
+  // Direct File Upload (auto-compressed to WebP + 2 MB max)
   uploadFile: async (
     file: File,
     category: string = 'receipts'
   ): Promise<{ success: boolean; url: string; message?: string; compressedSize?: number }> => {
-    const processedFile = await compressImageFile(file);
+    const isReceipt = category === 'receipts';
+    const processedFile = await compressImageFile(file, {
+      allowLargeInput: !isReceipt,
+      maxDimension: isReceipt ? 1280 : 1500,
+      quality: isReceipt ? 0.78 : 0.84,
+    });
+    if (processedFile.size > 2 * 1024 * 1024) {
+      throw new Error('Ukuran gambar setelah kompresi masih melebihi 2 MB. Gunakan gambar lebih kecil.');
+    }
     const formData = new FormData();
     formData.append('file', processedFile);
     formData.append('category', category);

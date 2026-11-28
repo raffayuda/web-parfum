@@ -15,7 +15,7 @@ export const ManualOrderTab: React.FC = () => {
   const [shippingAddress, setShippingAddress] = useState('');
   const [shippingCity, setShippingCity] = useState('Jakarta Selatan');
   const [shippingPostal, setShippingPostal] = useState('12190');
-  const [selectedPerfumeSlug, setSelectedPerfumeSlug] = useState('vetiver-obscura');
+  const [selectedPerfumeSlug, setSelectedPerfumeSlug] = useState('emerald');
   const [quantity, setQuantity] = useState('1');
   const [paymentStatus, setPaymentStatus] = useState('PROCESSING');
   const [adminNotes, setAdminNotes] = useState('Pesanan dikonfirmasi via WhatsApp.');

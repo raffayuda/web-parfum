@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { QrCode, MessageSquare, ShoppingBag, Plus, Minus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { QrCode, MessageSquare, ShoppingBag, Plus, Minus, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { addToCart, openCartDrawer } from '../../lib/cart';
 
@@ -22,8 +22,27 @@ export const ProductOrderActions: React.FC<ProductOrderActionsProps> = ({
   whatsappUrl,
 }) => {
   const [qty, setQty] = useState(1);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const isAvailable = product.isAvailable !== false;
   const checkoutUrl = `/checkout?product=${encodeURIComponent(product.slug || product.id || product.name)}`;
+
+  useEffect(() => {
+    const syncAuth = () => {
+      try {
+        const cached = localStorage.getItem('omoo_customer_user');
+        setIsLoggedIn(Boolean(cached && JSON.parse(cached)?.id));
+      } catch {
+        setIsLoggedIn(false);
+      }
+    };
+    syncAuth();
+    window.addEventListener('omoo:auth-changed', syncAuth);
+    window.addEventListener('storage', syncAuth);
+    return () => {
+      window.removeEventListener('omoo:auth-changed', syncAuth);
+      window.removeEventListener('storage', syncAuth);
+    };
+  }, []);
 
   const handleAddToCart = () => {
     addToCart(
@@ -34,7 +53,7 @@ export const ProductOrderActions: React.FC<ProductOrderActionsProps> = ({
         edition: product.edition || 'OMOO',
         volume: product.volume,
         price: Number(product.price) || 0,
-        bottleImage: product.bottleImage || '/images/bottle-vetiver.jpg',
+        bottleImage: product.bottleImage || '/images/products/emerald-lifestyle.webp',
       },
       qty
     );
@@ -78,16 +97,30 @@ export const ProductOrderActions: React.FC<ProductOrderActionsProps> = ({
             </button>
           </div>
 
-          {/* Direct Checkout QRIS */}
-          <a
-            href={checkoutUrl}
-            className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 border border-line bg-surface/30 hover:border-ink hover:bg-surface text-ink text-xs uppercase tracking-[0.12em] font-medium transition-all duration-300 ease-luxe text-center"
-          >
-            <QrCode className="w-4 h-4 text-accent" />
-            <span>Beli Langsung via QRIS</span>
-          </a>
+          {/* Direct Checkout QRIS (requires login so order is saved to My Orders) */}
+          {isLoggedIn ? (
+            <a
+              href={checkoutUrl}
+              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 border border-line bg-surface/30 hover:border-ink hover:bg-surface text-ink text-xs uppercase tracking-[0.12em] font-medium transition-all duration-300 ease-luxe text-center"
+            >
+              <QrCode className="w-4 h-4 text-accent" />
+              <span>Beli Langsung via QRIS</span>
+            </a>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                toast.info('Silakan masuk atau daftar akun untuk bayar via QRIS agar riwayat pesanan tersimpan.');
+                window.dispatchEvent(new Event('omoo:open-account-modal'));
+              }}
+              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 border border-line bg-surface/30 hover:border-ink hover:bg-surface text-ink text-xs uppercase tracking-[0.12em] font-medium transition-all duration-300 ease-luxe text-center cursor-pointer"
+            >
+              <Lock className="w-4 h-4 text-accent" />
+              <span>Masuk / Daftar untuk Bayar QRIS</span>
+            </button>
+          )}
 
-          {/* Secondary Action: WhatsApp Order */}
+          {/* Secondary Action: WhatsApp Order (Always open for guest or logged-in) */}
           <a
             href={whatsappUrl}
             target="_blank"
@@ -95,7 +128,7 @@ export const ProductOrderActions: React.FC<ProductOrderActionsProps> = ({
             className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 border border-line bg-transparent hover:border-ink text-muted hover:text-ink text-xs uppercase tracking-[0.12em] font-medium transition-all duration-300 ease-luxe"
           >
             <MessageSquare className="w-4 h-4 text-emerald-700" />
-            <span>Pesan via WhatsApp Admin</span>
+            <span>{isLoggedIn ? 'Pesan via WhatsApp Admin' : 'Pesan via WhatsApp (Tanpa Akun)'}</span>
           </a>
         </>
       ) : (

@@ -11,6 +11,7 @@ import { resolvePublicImageUrl } from '../../data/images';
 import { whatsappHref } from '../../data/site';
 import { prisma } from '../../../server/src/db';
 import { ProductOrderActions } from '../../components/checkout/ProductOrderActions';
+import { ProductGalleryViewer, type ProductGalleryImageItem } from '../../components/collection/ProductGalleryViewer';
 
 export const prerender = false;
 
@@ -59,7 +60,7 @@ const fragrance = {
   price: dbFrag ? Number(dbFrag.price) : staticFrag?.price,
   bottle: resolvePublicImageUrl(dbFrag?.bottleImage || staticFrag?.bottle),
   card: resolvePublicImageUrl(dbFrag?.bottleImage || staticFrag?.card),
-  macro: resolvePublicImageUrl(dbFrag?.macroImage || staticFrag?.macro, '/images/macro-vetiver.jpg'),
+  macro: resolvePublicImageUrl(dbFrag?.macroImage || staticFrag?.macro, '/images/products/emerald-box.webp'),
   notes: dbFrag?.notes ? (dbFrag.notes as any) : (staticFrag?.notes || { top: [], heart: [], base: [] }),
   material: dbFrag?.material ? (dbFrag.material as any) : (staticFrag?.material || { name: 'Raw Material', origin: 'Grasse', phrase: 'Murni dari alam' }),
   story: dbFrag?.story
@@ -70,6 +71,28 @@ const fragrance = {
   isAvailable: dbFrag ? dbFrag.isAvailable : (staticFrag?.isAvailable ?? true),
   related: dbFrag?.relatedSlugs?.length ? dbFrag.relatedSlugs : (staticFrag?.related || []),
 };
+
+// Build multi-image gallery list from DB galleryImages + bottleImage + macroImage (deduplicated)
+const rawGallery: ProductGalleryImageItem[] = [];
+const pushUniqueImage = (url?: string | null, alt?: string, label?: string) => {
+  if (!url) return;
+  const resolved = resolvePublicImageUrl(url);
+  if (!resolved || rawGallery.some((item) => item.url === resolved)) return;
+  rawGallery.push({ url: resolved, alt: alt || fragrance.name, label });
+};
+
+pushUniqueImage(fragrance.bottle, fragrance.bottleAlt || fragrance.name, 'Foto Utama');
+if (Array.isArray(dbFrag?.galleryImages)) {
+  for (const g of dbFrag.galleryImages as any[]) {
+    if (g?.url) pushUniqueImage(g.url, g.alt || fragrance.name, g.label);
+  }
+} else if (Array.isArray(staticFrag?.galleryImages)) {
+  for (const g of staticFrag.galleryImages) {
+    pushUniqueImage(typeof g.url === 'string' ? g.url : '', g.alt || fragrance.name, g.label);
+  }
+}
+pushUniqueImage(fragrance.macro, fragrance.macroAlt || `Kemasan ${fragrance.name}`, 'Kemasan Box');
+const productGallery = rawGallery;
 const isAvailable = fragrance.isAvailable;
 const related = fragrance.related.map((slug: string) => bySlug(slug) || (fragrances.find(f => f.slug === slug))).filter(Boolean);
 const productWhatsapp = whatsappHref(
@@ -115,35 +138,21 @@ const schema = {
 
   <section class="pb-section-tight pt-8 md:pt-10">
     <div class="mx-auto grid w-full max-w-page gap-10 px-gutter md:grid-cols-12 md:gap-gutter">
-      <div class="group relative md:col-span-6">
-        <Media
-          src={fragrance.bottle}
-          alt={fragrance.bottleAlt}
-          aspect="4 / 5"
-          widths={[400, 600, 820, 1000]}
-          sizes="(max-width: 1024px) 100vw, 48vw"
-          priority
-          quality={86}
+      <div class="relative md:col-span-6 space-y-6">
+        <ProductGalleryViewer
+          client:load
+          images={productGallery}
+          productName={fragrance.name}
         />
 
-        <div class="mt-4 hidden grid-cols-2 gap-4 lg:grid">
-          <Media
-            src={fragrance.macro}
-            alt={fragrance.macroAlt}
-            aspect="1 / 1"
-            widths={[240, 360, 520]}
-            sizes="(max-width: 1024px) 50vw, 24vw"
-            reveal
-          />
-          <div class="flex flex-col justify-between border-t border-line pt-3">
-            <p class="text-[0.58rem] font-medium uppercase tracking-[0.12em] text-muted">Material</p>
-            <p class="font-display text-[clamp(1.4rem,2vw,1.9rem)] font-light italic leading-[1.05]">
-              {fragrance.material.phrase}
-            </p>
-            <p class="text-[0.65rem] uppercase tracking-[0.1em] text-muted">
-              {fragrance.material.name}, {fragrance.material.origin}
-            </p>
-          </div>
+        <div class="flex flex-col justify-between border-t border-line pt-4">
+          <p class="text-[0.58rem] font-medium uppercase tracking-[0.12em] text-muted">Material &amp; Inspirasi</p>
+          <p class="mt-2 font-display text-[clamp(1.4rem,2vw,1.9rem)] font-light italic leading-[1.15]">
+            {fragrance.material.phrase}
+          </p>
+          <p class="mt-2 text-[0.65rem] uppercase tracking-[0.1em] text-muted">
+            {fragrance.material.name}, {fragrance.material.origin}
+          </p>
         </div>
       </div>
 
@@ -167,7 +176,7 @@ const schema = {
         <div class="mt-8 flex items-baseline justify-between gap-6 border-y border-line py-4">
           <span class="font-display text-3xl">{priceLabel(fragrance.price)}</span>
           <span class="text-[0.7rem] uppercase tracking-[0.08em] text-muted">
-            {fragrance.volume} / Extrait
+            {fragrance.volume} / Eau de Parfum
           </span>
         </div>
 

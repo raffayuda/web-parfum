@@ -87,13 +87,29 @@ export function resolveImage(src: ImageMetadata | string | undefined | null, fal
 }
 
 /** Normalize image URLs for client-side <img> elements so legacy paths, filenames, or ImageMetadata never 404. */
-export function resolvePublicImageUrl(src: any, fallback = '/images/bottle-vetiver.jpg'): string {
+const legacyImageMap: Record<string, string> = {
+  '/images/bottle-vetiver.jpg': '/images/products/emerald-lifestyle.webp',
+  '/images/bottle-iris.jpg': '/images/products/youth-lumina-mood.webp',
+  '/images/bottle-fig.jpg': '/images/products/emerald-studio.webp',
+  '/images/bottle-sel.jpg': '/images/products/golden-de-brume-mood.webp',
+  '/images/bottle-oud.jpg': '/images/products/rare-mood.webp',
+  '/images/bottle-ambrette.jpg': '/images/products/golden-de-brume-studio.webp',
+  '/images/macro-vetiver.jpg': '/images/products/emerald-box.webp',
+  '/images/macro-iris.jpg': '/images/products/youth-lumina-box.webp',
+  '/images/macro-fig.jpg': '/images/products/emerald-box.webp',
+  '/images/macro-sel.jpg': '/images/products/golden-de-brume-box.webp',
+  '/images/macro-oud.jpg': '/images/products/rare-box.webp',
+  '/images/macro-ambrette.jpg': '/images/products/trio-editorial.webp',
+};
+
+export function resolvePublicImageUrl(src: any, fallback = '/images/products/emerald-lifestyle.webp'): string {
   if (!src) return fallback;
   if (typeof src === 'object' && typeof src.src === 'string') {
     return src.src;
   }
   const str = String(src).trim();
   if (!str) return fallback;
+  if (legacyImageMap[str]) return legacyImageMap[str];
   if (
     str.startsWith('data:') ||
     str.startsWith('http://') ||
@@ -104,16 +120,18 @@ export function resolvePublicImageUrl(src: any, fallback = '/images/bottle-vetiv
     return str;
   }
   if (str.startsWith('/src/assets/images/')) {
-    return str.replace(/^\/src\/assets\/images\//, '/images/');
+    const normalized = str.replace(/^\/src\/assets\/images\//, '/images/');
+    return legacyImageMap[normalized] || normalized;
   }
   if (str.startsWith('src/assets/images/')) {
-    return str.replace(/^src\/assets\/images\//, '/images/');
+    const normalized = str.replace(/^src\/assets\/images\//, '/images/');
+    return legacyImageMap[normalized] || normalized;
   }
   if (str.startsWith('images/')) {
-    return `/${str}`;
+    return legacyImageMap[`/${str}`] || `/${str}`;
   }
   if (!str.includes('/')) {
-    return `/images/${str}`;
+    return legacyImageMap[`/images/${str}`] || `/images/${str}`;
   }
   return str;
 }

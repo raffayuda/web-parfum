@@ -1,5 +1,7 @@
 import { PrismaClient, UserRole, MemberStatus, SectionTemplate, CertType } from '@prisma/client';
 import { hashPassword } from 'better-auth/crypto';
+import { DEFAULT_EDITORIAL_SLIDES } from '../src/data/carousel';
+import { GALLERY_PAGE_SLUG, DEFAULT_GALLERY_ITEMS } from '../server/src/utils/gallery';
 
 const prisma = new PrismaClient();
 
@@ -8,9 +10,8 @@ async function main() {
 
   // 1. Seed Admin User
   const adminEmail = 'admin@omoo.studio';
-  const existingAdmin = await prisma.user.findUnique({ where: { email: adminEmail } });
+  let adminUser = await prisma.user.findUnique({ where: { email: adminEmail } });
 
-  let adminUser = existingAdmin;
   if (!adminUser) {
     adminUser = await prisma.user.create({
       data: {
@@ -24,11 +25,7 @@ async function main() {
       },
     });
 
-    // Create password credential for better-auth
-    // Password hash for: 'admin123456'
-    // Better Auth uses scrypt or bcrypt; we store a standard hash or account entry
     const passwordHash = await hashPassword('admin123456');
-
     await prisma.account.create({
       data: {
         userId: adminUser.id,
@@ -37,7 +34,6 @@ async function main() {
         password: passwordHash,
       },
     });
-
     console.log('Created Admin user: admin@omoo.studio / admin123456');
   }
 
@@ -70,240 +66,213 @@ async function main() {
     console.log('Created Demo Customer: customer@omoo.studio / customer123');
   }
 
-  // 3. Seed Fragrances Catalog
+  // 3. Remove Old Placeholder Perfumes & Seed Real 4 Variants (30 ml)
+  const legacyPlaceholderSlugs = [
+    'vetiver-obscura',
+    'iris-cendre',
+    'fig-nocturne',
+    'sel-marin',
+    'oud-intime',
+    'ambrette-12',
+  ];
+
+  await prisma.fragrance.deleteMany({
+    where: { slug: { in: legacyPlaceholderSlugs } },
+  });
+
   const initialFragrances = [
     {
-      slug: 'vetiver-obscura',
+      slug: 'emerald',
       edition: 'OM-01',
-      name: 'Vetiver Obscura',
-      family: 'Woody',
-      tagline: 'Vetiver, smoke, cold citrus.',
-      description: 'Akar vetiver yang lembap, dipotong dingin oleh grapefruit dan dibiarkan mengering bersama cedar.',
-      price: 2450000,
-      volume: '50 ml',
-      concentration: 'Extrait de parfum, 20%',
+      name: 'Emerald',
+      family: 'Green',
+      tagline: 'Dewy green tea, crisp foliage, serene bergamot.',
+      description:
+        'Kesegaran daun teh hijau hangat dan embun pagi di balik jendela kayu, berpadu dengan kelembutan bergamot dan cedar bersih.',
+      price: 485000,
+      volume: '30 ml',
+      concentration: 'Eau de parfum, 20%',
       isAvailable: true,
-      stockCount: 24,
-        bottleImage: '/images/bottle-vetiver.jpg',
-        bottleAlt: 'Botol kaca berat Omoo Vetiver Obscura dengan tutup hitam',
-        macroImage: '/images/macro-vetiver.jpg',
-      macroAlt: 'Akar vetiver kering dengan latar belakang batu hitam',
+      stockCount: 25,
+      bottleImage: '/images/products/emerald-lifestyle.webp',
+      bottleAlt: 'Botol kaca bulat OMOO Emerald Eau de Parfum 30 ml di atas nampan kayu dengan teh hijau',
+      macroImage: '/images/products/emerald-box.webp',
+      macroAlt: 'Kemasan box hijau botanical OMOO Emerald 30 ml dengan pita satin',
+      galleryImages: [
+        { url: '/images/products/emerald-lifestyle.webp', alt: 'OMOO Emerald 30 ml bersama seduhan teh hijau hangat', label: 'Suasana & Botol' },
+        { url: '/images/products/emerald-studio.webp', alt: 'Foto studio close-up botol bulat tutup emas OMOO Emerald 30 ml', label: 'Detail Botol' },
+        { url: '/images/products/emerald-box.webp', alt: 'Kemasan eksklusif OMOO Emerald 30 ml', label: 'Kemasan Box' },
+        { url: '/images/products/trio-editorial.webp', alt: 'Koleksi tiga box OMOO termasuk Emerald, Rare, dan Golden de Brume', label: 'Koleksi Trio' },
+      ],
       notes: {
-        top: ['Grapefruit peel', 'Pink pepper'],
-        heart: ['Haitian vetiver', 'Orris root'],
-        base: ['Cedar', 'Ambrette', 'Incense'],
+        top: ['Bergamot', 'Green tea leaf', 'Morning dew'],
+        heart: ['White fig leaf', 'Jasmine bud', 'Neroli'],
+        base: ['White cedar', 'Soft vetiver', 'Clean musk'],
       },
       material: {
-        name: 'Vetiver',
-        origin: 'Haiti',
-        phrase: 'Akar, asap, tanah basah.',
+        name: 'Green Tea',
+        origin: 'Jawa Barat & Uji',
+        phrase: 'Daun teh basah, embun pagi, ketenangan.',
       },
       story: [
-        'Vetiver bukan kayu, melainkan akar. Ia datang bersama tanah yang masih menempel: pahit, hijau, dan sedikit berasap.',
-        'Pembukaannya terang dan singkat. Yang tersisa lebih tenang dan mineral, lebih dekat ke ruangan batu setelah hujan daripada ke cologne biasa.',
+        'Emerald lahir dari suasana pagi yang tenang: secangkir teh hijau hangat di atas meja kayu, halaman buku botani yang terbuka, dan cahaya jendela yang lembut.',
+        'Aromanya dibuka oleh kesegaran daun teh dan citrus lembut yang jernih, lalu menetap rapi di kulit sebagai wangi hijau bersih yang menenangkan sepanjang hari.',
       ],
       quote: {
-        text: 'Saya ingin vetiver yang berbau seperti ladang, bukan botol.',
-        attribution: 'Camille Aumont, perfumer',
+        text: 'Ketentraman di pagi hari yang diringkas dalam botol kaca 30 ml.',
+        attribution: 'OMOO Studio, Jakarta',
       },
       performance: {
         concentration: '20%',
         maceration: 'Enam minggu',
-        longevity: '8 sampai 10 jam',
-        sillage: 'Sejauh lengan',
+        longevity: '7 sampai 9 jam',
+        sillage: 'Jernih & menenangkan',
       },
-      relatedSlugs: ['fig-nocturne', 'oud-intime'],
+      relatedSlugs: ['golden-de-brume', 'youth-lumina'],
     },
     {
-      slug: 'iris-cendre',
+      slug: 'golden-de-brume',
       edition: 'OM-02',
-      name: 'Iris Cendre',
-      family: 'Floral',
-      tagline: 'Iris, cold powder, suede.',
-      description: 'Akar iris pucat, violet leaf, dan sentuhan suede yang menempel hangat di kulit.',
-      price: 2550000,
-      volume: '50 ml',
-      concentration: 'Extrait de parfum, 20%',
+      name: 'Golden de Brume',
+      family: 'Oriental',
+      tagline: 'Sunlit amber, warm desert breeze, velvet musk.',
+      description:
+        'Kehangatan sinar matahari senja di balik bukit pasir keemasan, diracik dengan sentuhan amber manis, saffron halus, dan beludru kayu cendana.',
+      price: 520000,
+      volume: '30 ml',
+      concentration: 'Eau de parfum, 20%',
       isAvailable: true,
-      stockCount: 18,
-      bottleImage: '/images/bottle-iris.jpg',
-      bottleAlt: 'Botol kaca Omoo Iris Cendre',
-      macroImage: '/images/macro-iris.jpg',
-      macroAlt: 'Rimpang iris pucat yang mengering',
+      stockCount: 20,
+      bottleImage: '/images/products/golden-de-brume-mood.webp',
+      bottleAlt: 'Botol OMOO Golden de Brume 30 ml di atas kain beludru marun dengan sorotan cahaya emas',
+      macroImage: '/images/products/golden-de-brume-box.webp',
+      macroAlt: 'Kemasan box OMOO Golden de Brume 30 ml di atas hamparan pasir senja',
+      galleryImages: [
+        { url: '/images/products/golden-de-brume-mood.webp', alt: 'OMOO Golden de Brume 30 ml di atas kain beludru marun bercahaya emas', label: 'Edisi Beludru' },
+        { url: '/images/products/golden-de-brume-studio.webp', alt: 'Foto studio close-up botol OMOO Golden de Brume 30 ml', label: 'Detail Botol' },
+        { url: '/images/products/golden-de-brume-box.webp', alt: 'Kemasan box OMOO Golden de Brume 30 ml di bukit pasir senja', label: 'Kemasan Box' },
+      ],
       notes: {
-        top: ['Violet leaf', 'Angelica root'],
-        heart: ['Tuscan orris butter', 'Carrot seed'],
-        base: ['White suede', 'Cedar', 'Clean musk'],
+        top: ['Cardamom', 'Saffron thread', 'Mandarin zest'],
+        heart: ['Golden amber', 'Toasted Tonka', 'Damask rose'],
+        base: ['Sandalwood', 'Benzoin resin', 'Warm vanilla'],
       },
       material: {
-        name: 'Iris Pallida',
-        origin: 'Tuscany',
-        phrase: 'Bedak dingin, suede, perak.',
+        name: 'Golden Amber',
+        origin: 'Oman & Nusantara',
+        phrase: 'Kabut emas, resin hangat, senja gurun.',
       },
       story: [
-        'Iris adalah aroma waktu. Rimpangnya harus dikeringkan tiga tahun sebelum mentega wangi bisa diekstraksi.',
-        'Hasilnya adalah bedak paling halus: bukan aroma manis toko kosmetik, melainkan debu marmer yang sejuk.',
+        'Golden de Brume menangkap momen keemasan menjelang petang—hangat, memikat, namun tetap lembut memeluk kulit seperti kain beludru.',
+        'Perpaduan resin amber, rempah cardamom, dan sandalwood lembut meninggalkan jejak elegan yang berkelas dari sore hingga larut malam.',
       ],
       quote: {
-        text: 'Iris adalah parfum tanpa gender paling tenang di dunia.',
-        attribution: 'Studio Note, 2021',
+        text: 'Seperti kabut keemasan yang bertahan hangat jauh setelah matahari tenggelam.',
+        attribution: 'OMOO Studio, Jakarta',
       },
       performance: {
         concentration: '20%',
         maceration: 'Delapan minggu',
-        longevity: '7 sampai 9 jam',
-        sillage: 'Intimate to moderate',
+        longevity: '8 sampai 11 jam',
+        sillage: 'Hangat & memeluk',
       },
-      relatedSlugs: ['vetiver-obscura', 'ambrette-12'],
+      relatedSlugs: ['rare', 'emerald'],
     },
     {
-      slug: 'fig-nocturne',
+      slug: 'rare',
       edition: 'OM-03',
-      name: 'Fig Nocturne',
-      family: 'Green',
-      tagline: 'Fig leaf, milky sap, bitter bark.',
-      description: 'Daun ara gelap yang dihancurkan di malam hari. Getah putih yang pahit dan kayu lembap.',
-      price: 2350000,
-      volume: '50 ml',
-      concentration: 'Extrait de parfum, 20%',
+      name: 'Rare',
+      family: 'Citrus',
+      tagline: 'Bitter orange blossom, molten honey, dark woods.',
+      description:
+        'Karakter berani dalam flacon hitam berlabel emas: kesegaran jeruk matang dan bunga neroli yang diselimuti madu hangat dan kayu gelap.',
+      price: 545000,
+      volume: '30 ml',
+      concentration: 'Eau de parfum, 20%',
       isAvailable: true,
-      stockCount: 15,
-      bottleImage: '/images/bottle-fig.jpg',
-      bottleAlt: 'Botol kaca Omoo Fig Nocturne',
-      macroImage: '/images/macro-fig.jpg',
-      macroAlt: 'Daun ara segar dengan tetesan getah putih',
+      stockCount: 18,
+      bottleImage: '/images/products/rare-mood.webp',
+      bottleAlt: 'Botol hitam label emas OMOO Rare 30 ml bersama jeruk segar, bunga putih, dan madu',
+      macroImage: '/images/products/rare-box.webp',
+      macroAlt: 'Kemasan box marmer hitam berasap OMOO Rare 30 ml',
+      galleryImages: [
+        { url: '/images/products/rare-mood.webp', alt: 'Botol OMOO Rare 30 ml bersama jeruk, bunga neroli, dan sirup madu keemasan', label: 'Citrus & Madu' },
+        { url: '/images/products/rare-stage.webp', alt: 'Botol hitam OMOO Rare 30 ml di atas panggung kabut dramatis', label: 'Edisi Malam' },
+        { url: '/images/products/rare-box.webp', alt: 'Kemasan box marmer hitam OMOO Rare 30 ml', label: 'Kemasan Box' },
+      ],
       notes: {
-        top: ['Crushed fig leaf', 'Cardamom'],
-        heart: ['Milky fig sap', 'Black tea'],
-        base: ['Fig bark', 'Iso E Super', 'Dry amber'],
+        top: ['Bitter orange', 'Blood mandarin', 'Citrus peel'],
+        heart: ['Orange blossom', 'Wild honey', 'Spiced jasmine'],
+        base: ['Smoked oud', 'Patchouli', 'Dark amber'],
       },
       material: {
-        name: 'Fig Leaf',
-        origin: 'Provence',
-        phrase: 'Daun patah, getah susu, malam basah.',
+        name: 'Neroli & Honey',
+        origin: 'Seville & Aceh',
+        phrase: 'Jeruk pahit, tetes madu, kayu hitam.',
       },
       story: [
-        'Bukan buah ara manis, melainkan aroma tajam saat daunnya diremas dalam genggaman tangan di udara malam.',
-        'Ada kesejukan hijau yang bergeser perlahan menjadi kehangatan kayu kering.',
+        'Rare mematahkan anggapan bahwa aroma citrus selalu ringan. Kami mempertemukan perasan jeruk segar dan bunga orange blossom dengan madu liar serta kayu gelap yang intens.',
+        'Hasilnya adalah aroma berlapis emas yang tegas, sensual, dan sulit dilupakan di ruangan mana pun Anda melangkah.',
       ],
+      quote: {
+        text: 'Kontras antara kesegaran jeruk dan kedalaman kayu gelap berbalut madu.',
+        attribution: 'OMOO Studio, Jakarta',
+      },
       performance: {
         concentration: '20%',
-        maceration: 'Lima minggu',
-        longevity: '8 jam',
-        sillage: 'Moderate',
+        maceration: 'Delapan minggu',
+        longevity: '9 sampai 12 jam',
+        sillage: 'Berani & berkarakter',
       },
-      relatedSlugs: ['sel-marin', 'vetiver-obscura'],
+      relatedSlugs: ['golden-de-brume', 'youth-lumina'],
     },
     {
-      slug: 'sel-marin',
+      slug: 'youth-lumina',
       edition: 'OM-04',
-      name: 'Sel Marin',
-      family: 'Fresh',
-      tagline: 'Sea salt, seaweed, dry driftwood.',
-      description: 'Garam laut kasar di atas batu karang, alga kering, dan kayu apung yang dijemur matahari pesisir.',
-      price: 2300000,
-      volume: '50 ml',
-      concentration: 'Extrait de parfum, 20%',
+      name: 'Youth & Lumina',
+      family: 'Floral',
+      tagline: 'Pink peony mist, velvet peach, luminous musk.',
+      description:
+        'Pancaran energi muda yang ceria dan berkilau: perpaduan kelopak mawar merah muda, buah persik lembut, dan vanilla praline yang ringan di kulit.',
+      price: 495000,
+      volume: '30 ml',
+      concentration: 'Eau de parfum, 20%',
       isAvailable: true,
-      stockCount: 30,
-      bottleImage: '/images/bottle-sel.jpg',
-      bottleAlt: 'Botol kaca Omoo Sel Marin',
-      macroImage: '/images/macro-sel.jpg',
-      macroAlt: 'Kristal garam laut kasar',
+      stockCount: 22,
+      bottleImage: '/images/products/youth-lumina-mood.webp',
+      bottleAlt: 'Botol OMOO Youth & Lumina 30 ml dengan kepulan kabut merah muda artistik',
+      macroImage: '/images/products/youth-lumina-box.webp',
+      macroAlt: 'Kemasan box pastel artistik OMOO Youth & Lumina 30 ml',
+      galleryImages: [
+        { url: '/images/products/youth-lumina-mood.webp', alt: 'OMOO Youth & Lumina 30 ml dengan kepulan kabut floral merah muda', label: 'Luminous Mist' },
+        { url: '/images/products/youth-lumina-studio.webp', alt: 'Foto studio close-up botol OMOO Youth & Lumina 30 ml', label: 'Detail Botol' },
+        { url: '/images/products/youth-lumina-box.webp', alt: 'Kemasan box OMOO Youth & Lumina 30 ml', label: 'Kemasan Box' },
+      ],
       notes: {
-        top: ['Marine salt', 'Bergamot peel'],
-        heart: ['Kelp absolute', 'Sage'],
-        base: ['Driftwood', 'Ambroxan', 'White cedar'],
+        top: ['Pink pepper', 'White peach', 'Lychee'],
+        heart: ['Pink peony', 'Damask rose', 'Magnolia'],
+        base: ['Soft praline', 'White musk', 'Cashmere wood'],
       },
       material: {
-        name: 'Sea Kelp',
-        origin: 'Brittany',
-        phrase: 'Garam, ombak dingin, kayu lapuk.',
+        name: 'Pink Peony',
+        origin: 'Grasse',
+        phrase: 'Kelopak mawar muda, praline lembut, kilau musk.',
       },
       story: [
-        'Aroma udara laut yang sesungguhnya: mineral, bersih, asin, dengan kedalaman yang tak bertepi.',
+        'Youth & Lumina merayakan sisi yang cerah, ekspresif, dan penuh daya hidup—dituang dalam botol kaca bening bermahkota emas.',
+        'Kelopak peony merah muda dan buah lychee berpadu manis halus di atas musk lembut, cocok dipakai sehari-hari maupun momen spesial.',
       ],
+      quote: {
+        text: 'Aroma floral modern yang bercahaya tanpa pernah terasa berlebihan.',
+        attribution: 'OMOO Studio, Jakarta',
+      },
       performance: {
         concentration: '20%',
         maceration: 'Enam minggu',
-        longevity: '7 sampai 8 jam',
-        sillage: 'Moderate',
+        longevity: '7 sampai 9 jam',
+        sillage: 'Memikat & lembut',
       },
-      relatedSlugs: ['fig-nocturne', 'ambrette-12'],
-    },
-    {
-      slug: 'oud-intime',
-      edition: 'OM-05',
-      name: 'Oud Intime',
-      family: 'Oriental',
-      tagline: 'Wild agarwood, dark honey, leather.',
-      description: 'Gaharu liar dari Kalimantan Timur, disuling lambat dengan sentuhan madu hutan dan kulit tua.',
-      price: 2850000,
-      volume: '50 ml',
-      concentration: 'Extrait de parfum, 22%',
-      isAvailable: true,
-      stockCount: 10,
-      bottleImage: '/images/bottle-oud.jpg',
-      bottleAlt: 'Botol kaca Omoo Oud Intime',
-      macroImage: '/images/macro-oud.jpg',
-      macroAlt: 'Serpihan kayu gaharu resin gelap',
-      notes: {
-        top: ['Wild honey', 'Nutmeg'],
-        heart: ['Assam agarwood', 'Turkish rose'],
-        base: ['Birch tar leather', 'Vanilla bean', 'Benzoin'],
-      },
-      material: {
-        name: 'Agarwood (Gaharu)',
-        origin: 'East Kalimantan',
-        phrase: 'Resin tua, asap sakral, kehangatan gelap.',
-      },
-      story: [
-        'Gaharu liar yang dipanen secara lestari. Bukan oud sintetis yang menusuk, tetapi resonansi kayu yang mendalam dan intim di atas kulit.',
-      ],
-      performance: {
-        concentration: '22%',
-        maceration: 'Sepuluh minggu',
-        longevity: '12+ jam',
-        sillage: 'Strong & lingering',
-      },
-      relatedSlugs: ['vetiver-obscura', 'iris-cendre'],
-    },
-    {
-      slug: 'ambrette-12',
-      edition: 'OM-06',
-      name: 'Ambrette 12',
-      family: 'Musk',
-      tagline: 'Botanical musk, pear skin, warm linen.',
-      description: 'Musk nabati dari biji ambrette, kulit pir dingin, dan tekstur linen yang dijemur angin pagi.',
-      price: 2650000,
-      volume: '50 ml',
-      concentration: 'Extrait de parfum, 20%',
-      isAvailable: false, // Intentionally Unavailable to test & demonstrate out of stock badge
-      stockCount: 0,
-      bottleImage: '/images/bottle-ambrette.jpg',
-      bottleAlt: 'Botol kaca Omoo Ambrette 12',
-      macroImage: '/images/macro-ambrette.jpg',
-      macroAlt: 'Biji ambrette botani',
-      notes: {
-        top: ['Pear skin', 'Ambrette seed'],
-        heart: ['Iris concrete', 'Cashmeran'],
-        base: ['Iso-musk', 'Sandalwood', 'Clean amber'],
-      },
-      material: {
-        name: 'Ambrette Seed',
-        origin: 'Martinique',
-        phrase: 'Musk nabati, kelembutan intim, kulit kedua.',
-      },
-      story: [
-        'Satu-satunya musk alami yang berasal dari tanaman. Ambrette 12 adalah edisi terbatas yang saat ini sedang menunggu batch panen berikutnya.',
-      ],
-      performance: {
-        concentration: '20%',
-        maceration: 'Tujuh minggu',
-        longevity: '8 jam',
-        sillage: 'Skin scent',
-      },
-      relatedSlugs: ['iris-cendre', 'sel-marin'],
+      relatedSlugs: ['emerald', 'rare'],
     },
   ];
 
@@ -314,23 +283,27 @@ async function main() {
       create: frag,
     });
   }
-  console.log(`Seeded ${initialFragrances.length} fragrances into catalogue.`);
+  console.log(`Seeded ${initialFragrances.length} real OMOO fragrances into catalogue.`);
 
-  // 4. Seed Halal & BPOM Certifications
+  // 4. Clean old cert links & Seed Halal & BPOM Certifications
+  await prisma.certification.deleteMany({
+    where: { verifyCode: { in: ['BPOM-OM01-VETIVER', 'BPOM-OM02-IRIS'] } },
+  });
+
   const certs = [
     {
       certType: CertType.BPOM,
       certNumber: 'NA18230601234',
-      productSlug: 'vetiver-obscura',
-      productName: 'OMOO Vetiver Obscura Extrait de Parfum 50ml',
+      productSlug: 'emerald',
+      productName: 'OMOO Emerald Eau de Parfum 30ml',
       authority: 'Badan Pengawas Obat dan Makanan Republik Indonesia (BPOM RI)',
       issueDate: new Date('2024-03-12'),
       validUntil: new Date('2029-03-12'),
-      verifyCode: 'BPOM-OM01-VETIVER',
+      verifyCode: 'BPOM-OM01-EMERALD',
       status: 'VERIFIED',
       details: {
         laboratory: 'Balai Uji Mutu Kosmetika Nasional',
-        batchTested: 'OM-VO-2024-B1',
+        batchTested: 'OM-EM-2026-B1',
         dermatologicallyTested: true,
         heavyMetalFree: true,
       },
@@ -338,16 +311,16 @@ async function main() {
     {
       certType: CertType.BPOM,
       certNumber: 'NA18230601235',
-      productSlug: 'iris-cendre',
-      productName: 'OMOO Iris Cendre Extrait de Parfum 50ml',
+      productSlug: 'golden-de-brume',
+      productName: 'OMOO Golden de Brume Eau de Parfum 30ml',
       authority: 'Badan Pengawas Obat dan Makanan Republik Indonesia (BPOM RI)',
       issueDate: new Date('2024-04-18'),
       validUntil: new Date('2029-04-18'),
-      verifyCode: 'BPOM-OM02-IRIS',
+      verifyCode: 'BPOM-OM02-GOLDEN',
       status: 'VERIFIED',
       details: {
         laboratory: 'Balai Uji Mutu Kosmetika Nasional',
-        batchTested: 'OM-IC-2024-B1',
+        batchTested: 'OM-GD-2026-B1',
         dermatologicallyTested: true,
         heavyMetalFree: true,
       },
@@ -355,8 +328,8 @@ async function main() {
     {
       certType: CertType.HALAL,
       certNumber: 'ID31110001234560124',
-      productSlug: 'vetiver-obscura',
-      productName: 'OMOO Studio Fragrance Formulations (Seluruh Varian)',
+      productSlug: 'emerald',
+      productName: 'OMOO Studio Fragrance Formulations (Seluruh Varian 30ml)',
       authority: 'Badan Penyelenggara Jaminan Produk Halal (BPJPH) & MUI',
       issueDate: new Date('2024-01-20'),
       validUntil: new Date('2028-01-20'),
@@ -384,7 +357,7 @@ async function main() {
     {
       slug: 'home',
       title: 'Perfume, made slowly',
-      description: 'Omoo adalah rumah parfum kecil di Jakarta. Enam komposisi extrait de parfum, diracik dari material pilihan, dibuat perlahan.',
+      description: 'Omoo adalah rumah parfum kecil di Jakarta. Empat komposisi eau de parfum 30 ml, diracik dari material pilihan.',
       sections: [
         {
           name: 'Hero Editorial',
@@ -392,77 +365,91 @@ async function main() {
           order: 1,
           eyebrow: 'Parfum Independen, Jakarta',
           title: 'Wear what cannot be seen.',
-          subtitle: 'Enam komposisi dengan bahan pilihan, diracik dalam batch kecil di Jakarta. Tahan lama di kulit.',
+          subtitle: 'Empat komposisi khas OMOO dalam kemasan 30 ml, diracik dalam batch kecil di Jakarta. Tahan lama di kulit.',
           contentData: {
             ctaText: 'Explore Collection',
             ctaLink: '/collection',
-            secondaryText: 'Tentang OMOO',
-            secondaryLink: '/about',
+            secondaryText: 'Find your scent',
+            secondaryLink: '/find',
+          },
+        },
+        {
+          name: 'Atelier Lookbook Carousel',
+          template: SectionTemplate.EDITORIAL_CAROUSEL,
+          order: 2,
+          eyebrow: 'Atelier Lookbook • Edisi 30 ml',
+          title: 'Empat karakter. Kemasan baru.',
+          subtitle: 'Geser untuk melihat detail botol, box eksklusif, dan suasana tiap komposisi.',
+          contentData: {
+            autoplayMs: 6500,
+            slides: DEFAULT_EDITORIAL_SLIDES as any,
           },
         },
         {
           name: 'Fragrance Grid Showcase',
           template: SectionTemplate.FRAGRANCE_GRID,
-          order: 2,
-          eyebrow: 'Koleksi',
-          title: 'Enam Komposisi',
-          subtitle: 'Extrait de parfum konsentrasi 20% ke atas. Tersedia dalam botol 50 ml bernomor seri.',
+          order: 3,
+          eyebrow: 'Koleksi 30 ml',
+          title: 'Satu karakter, satu komposisi.',
+          subtitle: 'Lihat semua parfum',
           contentData: {
             limit: 6,
             showFilters: true,
+            footerQuote: 'Koleksi kami dijaga tetap fokus agar setiap batch dapat dikontrol langsung kualitas aromanya.',
           },
         },
         {
           name: 'Material Story (Asal Bahan)',
           template: SectionTemplate.MATERIAL_STORY,
-          order: 3,
+          order: 4,
           eyebrow: 'Bahan Baku',
-          title: 'One material at a time.',
-          subtitle: 'Kami memilih bahan utama sebelum merancang formula. Dari akar vetiver Haiti hingga gaharu liar Kalimantan.',
+          title: 'Materials, satu per satu.',
+          subtitle: 'Setiap komposisi dimulai dari bahan utama terpilih — dari daun teh hijau hingga amber hangat dan jeruk pahit.',
           contentData: {
             materials: [
-              { name: 'Vetiver', origin: 'Haiti', quote: 'Akar, asap, dan tanah basah setelah hujan.' },
-              { name: 'Iris Pallida', origin: 'Tuscany', quote: 'Rimpang beristirahat tiga tahun sebelum disuling lambat.' },
-              { name: 'Wild Oud', origin: 'Kalimantan', quote: 'Kayu resin murni, dipanen etis dalam lot kecil.' },
+              { name: 'Green Tea', origin: 'Jawa Barat & Uji', quote: 'Daun teh basah, embun pagi, ketenangan.' },
+              { name: 'Golden Amber', origin: 'Oman & Nusantara', quote: 'Kabut emas, resin hangat, senja gurun.' },
+              { name: 'Neroli & Honey', origin: 'Seville & Aceh', quote: 'Jeruk pahit, tetes madu, kayu hitam.' },
+              { name: 'Pink Peony', origin: 'Grasse', quote: 'Kelopak mawar muda, praline lembut, kilau musk.' },
             ],
           },
         },
         {
           name: 'Proses Peracikan',
           template: SectionTemplate.PROCESS_STEPS,
-          order: 4,
+          order: 5,
           eyebrow: 'Proses',
           title: 'Diracik perlahan.',
           subtitle: 'Tidak terburu-buru mengejar jadwal pasar. Formula matang menentukan kapan ia siap dikemas.',
           contentData: {
             steps: [
               { step: '01', title: 'Peracikan', desc: 'Satu bahan utama memimpin. Catatan lain ditulis mengelilinginya tanpa menutupinya.' },
-              { step: '02', title: 'Pematangan', desc: 'Konsentrat beristirahat dalam kaca gelap selama 6 hingga 10 minggu hingga aromanya menyatu halus.' },
-              { step: '03', title: 'Pembotolan', desc: 'Setiap botol diisi, disegel, dan diberi nomor seri secara manual di studio Jakarta.' },
+              { step: '02', title: 'Pematangan', desc: 'Konsentrat beristirahat dalam kaca gelap selama 6 hingga 8 minggu hingga aromanya menyatu halus.' },
+              { step: '03', title: 'Pembotolan', desc: 'Setiap botol 30 ml diisi, disegel, dan dimasukkan ke dalam kotak eksklusif OMOO.' },
             ],
           },
         },
         {
           name: 'Halal & BPOM Authenticity Seal',
           template: SectionTemplate.HALAL_BPOM_BADGE,
-          order: 5,
+          order: 6,
           eyebrow: 'Legality & Trust',
           title: 'Sertifikasi Resmi BPOM & Halal',
           subtitle: 'Ketenangan jiwa dalam setiap semprotan. Seluruh formula OMOO telah teruji di laboratorium independen, terdaftar resmi di BPOM RI, dan bersertifikat Halal Indonesia.',
           contentData: {
             showQrScanner: true,
-            featuredCode: 'BPOM-OM01-VETIVER',
+            featuredCode: 'BPOM-OM01-EMERALD',
           },
         },
         {
           name: 'Discovery Set CTA',
           template: SectionTemplate.DISCOVERY_BANNER,
-          order: 6,
+          order: 7,
           eyebrow: 'Sample the House',
-          title: 'Discovery Set (6 x 2 ml)',
-          subtitle: 'Kenali seluruh keenam wewangian di kulit Anda sebelum memilih satu flacon penuh. Nilai set dapat digunakan sebagai voucher potongan untuk botol 50 ml berikutnya.',
+          title: 'Discovery Set (4 x 2 ml)',
+          subtitle: 'Kenali seluruh keempat varian OMOO di kulit Anda sebelum memilih flacon 30 ml penuh.',
           contentData: {
-            price: 450000,
+            price: 195000,
             ctaText: 'Pesan Discovery Set',
             ctaLink: '/collection#discovery-set',
           },
@@ -470,7 +457,7 @@ async function main() {
         {
           name: 'Frequently Asked Questions',
           template: SectionTemplate.FAQ_ACCORDION,
-          order: 7,
+          order: 8,
           eyebrow: 'Inquiries',
           title: 'Frequently Asked Questions',
           subtitle: 'Jawaban atas pertanyaan seputar formulasi, perawatan botol, dan pemesanan.',
@@ -478,7 +465,50 @@ async function main() {
             faqs: [
               { q: 'Apakah parfum OMOO unisex?', a: 'Ya, kami tidak mengotakkan wewangian berdasarkan gender. Material alamilah yang berbicara.' },
               { q: 'Bagaimana cara terbaik menyimpan flacon?', a: 'Simpan berdiri tegak di tempat yang sejuk dan terlindung dari sinar matahari langsung.' },
-              { q: 'Bagaimana cara konfirmasi pembayaran QRIS?', a: 'Setelah transfer berhasil, unggah bukti bayar di halaman web atau klik konfirmasi via WhatsApp kami.' },
+              { q: 'Bagaimana cara konfirmasi pembayaran QRIS?', a: 'Setelah transfer berhasil, unggah bukti bayar di halaman web atau konfirmasi via WhatsApp admin kami.' },
+            ],
+          },
+        },
+      ],
+    },
+    {
+      slug: GALLERY_PAGE_SLUG,
+      title: 'Galeri & Dokumentasi OMOO',
+      description: 'Daftar item dokumentasi dan galeri website OMOO.',
+      sections: [
+        {
+          name: 'Gallery Items Store',
+          template: SectionTemplate.RICH_TEXT_MEDIA,
+          order: 0,
+          contentData: { items: DEFAULT_GALLERY_ITEMS as any },
+        },
+      ],
+    },
+    {
+      slug: 'about',
+      title: 'About Us — OMOO',
+      description: 'Mengenal OMOO: rumah parfum independen baru di Jakarta yang meracik empat komposisi 30 ml dalam batch kecil.',
+      sections: [
+        {
+          name: 'About Studio Story',
+          template: SectionTemplate.HERO_SPLIT,
+          order: 1,
+          eyebrow: 'Bab Pertama OMOO — Jakarta',
+          title: 'Lahir untuk aroma yang jujur.',
+          subtitle: 'Sebagai rumah parfum baru, kami memilih melangkah perlahan dengan empat komposisi 30 ml yang matang.',
+          contentData: {
+            elements: {
+              'about-title': 'Lahir untuk aroma yang jujur.',
+              'about-deck': 'OMOO adalah rumah parfum independen yang memulai bab pertamanya dari Jakarta. Kami meracik empat komposisi 30 ml dalam batch kecil dengan ketelitian dan karakter yang jujur.',
+            },
+            images: {
+              'about-hero-img': '/images/products/trio-editorial.webp',
+            },
+            timeline: [
+              { id: 'pillar-01', year: '01', copy: 'Formulasi jujur dalam batch kecil — setiap varian OMOO lahir dari keseimbangan aroma yang teruji langsung, bukan mengejar tren sesaat.' },
+              { id: 'pillar-02', year: '02', copy: 'Pematangan bertahap (maceration) dalam botol kaca gelap agar kesegaran pembuka dan kehangatan dasar menyatu halus di kulit.' },
+              { id: 'pillar-03', year: '03', copy: 'Kemasan 30 ml yang ringkas, elegan, dan siap dipakai setiap hari maupun dibawa bepergian tanpa kehilangan kesan mewah.' },
+              { id: 'pillar-04', year: '04', copy: 'Komitmen kualitas & transparansi — dikerjakan dengan standar mutu ketat, bersertifikat resmi BPOM dan Halal Indonesia.' },
             ],
           },
         },
@@ -487,32 +517,18 @@ async function main() {
     {
       slug: 'maison',
       title: 'Maison Omoo',
-      description: 'Rumah parfum independen yang berakar di Jakarta, didirikan dengan kecintaan mendalam pada bahan mentah botanikal murni.',
+      description: 'Rumah parfum independen yang lahir di Jakarta, berfokus pada empat komposisi 30 ml dengan kualitas terjaga.',
       sections: [
         {
           name: 'Maison Hero Split',
           template: SectionTemplate.HERO_SPLIT,
           order: 1,
           eyebrow: 'About the House',
-          title: 'A house built around one material at a time.',
-          subtitle: 'Didirikan di Jakarta Selatan pada tahun 2019, Omoo adalah eksplorasi tanpa kompromi terhadap esensi material mentah wewangian.',
+          title: 'Lahir untuk aroma yang jujur.',
+          subtitle: 'OMOO memulai perjalanannya dari studio peracikan di Jakarta, fokus pada empat komposisi Eau de Parfum 30 ml.',
           contentData: {
-            imageUrl: '/images/atelier.jpg',
-            imageAlt: 'Studio OMOO di Jakarta',
-          },
-        },
-        {
-          name: 'Origins & Philosophy',
-          template: SectionTemplate.RICH_TEXT_MEDIA,
-          order: 2,
-          eyebrow: 'Philosophy',
-          title: 'Slowness as an act of resistance.',
-          subtitle: 'Dalam dunia yang menuntut kecepatan instan, kami memilih waktu. Enam minggu maserasi adalah standar minimum kami.',
-          contentData: {
-            paragraphs: [
-              'Kami tidak merilis wewangian berdasarkan tren musim. Setiap formula lahir dari dialog intim dengan para penanam dan penyuling bahan baku di berbagai penjuru dunia.',
-              'Dari distrik Grasse hingga pedalaman hutan Kalimantan, kami mengumpulkan esensi murni terbaik.',
-            ],
+            imageUrl: '/images/products/trio-editorial.webp',
+            imageAlt: 'Koleksi Perdana OMOO 30 ml',
           },
         },
       ],
@@ -566,7 +582,6 @@ async function main() {
       },
     });
 
-    // Delete existing sections to recreate cleanly in seed
     await prisma.pageSection.deleteMany({ where: { pageId: page.id } });
 
     for (const sec of p.sections) {
@@ -576,9 +591,9 @@ async function main() {
           name: sec.name,
           template: sec.template,
           order: sec.order,
-          title: sec.title,
-          eyebrow: sec.eyebrow,
-          subtitle: sec.subtitle,
+          title: (sec as any).title,
+          eyebrow: (sec as any).eyebrow,
+          subtitle: (sec as any).subtitle,
           contentData: sec.contentData,
           isActive: true,
         },
@@ -586,44 +601,6 @@ async function main() {
     }
     console.log(`Seeded page '${p.slug}' with ${p.sections.length} sections.`);
   }
-
-  // 6. Seed Demo Orders for Customer Tracker
-  const demoOrder = await prisma.order.upsert({
-    where: { orderNumber: 'OM-20261122-0042' },
-    update: {},
-    create: {
-      orderNumber: 'OM-20261122-0042',
-      userId: demoUser.id,
-      customerName: demoUser.name,
-      customerEmail: demoUser.email,
-      customerPhone: demoUser.phone || '+6281234567890',
-      shippingAddress: 'Jl. Senopati No. 42, RT 01 / RW 02',
-      shippingCity: 'Jakarta Selatan',
-      shippingPostal: '12190',
-      shippingCourier: 'JNE YES',
-      trackingNumber: 'JNE109823481234',
-      totalAmount: 2450000,
-      paymentMethod: 'QRIS',
-      status: 'PROCESSING',
-      paymentProofUrl: '/uploads/receipts/demo-receipt.png',
-      paymentProofNote: 'Transfer via BCA QRIS m-Banking',
-      validatedAt: new Date(),
-      validatedBy: adminUser.name,
-      adminNotes: 'Pembayaran telah tervalidasi. Botol OM-01 seri #084 sedang dikemas dalam kotak velvet.',
-      items: {
-        create: [
-          {
-            name: 'Vetiver Obscura Extrait de Parfum',
-            volume: '50 ml',
-            quantity: 1,
-            unitPrice: 2450000,
-            subtotal: 2450000,
-          },
-        ],
-      },
-    },
-  });
-  console.log(`Seeded demo order: ${demoOrder.orderNumber}`);
 
   console.log('✅ OMOO Database Seeding Complete!');
 }

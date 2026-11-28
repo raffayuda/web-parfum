@@ -58,66 +58,77 @@ export const CatalogTab: React.FC = () => {
   const [isAvailable, setIsAvailable] = useState(true);
 
   // Visual Photos
-  const [bottleImage, setBottleImage] = useState('/images/bottle-vetiver.jpg');
-  const [macroImage, setMacroImage] = useState('/images/macro-vetiver.jpg');
+  const [bottleImage, setBottleImage] = useState('/images/products/emerald-lifestyle.webp');
+  const [macroImage, setMacroImage] = useState('/images/products/emerald-box.webp');
+  const [galleryImages, setGalleryImages] = useState<Array<{ url: string; alt: string; label?: string }>>([]);
 
   // Composition Notes (comma separated)
-  const [notesTop, setNotesTop] = useState('Grapefruit peel, Pink pepper');
-  const [notesHeart, setNotesHeart] = useState('Haitian vetiver, Orris root');
-  const [notesBase, setNotesBase] = useState('Cedar, Ambrette, Incense');
+  const [notesTop, setNotesTop] = useState('Bergamot, Green tea leaf');
+  const [notesHeart, setNotesHeart] = useState('White fig leaf, Jasmine bud');
+  const [notesBase, setNotesBase] = useState('White cedar, Soft vetiver, Clean musk');
 
   // Material & Story
-  const [materialName, setMaterialName] = useState('Vetiver');
-  const [materialOrigin, setMaterialOrigin] = useState('Haiti');
-  const [materialPhrase, setMaterialPhrase] = useState('Akar, asap, tanah basah.');
+  const [materialName, setMaterialName] = useState('Green Tea');
+  const [materialOrigin, setMaterialOrigin] = useState('Jawa Barat & Uji');
+  const [materialPhrase, setMaterialPhrase] = useState('Daun teh basah, embun pagi, ketenangan.');
   const [story, setStory] = useState(
-    'Vetiver bukan kayu, melainkan akar. Ia datang bersama tanah yang masih menempel: pahit, hijau, dan sedikit berasap.\n\nPembukaannya terang dan singkat. Yang tersisa lebih tenang dan mineral, lebih dekat ke ruangan batu setelah hujan daripada ke cologne biasa.'
+    'Emerald lahir dari suasana pagi yang tenang bersama seduhan teh hijau hangat dan cahaya jendela lembut.'
   );
 
   // Perfumer Quote
-  const [quoteText, setQuoteText] = useState('Saya ingin vetiver yang berbau seperti ladang, bukan botol.');
-  const [quoteAttribution, setQuoteAttribution] = useState('Camille Aumont, perfumer');
+  const [quoteText, setQuoteText] = useState('Ketentraman pagi yang diringkas dalam botol kaca 30 ml.');
+  const [quoteAttribution, setQuoteAttribution] = useState('OMOO Studio, Jakarta');
 
   // Performance
   const [maceration, setMaceration] = useState('Enam minggu');
-  const [longevity, setLongevity] = useState('8 sampai 10 jam');
-  const [sillage, setSillage] = useState('Sejauh lengan');
+  const [longevity, setLongevity] = useState('7 sampai 9 jam');
+  const [sillage, setSillage] = useState('Jernih & menenangkan');
 
-  // Preset photo options
+  // Preset photo options (WebP Client Assets)
   const presetBottlePhotos = [
-    { label: 'Botol Vetiver Obscura', url: '/images/bottle-vetiver.jpg' },
-    { label: 'Botol Iris Cendre', url: '/images/bottle-iris.jpg' },
-    { label: 'Botol Fig Nocturne', url: '/images/bottle-fig.jpg' },
-    { label: 'Botol Sel Marin', url: '/images/bottle-sel.jpg' },
-    { label: 'Botol Oud Intime', url: '/images/bottle-oud.jpg' },
-    { label: 'Botol Ambrette 12', url: '/images/bottle-ambrette.jpg' },
+    { label: 'Emerald Lifestyle', url: '/images/products/emerald-lifestyle.webp' },
+    { label: 'Emerald Studio', url: '/images/products/emerald-studio.webp' },
+    { label: 'Golden de Brume Mood', url: '/images/products/golden-de-brume-mood.webp' },
+    { label: 'Golden de Brume Studio', url: '/images/products/golden-de-brume-studio.webp' },
+    { label: 'Rare Citrus & Madu', url: '/images/products/rare-mood.webp' },
+    { label: 'Rare Panggung', url: '/images/products/rare-stage.webp' },
+    { label: 'Youth & Lumina Mood', url: '/images/products/youth-lumina-mood.webp' },
+    { label: 'Youth & Lumina Studio', url: '/images/products/youth-lumina-studio.webp' },
   ];
 
   const presetMacroPhotos = [
-    { label: 'Makro Vetiver Root', url: '/images/macro-vetiver.jpg' },
-    { label: 'Makro Iris Rhizome', url: '/images/macro-iris.jpg' },
-    { label: 'Makro Fig Leaf', url: '/images/macro-fig.jpg' },
-    { label: 'Makro Mineral Salt', url: '/images/macro-sel.jpg' },
-    { label: 'Makro Oud Wood', url: '/images/macro-oud.jpg' },
-    { label: 'Makro Ambrette Seed', url: '/images/macro-ambrette.jpg' },
+    { label: 'Box Emerald', url: '/images/products/emerald-box.webp' },
+    { label: 'Box Golden de Brume', url: '/images/products/golden-de-brume-box.webp' },
+    { label: 'Box Rare', url: '/images/products/rare-box.webp' },
+    { label: 'Box Youth & Lumina', url: '/images/products/youth-lumina-box.webp' },
+    { label: 'Trio Editorial', url: '/images/products/trio-editorial.webp' },
+    { label: 'Trio Flatlay', url: '/images/products/trio-flatlay.webp' },
   ];
 
   const [isUploadingBottle, setIsUploadingBottle] = useState(false);
   const [isUploadingMacro, setIsUploadingMacro] = useState(false);
+  const [isUploadingExtra, setIsUploadingExtra] = useState(false);
 
-  const handleFileUpload = async (file: File, target: 'bottle' | 'macro') => {
+  const handleFileUpload = async (file: File, target: 'bottle' | 'macro' | 'gallery') => {
     try {
       if (target === 'bottle') setIsUploadingBottle(true);
-      else setIsUploadingMacro(true);
+      else if (target === 'macro') setIsUploadingMacro(true);
+      else setIsUploadingExtra(true);
 
       const res = await api.uploadFile(file, 'perfumes');
       if (res.success && res.url) {
         if (target === 'bottle') {
           setBottleImage(res.url);
-          toast.success('Foto botol wewangian berhasil diunggah!');
-        } else {
+          toast.success('Foto botol wewangian berhasil dikonversi ke WebP & diunggah!');
+        } else if (target === 'macro') {
           setMacroImage(res.url);
-          toast.success('Foto makro wewangian berhasil diunggah!');
+          toast.success('Foto kemasan/makro berhasil dikonversi ke WebP & diunggah!');
+        } else {
+          setGalleryImages((prev) => [
+            ...prev,
+            { url: res.url, alt: `Galeri ${name || 'OMOO'}`, label: `Sudut ${prev.length + 1}` },
+          ]);
+          toast.success('Foto tambahan produk berhasil ditambahkan (WebP)!');
         }
       } else {
         toast.error(res.message || 'Gagal mengunggah gambar.');
@@ -126,7 +137,8 @@ export const CatalogTab: React.FC = () => {
       toast.error(err.message || 'Terjadi kesalahan saat mengunggah.');
     } finally {
       if (target === 'bottle') setIsUploadingBottle(false);
-      else setIsUploadingMacro(false);
+      else if (target === 'macro') setIsUploadingMacro(false);
+      else setIsUploadingExtra(false);
     }
   };
 
@@ -198,18 +210,19 @@ export const CatalogTab: React.FC = () => {
 
   const resetForm = () => {
     setName('');
-    setEdition('OM-07');
+    setEdition('OM-05');
     setSlug('');
-    setFamily('Woody');
+    setFamily('Green');
     setTagline('');
     setDescription('');
-    setPrice('2450000');
-    setVolume('50 ml');
-    setConcentration('Extrait de parfum, 20%');
-    setStockCount('24');
+    setPrice('485000');
+    setVolume('30 ml');
+    setConcentration('Eau de parfum, 20%');
+    setStockCount('20');
     setIsAvailable(true);
-    setBottleImage('/images/bottle-vetiver.jpg');
-    setMacroImage('/images/macro-vetiver.jpg');
+    setBottleImage('/images/products/emerald-lifestyle.webp');
+    setMacroImage('/images/products/emerald-box.webp');
+    setGalleryImages([]);
     setNotesTop('');
     setNotesHeart('');
     setNotesBase('');
@@ -236,8 +249,9 @@ export const CatalogTab: React.FC = () => {
     setConcentration(p.concentration || 'Extrait de parfum, 20%');
     setStockCount(String(p.stockCount ?? 24));
     setIsAvailable(p.isAvailable ?? true);
-    setBottleImage((p.bottleImage || '/images/bottle-vetiver.jpg').replace(/^\/src\/assets\/images\//, '/images/'));
-    setMacroImage((p.macroImage || '/images/macro-vetiver.jpg').replace(/^\/src\/assets\/images\//, '/images/'));
+    setBottleImage((p.bottleImage || '/images/products/emerald-lifestyle.webp').replace(/^\/src\/assets\/images\//, '/images/'));
+    setMacroImage((p.macroImage || '/images/products/emerald-box.webp').replace(/^\/src\/assets\/images\//, '/images/'));
+    setGalleryImages(Array.isArray(p.galleryImages) ? p.galleryImages : []);
 
     // Notes
     const n = p.notes || {};
@@ -320,7 +334,8 @@ export const CatalogTab: React.FC = () => {
       bottleImage,
       bottleAlt: `Flacon wewangian OMOO ${name}`,
       macroImage,
-      macroAlt: `Makro bahan alami wewangian ${name}`,
+      macroAlt: `Kemasan box wewangian OMOO ${name}`,
+      galleryImages,
       notes: {
         top: parseList(notesTop),
         heart: parseList(notesHeart),
@@ -655,6 +670,68 @@ export const CatalogTab: React.FC = () => {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Extra Gallery Images Switcher Section */}
+            <div className="pt-4 border-t border-line/70 space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <span className="text-[0.65rem] font-semibold tracking-[0.1em] uppercase text-ink block">
+                    Galeri Foto Tambahan Produk (Bisa Diklik di Halaman Detail)
+                  </span>
+                  <span className="text-[0.64rem] text-muted">
+                    Tambahkan foto botol, detail label, atau kemasan box tambahan (otomatis dikonversi ke WebP).
+                  </span>
+                </div>
+                <label className="inline-flex items-center gap-2 px-3 py-1.5 border border-line bg-surface/40 hover:border-ink text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors">
+                  <Upload className="w-3.5 h-3.5 text-accent" />
+                  <span>{isUploadingExtra ? 'Mengonversi WebP...' : 'Tambah Foto Galeri'}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={isUploadingExtra}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileUpload(file, 'gallery');
+                    }}
+                  />
+                </label>
+              </div>
+
+              {galleryImages.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                  {galleryImages.map((g, idx) => (
+                    <div key={`${g.url}-${idx}`} className="flex items-center gap-3 p-2.5 border border-line bg-surface/30">
+                      <img
+                        src={g.url}
+                        alt={g.alt || name}
+                        className="w-12 h-14 object-cover border border-line shrink-0"
+                      />
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <input
+                          type="text"
+                          value={g.label || ''}
+                          onChange={(e) =>
+                            setGalleryImages((prev) =>
+                              prev.map((item, i) => (i === idx ? { ...item, label: e.target.value } : item))
+                            )
+                          }
+                          placeholder="Label (mis. Kemasan Box)"
+                          className="w-full bg-bg border border-line px-2 py-1 text-[0.68rem] text-ink"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setGalleryImages((prev) => prev.filter((_, i) => i !== idx))}
+                          className="text-[0.62rem] text-red-500 hover:underline cursor-pointer"
+                        >
+                          Hapus foto ini
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

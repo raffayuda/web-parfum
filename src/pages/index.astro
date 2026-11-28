@@ -9,10 +9,12 @@ import SectionHeader from '../components/ui/SectionHeader.astro';
 import FragranceCard from '../components/FragranceCard.astro';
 import DiscoverySet from '../components/DiscoverySet.astro';
 import { GalleryGrid } from '../components/gallery/GalleryGrid';
+import { EditorialCarousel } from '../components/home/EditorialCarousel';
+import { DEFAULT_EDITORIAL_SLIDES } from '../data/carousel';
 import { featured, materials, priceLabel } from '../data/fragrances';
 import { getGalleryItems } from '../../server/src/utils/gallery';
 import { site } from '../data/site';
-import { images, alts } from '../data/images';
+import { images, alts, resolvePublicImageUrl } from '../data/images';
 import { prisma } from '../../server/src/db';
 import { InlineVisualEditor } from '../components/admin/InlineVisualEditor';
 
@@ -52,6 +54,7 @@ try {
 
 // Find dynamic sections:
 const heroSec = dbSections.find((s) => s.template === 'HERO_EDITORIAL');
+const carouselSec = dbSections.find((s) => s.template === 'EDITORIAL_CAROUSEL');
 const showcaseSec = dbSections.find((s) => s.template === 'FRAGRANCE_GRID');
 const materialSec = dbSections.find((s) => s.template === 'MATERIAL_STORY');
 const quizSec = dbSections.find((s) => s.template === 'RICH_TEXT_MEDIA');
@@ -62,6 +65,7 @@ const discoverySec = dbSections.find((s) => s.template === 'DISCOVERY_BANNER');
 
 // Section visibility: permanently respected from database. If deleted or hidden, NEVER reappear!
 const showHero = !hiddenSections.includes('HERO_EDITORIAL') && (heroSec ? heroSec.isActive : dbSections.length === 0);
+const showCarousel = !hiddenSections.includes('EDITORIAL_CAROUSEL') && (carouselSec ? carouselSec.isActive : true);
 const showShowcase = !hiddenSections.includes('FRAGRANCE_GRID') && (showcaseSec ? showcaseSec.isActive : dbSections.length === 0);
 const showMaterials = !hiddenSections.includes('MATERIAL_STORY') && (materialSec ? materialSec.isActive : dbSections.length === 0);
 const showQuiz = !hiddenSections.includes('RICH_TEXT_MEDIA') && (quizSec ? quizSec.isActive : dbSections.length === 0);
@@ -70,24 +74,33 @@ const showProcess = !hiddenSections.includes('PROCESS_STEPS') && (processSec ? p
 const showHalal = !hiddenSections.includes('HALAL_BPOM_BADGE') && (halalSec ? halalSec.isActive : dbSections.length === 0);
 const showDiscovery = !hiddenSections.includes('DISCOVERY_BANNER') && (discoverySec ? discoverySec.isActive : dbSections.length === 0);
 
+// Dynamic Atelier Lookbook Carousel data
+const carouselEyebrow = carouselSec?.eyebrow || 'Atelier Lookbook • Edisi 30 ml';
+const carouselHeading = carouselSec?.title || 'Empat karakter. Kemasan baru.';
+const carouselSlides =
+  Array.isArray((carouselSec?.contentData as any)?.slides) && (carouselSec?.contentData as any).slides.length > 0
+    ? (carouselSec?.contentData as any).slides
+    : DEFAULT_EDITORIAL_SLIDES;
+const carouselAutoplayMs = Number((carouselSec?.contentData as any)?.autoplayMs || 6500);
+
 // 1. Hero Section texts
 const heroEyebrow = heroSec?.eyebrow || 'Parfum Independen, Jakarta';
 const heroTitle = heroSec?.title || 'Wear what cannot be seen.';
 const heroSubtitle =
   heroSec?.subtitle ||
-  'Enam komposisi dengan bahan pilihan, diracik dalam batch kecil di Jakarta. Tahan lama di kulit.';
+  'Empat komposisi khas OMOO dalam kemasan 30 ml, diracik dalam batch kecil di Jakarta. Tahan lama di kulit.';
 const heroCtaText = heroSec?.contentData?.ctaText || 'Explore the collection';
 const heroCtaLink = heroSec?.contentData?.ctaLink || '/collection/';
 const heroSecondaryText = heroSec?.contentData?.secondaryText || 'Find your scent';
 const heroSecondaryLink = heroSec?.contentData?.secondaryLink || '/find/';
 
 // 2. Showcase Catalog Section texts
-const showcaseEyebrow = showcaseSec?.eyebrow || 'Enam Komposisi';
-const showcaseTitle = showcaseSec?.title || 'Satu bahan utama, satu karakter.';
+const showcaseEyebrow = showcaseSec?.eyebrow || 'Koleksi 30 ml';
+const showcaseTitle = showcaseSec?.title || 'Satu karakter, satu komposisi.';
 const showcaseSubtitle = showcaseSec?.subtitle || 'Lihat semua parfum';
 const showcaseFooterQuote =
   showcaseSec?.contentData?.footerQuote ||
-  'Koleksi kami selalu terjaga enam varian. Formula baru hadir menggantikan yang lama agar kualitas tetap fokus.';
+  'Koleksi kami dijaga tetap fokus agar setiap batch baru bisa dikontrol langsung aromanya sebelum dikirim.';
 
 // Enrich Perfumes dynamically from DB
 const enrichedFromDb = dbPerfumes.map((dbFrag) => {
@@ -98,19 +111,30 @@ const enrichedFromDb = dbPerfumes.map((dbFrag) => {
     ...dbFrag,
     price: Number(dbFrag.price),
     notes: dbNotes,
-    bottle: dbFrag.bottleImage || dbFrag.bottle || staticFrag.bottle,
+    bottle: resolvePublicImageUrl(dbFrag.bottleImage || dbFrag.bottle || staticFrag.bottle),
     bottleAlt: dbFrag.bottleAlt || staticFrag.bottleAlt,
-    macro: dbFrag.macroImage || dbFrag.macro || staticFrag.macro,
+    macro: resolvePublicImageUrl(dbFrag.macroImage || dbFrag.macro || staticFrag.macro),
     macroAlt: dbFrag.macroAlt || staticFrag.macroAlt,
-    card: dbFrag.bottleImage || dbFrag.card || staticFrag.card,
+    card: resolvePublicImageUrl(dbFrag.bottleImage || dbFrag.card || staticFrag.card),
     cardAlt: dbFrag.cardAlt || staticFrag.cardAlt,
     isAvailable: dbFrag.isAvailable,
   };
 });
 
-const [lead, ...secondary] = enrichedFromDb.length > 0 ? enrichedFromDb : featured;
+const allActivePerfumes = enrichedFromDb.length > 0 ? enrichedFromDb : featured;
+const [lead, ...secondary] = allActivePerfumes;
 const enrichedLead = lead;
 const enrichedSecondary = secondary;
+
+const displayMaterials = allActivePerfumes.map((p: any) => ({
+  name: p.material?.name || p.name,
+  origin: p.material?.origin || 'Jakarta',
+  phrase: p.material?.phrase || p.tagline,
+  slug: p.slug,
+  edition: p.edition,
+  image: p.bottle,
+  alt: p.bottleAlt || p.name,
+}));
 
 const leadNotes = [
   { label: 'Top', notes: enrichedLead.notes.top },
@@ -179,8 +203,8 @@ const process = [
   {
     title: step3Title,
     copy: step3Copy,
-    image: images.bottleOud,
-    alt: alts.bottleOud,
+    image: '/images/products/trio-editorial.webp',
+    alt: 'Tiga box produk OMOO Eau de Parfum 30 ml',
   },
 ];
 
@@ -191,15 +215,15 @@ const halalSubtitle =
   halalSec?.subtitle ||
   'Seluruh formula wewangian OMOO telah teruji di laboratorium terakreditasi, resmi terdaftar di BPOM RI, dan bersertifikat Halal Indonesia.';
 const halalCtaText = halalSec?.contentData?.ctaText || 'Verifikasi Google Lens';
-const halalCode = halalSec?.contentData?.featuredCode || 'BPOM-OM01-VETIVER';
+const halalCode = halalSec?.contentData?.featuredCode || 'BPOM-OM01-EMERALD';
 const halalNotice = halalSec?.contentData?.scanNotice || 'Pindai QR dus atau buka lembar sertifikat';
 
 // 8. Discovery Set texts
-const discoveryTitle = discoverySec?.title || 'Discovery Set (6 x 2 ml)';
+const discoveryTitle = discoverySec?.title || 'Discovery Set (4 x 2 ml)';
 const discoverySubtitle =
   discoverySec?.subtitle ||
-  'Kenali seluruh keenam wewangian di kulit Anda sebelum memilih satu flacon penuh. Nilai set dapat digunakan sebagai voucher potongan untuk botol 50 ml berikutnya.';
-const discoveryPrice = Number(discoverySec?.contentData?.price || 450000);
+  'Kenali seluruh keempat varian OMOO di kulit Anda sebelum memilih flacon 30 ml penuh.';
+const discoveryPrice = Number(discoverySec?.contentData?.price || 195000);
 const discoveryCtaText = discoverySec?.contentData?.ctaText || 'Pesan Discovery Set';
 
 const schema = {
@@ -293,8 +317,8 @@ const schema = {
               aria-label="View the OMOO collection"
             >
               <Media
-                src={images.bottleSel}
-                alt={alts.bottleSel}
+                src="/images/products/trio-editorial.webp"
+                alt="Koleksi OMOO Eau de Parfum 30 ml — Golden de Brume, Rare, dan Emerald"
                 aspect="4 / 5"
                 widths={[420, 600, 686]}
                 sizes="(max-width: 1024px) 100vw, 42vw"
@@ -311,9 +335,9 @@ const schema = {
             >
               <div data-float-loop>
                 <Media
-                  src={images.macroOud}
-                  alt={alts.macroOud}
-                  aspect="1 / 1"
+                  src="/images/products/emerald-box.webp"
+                  alt="Kemasan box OMOO Emerald Eau de Parfum 30 ml"
+                  aspect="4 / 5"
                   widths={[160, 240, 360]}
                   sizes="(max-width: 640px) 96px, 160px"
                 />
@@ -324,6 +348,18 @@ const schema = {
       </div>
     </div>
   </section>
+  )}
+
+  {showCarousel && (
+    <div data-section-template="EDITORIAL_CAROUSEL" data-section-name="Atelier Lookbook Carousel">
+      <EditorialCarousel
+        client:load
+        eyebrow={carouselEyebrow}
+        heading={carouselHeading}
+        slides={carouselSlides}
+        autoplayMs={carouselAutoplayMs}
+      />
+    </div>
   )}
 
   {showShowcase && (
@@ -408,7 +444,7 @@ const schema = {
             <p class="flex items-baseline gap-3">
               <span class="font-display text-3xl">{priceLabel(enrichedLead.price)}</span>
               <span class="text-[0.68rem] uppercase tracking-[0.08em] text-muted">
-                {enrichedLead.volume} / Extrait
+                {enrichedLead.volume} / Eau de Parfum
               </span>
             </p>
             <ArrowLink href={`/collection/${enrichedLead.slug}/`}>Discover</ArrowLink>
@@ -450,7 +486,7 @@ const schema = {
       <div class="hidden lg:col-span-5 lg:block" data-reveal-image>
         <div class="relative aspect-[4/5] overflow-hidden bg-bg" data-atlas>
           {
-            materials.map((material, index) => (
+            displayMaterials.map((material: any, index: number) => (
               <div
                 class:list={[
                   'absolute inset-0 transition-opacity duration-700 ease-luxe',
@@ -459,21 +495,21 @@ const schema = {
                 data-atlas-frame={material.slug}
                 aria-hidden={index === 0 ? 'false' : 'true'}
               >
-                <Media src={material.image} alt="" fill class="h-full" sizes="40vw" />
+                <Media src={material.image} alt={material.alt || material.name} fill class="h-full" sizes="40vw" />
               </div>
             ))
           }
         </div>
 
         <div class="mt-4 flex justify-between gap-6 text-[0.65rem] font-medium uppercase tracking-[0.13em] text-muted">
-          <span data-atlas-caption-name>{materials[0].name}</span>
-          <span data-atlas-caption-origin>{materials[0].origin}</span>
+          <span data-atlas-caption-name>{displayMaterials[0]?.name}</span>
+          <span data-atlas-caption-origin>{displayMaterials[0]?.origin}</span>
         </div>
       </div>
 
       <ul data-stagger class="lg:col-span-6 lg:col-start-7">
         {
-          materials.map((material) => (
+          displayMaterials.map((material: any) => (
             <li class="border-b border-line" data-reveal>
               <a
                 href={`/collection/${material.slug}/`}

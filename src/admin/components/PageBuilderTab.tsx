@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/react/Button';
 import { Input, Textarea } from '../../components/ui/react/Input';
 import { Modal } from '../../components/ui/react/Modal';
 import { Badge } from '../../components/ui/react/Badge';
+import { DEFAULT_EDITORIAL_SLIDES } from '../../data/carousel';
 import { toast } from 'sonner';
 import {
   Plus,
@@ -25,6 +26,8 @@ import {
   ArrowLeft,
   Save,
   AlertTriangle,
+  Images,
+  Upload,
 } from 'lucide-react';
 
 interface TemplateOption {
@@ -49,6 +52,16 @@ const TEMPLATE_OPTIONS: TemplateOption[] = [
     description: 'Layout split 2-kolom: narasi di kiri dan foto atelier resolusi tinggi di kanan.',
     icon: Layout,
     defaultData: { imageUrl: '/src/assets/images/atelier.jpg', imageAlt: 'Atelier Omoo' },
+  },
+  {
+    value: 'EDITORIAL_CAROUSEL',
+    label: 'Atelier Lookbook Carousel (30 ml)',
+    description: 'Etalase interaktif asimetris berisi foto botol, box kemasan, nomor edisi, dan tab progres.',
+    icon: Images,
+    defaultData: {
+      autoplayMs: 6500,
+      slides: DEFAULT_EDITORIAL_SLIDES,
+    },
   },
   {
     value: 'FRAGRANCE_GRID',
@@ -362,6 +375,198 @@ export const PageBuilderTab: React.FC = () => {
           </div>
         );
 
+      case 'HALAL_BPOM_BADGE':
+        return (
+          <div className="space-y-4 p-5 bg-surface/30 border border-line">
+            <p className="text-[0.65rem] font-semibold uppercase tracking-wider text-accent">
+              Bidang Khusus Halal &amp; BPOM
+            </p>
+            <Input
+              label="Kode Verifikasi Unggulan"
+              value={contentFields.featuredCode || 'BPOM-OM01-EMERALD'}
+              onChange={(e) => updateField('featuredCode', e.target.value)}
+              placeholder="BPOM-OM01-EMERALD"
+            />
+          </div>
+        );
+
+      case 'EDITORIAL_CAROUSEL': {
+        const slides: any[] = Array.isArray(contentFields.slides) ? contentFields.slides : DEFAULT_EDITORIAL_SLIDES;
+
+        const updateSlide = (idx: number, key: string, val: any) => {
+          const next = slides.map((s, i) => (i === idx ? { ...s, [key]: val } : s));
+          updateField('slides', next);
+        };
+
+        const addSlide = () => {
+          const next = [
+            ...slides,
+            {
+              id: `slide-${Date.now()}`,
+              editionNumber: String(slides.length).padStart(2, '0'),
+              eyebrow: 'Edisi 30 ml',
+              title: 'Varian Baru',
+              subtitle: 'Karakter aroma singkat.',
+              description: 'Deskripsi singkat edisi parfum OMOO.',
+              volumeBadge: 'Eau de Parfum • 30 ml',
+              mainImage: '/images/products/trio-editorial.webp',
+              mainAlt: 'OMOO 30 ml',
+              insetImage: '/images/products/emerald-box.webp',
+              insetAlt: 'Box OMOO 30 ml',
+              ctaText: 'Jelajahi Varian',
+              ctaLink: '/collection/',
+              accentTone: 'gold',
+            },
+          ];
+          updateField('slides', next);
+        };
+
+        const removeSlide = (idx: number) => {
+          const next = slides.filter((_, i) => i !== idx);
+          updateField('slides', next);
+        };
+
+        const handleSlideUpload = async (idx: number, field: 'mainImage' | 'insetImage', file: File) => {
+          try {
+            const res = await api.uploadFile(file, 'carousel');
+            if (res.success && res.url) {
+              updateSlide(idx, field, res.url);
+              toast.success('Gambar slide berhasil dikonversi ke WebP!');
+            } else {
+              toast.error(res.message || 'Gagal mengunggah gambar slide.');
+            }
+          } catch (err: any) {
+            toast.error(err.message || 'Gagal mengunggah gambar slide.');
+          }
+        };
+
+        return (
+          <div className="space-y-5 p-5 bg-surface/30 border border-line">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
+              <div>
+                <p className="text-[0.65rem] font-semibold uppercase tracking-wider text-accent">
+                  Kelola Slide Atelier Carousel
+                </p>
+                <p className="text-[0.68rem] text-muted mt-0.5">
+                  Semua gambar yang diunggah otomatis dikonversi menjadi WebP ringan.
+                </p>
+              </div>
+              <Button type="button" variant="outline" size="sm" onClick={addSlide} icon={<Plus className="w-3.5 h-3.5" />}>
+                Tambah Slide
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              {slides.map((s, idx) => (
+                <div key={s.id || idx} className="border border-line bg-bg p-4 space-y-3">
+                  <div className="flex items-center justify-between border-b border-line/60 pb-2">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-ink">
+                      Slide #{idx + 1} — {s.title || 'Tanpa Judul'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removeSlide(idx)}
+                      className="text-xs text-red-500 hover:underline cursor-pointer"
+                    >
+                      Hapus Slide
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <Input
+                      label="No. Edisi"
+                      value={s.editionNumber || ''}
+                      onChange={(e) => updateSlide(idx, 'editionNumber', e.target.value)}
+                      placeholder="01"
+                    />
+                    <Input
+                      label="Eyebrow"
+                      value={s.eyebrow || ''}
+                      onChange={(e) => updateSlide(idx, 'eyebrow', e.target.value)}
+                    />
+                    <Input
+                      label="Judul Varian"
+                      value={s.title || ''}
+                      onChange={(e) => updateSlide(idx, 'title', e.target.value)}
+                    />
+                  </div>
+
+                  <Input
+                    label="Tagline / Subjudul"
+                    value={s.subtitle || ''}
+                    onChange={(e) => updateSlide(idx, 'subtitle', e.target.value)}
+                  />
+
+                  <Textarea
+                    label="Deskripsi"
+                    rows={2}
+                    value={s.description || ''}
+                    onChange={(e) => updateSlide(idx, 'description', e.target.value)}
+                  />
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Input
+                        label="Gambar Utama (URL / WebP)"
+                        value={s.mainImage || ''}
+                        onChange={(e) => updateSlide(idx, 'mainImage', e.target.value)}
+                      />
+                      <label className="inline-flex items-center gap-1.5 px-2.5 py-1 border border-line bg-surface/40 hover:border-ink text-[0.65rem] font-semibold uppercase tracking-wider cursor-pointer">
+                        <Upload className="w-3 h-3 text-accent" />
+                        <span>Upload Foto Utama (WebP)</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) handleSlideUpload(idx, 'mainImage', f);
+                          }}
+                        />
+                      </label>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Input
+                        label="Gambar Box Inset (URL / WebP)"
+                        value={s.insetImage || ''}
+                        onChange={(e) => updateSlide(idx, 'insetImage', e.target.value)}
+                      />
+                      <label className="inline-flex items-center gap-1.5 px-2.5 py-1 border border-line bg-surface/40 hover:border-ink text-[0.65rem] font-semibold uppercase tracking-wider cursor-pointer">
+                        <Upload className="w-3 h-3 text-accent" />
+                        <span>Upload Foto Box (WebP)</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) handleSlideUpload(idx, 'insetImage', f);
+                          }}
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <Input
+                      label="Teks Tombol CTA"
+                      value={s.ctaText || ''}
+                      onChange={(e) => updateSlide(idx, 'ctaText', e.target.value)}
+                    />
+                    <Input
+                      label="Link Tujuan CTA"
+                      value={s.ctaLink || ''}
+                      onChange={(e) => updateSlide(idx, 'ctaLink', e.target.value)}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+
       case 'DISCOVERY_BANNER':
         return (
           <div className="space-y-4 p-5 bg-surface/30 border border-line">
@@ -372,9 +577,9 @@ export const PageBuilderTab: React.FC = () => {
               <Input
                 label="Harga Discovery Set (IDR)"
                 type="number"
-                value={contentFields.price || 450000}
+                value={contentFields.price || 195000}
                 onChange={(e) => updateField('price', Number(e.target.value))}
-                placeholder="450000"
+                placeholder="195000"
               />
               <Input
                 label="Teks Tombol Aksi"

@@ -81,8 +81,13 @@ export const AccountDropdown: React.FC = () => {
       .catch(() => {});
 
     const handleStorageChange = () => checkUserSession();
+    const handleOpenModalEvent = () => {
+      setIsOpen(false);
+      setShowAuthModal(true);
+    };
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('omoo:auth-changed', handleStorageChange);
+    window.addEventListener('omoo:open-account-modal', handleOpenModalEvent);
 
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -94,6 +99,7 @@ export const AccountDropdown: React.FC = () => {
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('omoo:auth-changed', handleStorageChange);
+      window.removeEventListener('omoo:open-account-modal', handleOpenModalEvent);
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);

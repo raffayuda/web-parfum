@@ -51,18 +51,20 @@ export const InlineVisualEditor: React.FC = () => {
     }
   };
 
-  // Preset gallery images for quick selection
+  // Preset gallery images for quick selection (WebP Optimized)
   const presetPhotos = [
-    { label: 'Botol Sel Marin', url: '/images/bottle-sel.jpg' },
-    { label: 'Botol Vetiver Obscura', url: '/images/bottle-vetiver.jpg' },
-    { label: 'Botol Iris Cendre', url: '/images/bottle-iris.jpg' },
-    { label: 'Botol Fig Nocturne', url: '/images/bottle-fig.jpg' },
-    { label: 'Botol Oud Intime', url: '/images/bottle-oud.jpg' },
+    { label: 'Trio Box OMOO (30 ml)', url: '/images/products/trio-editorial.webp' },
+    { label: 'Trio Flatlay Marun', url: '/images/products/trio-flatlay.webp' },
+    { label: 'Emerald Lifestyle', url: '/images/products/emerald-lifestyle.webp' },
+    { label: 'Box Emerald 30 ml', url: '/images/products/emerald-box.webp' },
+    { label: 'Golden de Brume Mood', url: '/images/products/golden-de-brume-mood.webp' },
+    { label: 'Box Golden de Brume', url: '/images/products/golden-de-brume-box.webp' },
+    { label: 'Rare Citrus & Madu', url: '/images/products/rare-mood.webp' },
+    { label: 'Box Rare Marmer Hitam', url: '/images/products/rare-box.webp' },
+    { label: 'Youth & Lumina Mist', url: '/images/products/youth-lumina-mood.webp' },
+    { label: 'Box Youth & Lumina', url: '/images/products/youth-lumina-box.webp' },
     { label: 'Ruang Racik OMOO', url: '/images/atelier.jpg' },
     { label: 'Koridor Studio OMOO', url: '/images/corridor.jpg' },
-    { label: 'Makro Oud Gaharu', url: '/images/macro-oud.jpg' },
-    { label: 'Makro Vetiver Root', url: '/images/macro-vetiver.jpg' },
-    { label: 'Botol Ambrette 12', url: '/images/bottle-ambrette.jpg' },
   ];
 
   // Check admin session and URL query parameter ?edit=true
@@ -167,17 +169,18 @@ export const InlineVisualEditor: React.FC = () => {
         addBtn.type = 'button';
         addBtn.className =
           'add-timeline-btn mt-6 flex items-center gap-2 px-4 py-2 bg-accent/20 text-accent text-xs font-semibold uppercase tracking-wider border border-accent/40 hover:bg-accent/30 transition-all cursor-pointer rounded';
-        addBtn.innerHTML = '<span>+</span> Tambah Tahun / Kronologi';
+        addBtn.innerHTML = '<span>+</span> Tambah Prinsip / Poin Baru';
         addBtn.onclick = (e) => {
           e.preventDefault();
-          const newId = `timeline-${Date.now()}`;
+          const newId = `pillar-${Date.now()}`;
+          const nextNum = String(timelineList.querySelectorAll('.timeline-item').length + 1).padStart(2, '0');
           const itemEl = document.createElement('div');
           itemEl.className =
             'timeline-item group relative flex items-start gap-6 border-b border-line pb-6 pt-2 animate-fade-in';
           itemEl.setAttribute('data-timeline-id', newId);
           itemEl.innerHTML = `
-            <span class="font-display text-3xl font-light text-accent shrink-0 w-24 timeline-year outline-dashed outline-1 outline-accent/70 hover:bg-accent/10 cursor-text" contenteditable="true" data-editable-id="${newId}-year">2027</span>
-            <p class="text-sm text-ink leading-relaxed flex-1 pt-1 timeline-copy outline-dashed outline-1 outline-accent/70 hover:bg-accent/10 cursor-text" contenteditable="true" data-editable-id="${newId}-copy">Deskripsi catatan baru...</p>
+            <span class="font-display text-3xl font-light text-accent shrink-0 w-16 timeline-year outline-dashed outline-1 outline-accent/70 hover:bg-accent/10 cursor-text" contenteditable="true" data-editable-id="${newId}-year">${nextNum}</span>
+            <p class="text-sm text-ink leading-relaxed flex-1 pt-1 timeline-copy outline-dashed outline-1 outline-accent/70 hover:bg-accent/10 cursor-text" contenteditable="true" data-editable-id="${newId}-copy">Tulis poin standar atau prinsip baru studio OMOO...</p>
             <button type="button" class="timeline-del-btn text-[0.65rem] uppercase tracking-wider text-red-600 hover:text-red-500 px-2.5 py-1 border border-red-500/30 hover:border-red-500 transition-colors ml-2 self-start cursor-pointer">Hapus</button>
           `;
           const delBtn = itemEl.querySelector<HTMLButtonElement>('.timeline-del-btn');

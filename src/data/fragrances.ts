@@ -1,5 +1,10 @@
 import type { ImageMetadata } from 'astro';
-import { images, alts } from './images';
+
+export interface FragranceGalleryImage {
+  url: string;
+  alt: string;
+  label?: string;
+}
 
 export interface Fragrance {
   slug: string;
@@ -12,12 +17,13 @@ export interface Fragrance {
   volume: string;
   concentration: string;
   isAvailable?: boolean;
-  bottle: ImageMetadata;
+  bottle: ImageMetadata | string;
   bottleAlt: string;
-  macro: ImageMetadata;
+  macro: ImageMetadata | string;
   macroAlt: string;
-  card: ImageMetadata;
+  card: ImageMetadata | string;
   cardAlt: string;
+  galleryImages?: FragranceGalleryImage[];
   notes: {
     top: string[];
     heart: string[];
@@ -44,274 +50,264 @@ export interface Fragrance {
 
 export const fragrances: Fragrance[] = [
   {
-    slug: 'vetiver-obscura',
+    slug: 'emerald',
     edition: 'OM-01',
-    name: 'Vetiver Obscura',
-    family: 'Woody',
-    tagline: 'Vetiver, smoke, cold citrus.',
-    description:
-      'Akar vetiver yang lembap, dipotong dingin oleh grapefruit dan dibiarkan mengering bersama cedar.',
-    price: 2450000,
-    volume: '50 ml',
-    concentration: 'Extrait de parfum, 20%',
-    bottle: images.bottleVetiver,
-    bottleAlt: alts.bottleVetiver,
-    macro: images.macroVetiver,
-    macroAlt: alts.macroVetiver,
-    card: images.bottleVetiver,
-    cardAlt: alts.bottleVetiver,
-    notes: {
-      top: ['Grapefruit peel', 'Pink pepper'],
-      heart: ['Haitian vetiver', 'Orris root'],
-      base: ['Cedar', 'Ambrette', 'Incense'],
-    },
-    material: {
-      name: 'Vetiver',
-      origin: 'Haiti',
-      phrase: 'Akar, asap, tanah basah.',
-    },
-    story: [
-      'Vetiver bukan kayu, melainkan akar. Ia datang bersama tanah yang masih menempel: pahit, hijau, dan sedikit berasap. Kami membangun komposisi di sekitar kesan pertama itu, lalu membiarkan citrus dingin memotongnya.',
-      'Pembukaannya terang dan singkat. Yang tersisa lebih tenang dan mineral, lebih dekat ke ruangan batu setelah hujan daripada ke cologne biasa. Ia menempel dekat, lalu tinggal.',
-    ],
-    quote: {
-      text: 'Saya ingin vetiver yang berbau seperti ladang, bukan botol.',
-      attribution: 'Camille Aumont, perfumer',
-    },
-    performance: {
-      concentration: '20%',
-      maceration: 'Enam minggu',
-      longevity: '8 sampai 10 jam',
-      sillage: 'Sejauh lengan',
-    },
-    related: ['fig-nocturne', 'oud-intime'],
-  },
-  {
-    slug: 'iris-cendre',
-    edition: 'OM-02',
-    name: 'Iris Cendre',
-    family: 'Floral',
-    tagline: 'Iris, cold powder, suede.',
-    description: 'Akar iris pucat, violet leaf, dan sentuhan suede yang menempel hangat di kulit.',
-    price: 2550000,
-    volume: '50 ml',
-    concentration: 'Extrait de parfum, 20%',
-    bottle: images.bottleIris,
-    bottleAlt: alts.bottleIris,
-    macro: images.macroIris,
-    macroAlt: alts.macroIris,
-    card: images.bottleIris,
-    cardAlt: alts.bottleIris,
-    notes: {
-      top: ['Bergamot', 'Violet leaf'],
-      heart: ['Iris pallida', 'Suede'],
-      base: ['Sandalwood', 'Ambrette', 'White musk'],
-    },
-    material: {
-      name: 'Iris',
-      origin: 'Tuscany',
-      phrase: 'Rizom, bedak dingin, suede.',
-    },
-    story: [
-      'Iris meminta waktu. Rizomnya diangkat, dikeringkan, lalu dibiarkan beristirahat sampai patinya berubah menjadi bedak yang kering seperti kertas. Tidak ada cara untuk mempercepatnya.',
-      'Kami menjauhkan bunga dari cahaya. Violet leaf memberi tepi hijau yang dingin; suede dan ambrette melembutkan dasarnya sampai ia duduk seperti kulit kedua.',
-    ],
-    quote: {
-      text: 'Bedaknya harus terasa seperti cashmere di ruang gelap, bukan meja rias.',
-      attribution: 'Camille Aumont, perfumer',
-    },
-    performance: {
-      concentration: '20%',
-      maceration: 'Empat minggu',
-      longevity: '6 sampai 8 jam',
-      sillage: 'Dekat',
-    },
-    related: ['ambrette-12', 'sel-brut'],
-  },
-  {
-    slug: 'fig-nocturne',
-    edition: 'OM-03',
-    name: 'Fig Nocturne',
+    name: 'Emerald',
     family: 'Green',
-    tagline: 'Fig leaf, black fig, green sap.',
-    description: 'Pohon fig setelah gelap: getah hijau, buah yang pekat, cedar dan lumut.',
-    price: 2450000,
-    volume: '50 ml',
-    concentration: 'Extrait de parfum, 20%',
-    bottle: images.bottleFig,
-    bottleAlt: alts.bottleFig,
-    macro: images.macroFig,
-    macroAlt: alts.macroFig,
-    card: images.macroFig,
-    cardAlt: alts.macroFig,
+    tagline: 'Dewy green tea, crisp foliage, serene bergamot.',
+    description:
+      'Kesegaran daun teh hijau hangat dan embun pagi di balik jendela kayu, berpadu dengan kelembutan bergamot dan cedar bersih.',
+    price: 485000,
+    volume: '30 ml',
+    concentration: 'Eau de parfum, 20%',
+    bottle: '/images/products/emerald-lifestyle.webp',
+    bottleAlt: 'Botol kaca bulat OMOO Emerald Eau de Parfum 30 ml di atas nampan kayu dengan secangkir teh hijau',
+    macro: '/images/products/emerald-box.webp',
+    macroAlt: 'Kemasan box hijau botanical OMOO Emerald 30 ml dengan pita satin',
+    card: '/images/products/emerald-lifestyle.webp',
+    cardAlt: 'OMOO Emerald Eau de Parfum 30 ml',
+    galleryImages: [
+      {
+        url: '/images/products/emerald-lifestyle.webp',
+        alt: 'OMOO Emerald 30 ml bersama seduhan teh hijau hangat',
+        label: 'Suasana & Botol',
+      },
+      {
+        url: '/images/products/emerald-studio.webp',
+        alt: 'Foto studio close-up botol bulat tutup emas OMOO Emerald 30 ml',
+        label: 'Detail Botol',
+      },
+      {
+        url: '/images/products/emerald-box.webp',
+        alt: 'Kemasan eksklusif OMOO Emerald 30 ml',
+        label: 'Kemasan Box',
+      },
+      {
+        url: '/images/products/trio-editorial.webp',
+        alt: 'Koleksi tiga box OMOO termasuk Emerald, Rare, dan Golden de Brume',
+        label: 'Koleksi Trio',
+      },
+    ],
     notes: {
-      top: ['Fig leaf', 'Bitter orange'],
-      heart: ['Black fig', 'Galbanum'],
-      base: ['Cedar', 'Vetiver', 'Moss'],
+      top: ['Bergamot', 'Green tea leaf', 'Morning dew'],
+      heart: ['White fig leaf', 'Jasmine bud', 'Neroli'],
+      base: ['White cedar', 'Soft vetiver', 'Clean musk'],
     },
     material: {
-      name: 'Fig',
-      origin: 'Calabria',
-      phrase: 'Getah hijau, buah pekat, daun.',
+      name: 'Green Tea',
+      origin: 'Jawa Barat & Uji',
+      phrase: 'Daun teh basah, embun pagi, ketenangan.',
     },
     story: [
-      'Ada pohon ara di halaman belakang studio kami. Pada bulan Agustus, buahnya matang lebih cepat daripada kemampuan kami memanennya, dan seluruh halaman berbau getah serta daun yang hangat.',
-      'Kami ingin bagian hijaunya, bukan selainya. Fig leaf dan galbanum membawa bagian atas. Buahnya duduk di bawah, gelap dan tenang, sementara cedar dan lumut menjaganya agar tidak berubah manis.',
+      'Emerald lahir dari suasana pagi yang tenang: secangkir teh hijau hangat di atas meja kayu, halaman buku botani yang terbuka, dan cahaya jendela yang lembut.',
+      'Aromanya dibuka oleh kesegaran daun teh dan citrus lembut yang jernih, lalu menetap rapi di kulit sebagai wangi hijau bersih yang menenangkan sepanjang hari.',
     ],
     quote: {
-      text: 'Pohonnya lebih nyaring daripada buahnya. Itulah bagian yang selalu saya cari.',
-      attribution: 'Camille Aumont, perfumer',
-    },
-    performance: {
-      concentration: '20%',
-      maceration: 'Lima minggu',
-      longevity: '7 sampai 9 jam',
-      sillage: 'Sejauh lengan',
-    },
-    related: ['vetiver-obscura', 'sel-brut'],
-  },
-  {
-    slug: 'sel-brut',
-    edition: 'OM-04',
-    name: 'Sel Brut',
-    family: 'Fresh',
-    tagline: 'Sea salt, driftwood, wind.',
-    description: 'Garam di kulit, udara dingin, dan driftwood yang mengering di bawah matahari.',
-    price: 2450000,
-    volume: '50 ml',
-    concentration: 'Extrait de parfum, 20%',
-    bottle: images.bottleSel,
-    bottleAlt: alts.bottleSel,
-    macro: images.macroSel,
-    macroAlt: alts.macroSel,
-    card: images.bottleSel,
-    cardAlt: alts.bottleSel,
-    notes: {
-      top: ['Sea salt', 'Yuzu', 'Pink pepper'],
-      heart: ['Driftwood', 'Sage'],
-      base: ['Ambergris accord', 'White musk', 'Cedar'],
-    },
-    material: {
-      name: 'Sea salt',
-      origin: 'Noirmoutier',
-      phrase: 'Mineral, udara, kulit.',
-    },
-    story: [
-      'Sel Brut dimulai di sebuah pantai pada bulan November, dengan angin dari laut dan tidak banyak hal lain di sekitar. Hanya komposisi ini yang berbau udara secara eksplisit.',
-      'Sea salt dan yuzu membuat menit pertama terasa tajam. Driftwood, sage, dan accord ambergris mengambil alih perlahan, meninggalkan sesuatu yang hangat dan sedikit animal di kulit.',
-    ],
-    quote: {
-      text: 'Saya ingin momen setelah berenang, bukan lautnya sendiri.',
-      attribution: 'Camille Aumont, perfumer',
-    },
-    performance: {
-      concentration: '20%',
-      maceration: 'Empat minggu',
-      longevity: '6 sampai 8 jam',
-      sillage: 'Sedang',
-    },
-    related: ['fig-nocturne', 'ambrette-12'],
-  },
-  {
-    slug: 'oud-intime',
-    edition: 'OM-05',
-    name: 'Oud Intime',
-    family: 'Oriental',
-    tagline: 'Oud, rose, saffron, leather.',
-    description: 'Oud gelap dan mawar yang ditahan dekat. Saffron, leather, dan jejak incense.',
-    price: 3450000,
-    volume: '50 ml',
-    concentration: 'Extrait de parfum, 25%',
-    bottle: images.bottleOud,
-    bottleAlt: alts.bottleOud,
-    macro: images.macroOud,
-    macroAlt: alts.macroOud,
-    card: images.bottleOud,
-    cardAlt: alts.bottleOud,
-    notes: {
-      top: ['Saffron', 'Rose'],
-      heart: ['Oud', 'Leather'],
-      base: ['Patchouli', 'Tonka bean', 'Incense'],
-    },
-    material: {
-      name: 'Oud',
-      origin: 'Assam',
-      phrase: 'Resin, leather, panas.',
-    },
-    story: [
-      'Oud bisa menguasai ruangan sebelum seseorang masuk. Kami ingin yang sebaliknya: material gelap yang ditahan dekat, hanya terungkap ketika seseorang mendekat.',
-      'Saffron dan mawar membuka komposisi dengan kehangatan kering yang hampir metalik. Oud dan leather menyusul, dilembutkan patchouli dan tonka. Ini bukan parfum yang berisik. Ia panjang.',
-    ],
-    quote: {
-      text: 'Intimasi adalah soal jarak. Yang ini menjawab dari dekat.',
-      attribution: 'Camille Aumont, perfumer',
-    },
-    performance: {
-      concentration: '25%',
-      maceration: 'Delapan minggu',
-      longevity: '10 sampai 12 jam',
-      sillage: 'Dekat dan tahan lama',
-    },
-    related: ['vetiver-obscura', 'iris-cendre'],
-  },
-  {
-    slug: 'ambrette-12',
-    edition: 'OM-06',
-    name: 'Ambrette 12',
-    family: 'Musk',
-    tagline: 'Ambrette seed, almond, warm linen.',
-    description: 'Musk yang berperilaku seperti kulit. Ambrette, almond, dan linen hangat.',
-    price: 2450000,
-    volume: '50 ml',
-    concentration: 'Extrait de parfum, 20%',
-    bottle: images.bottleAmbrette,
-    bottleAlt: alts.bottleAmbrette,
-    macro: images.macroAmbrette,
-    macroAlt: alts.macroAmbrette,
-    card: images.macroAmbrette,
-    cardAlt: alts.macroAmbrette,
-    notes: {
-      top: ['Almond', 'Hay'],
-      heart: ['Ambrette seed', 'Iris'],
-      base: ['White musk', 'Vanilla', 'Cedar'],
-    },
-    material: {
-      name: 'Ambrette',
-      origin: 'Ecuador',
-      phrase: 'Musk, kulit pir, linen.',
-    },
-    story: [
-      'Ambrette adalah biji yang berbau musk, yang membuatnya sekaligus material dan ilusi. Kami membangun komposisi paling lembut di koleksi ini di sekelilingnya.',
-      'Almond dan hay memberi bagian atas kehangatan yang kering dan sedikit seperti kacang. Ambrette dan iris menjaga tengahnya. Dasarnya hampir tidak ada: white musk, sedikit vanilla, cedar. Ini parfum yang kami pakai ketika tidak ingin menjelaskan diri.',
-    ],
-    quote: {
-      text: 'Hal terakhir yang Anda sadari seharusnya menjadi hal yang Anda ingat.',
-      attribution: 'Camille Aumont, perfumer',
+      text: 'Ketentraman di pagi hari yang diringkas dalam botol kaca 30 ml.',
+      attribution: 'OMOO Studio, Jakarta',
     },
     performance: {
       concentration: '20%',
       maceration: 'Enam minggu',
-      longevity: '5 sampai 7 jam',
-      sillage: 'Hampir tak terasa',
+      longevity: '7 sampai 9 jam',
+      sillage: 'Jernih & menenangkan',
     },
-    related: ['iris-cendre', 'sel-brut'],
+    related: ['golden-de-brume', 'youth-lumina'],
+  },
+  {
+    slug: 'golden-de-brume',
+    edition: 'OM-02',
+    name: 'Golden de Brume',
+    family: 'Oriental',
+    tagline: 'Sunlit amber, warm desert breeze, velvet musk.',
+    description:
+      'Kehangatan sinar matahari senja di balik bukit pasir keemasan, diracik dengan sentuhan amber manis, saffron halus, dan beludru kayu cendana.',
+    price: 520000,
+    volume: '30 ml',
+    concentration: 'Eau de parfum, 20%',
+    bottle: '/images/products/golden-de-brume-mood.webp',
+    bottleAlt: 'Botol OMOO Golden de Brume 30 ml di atas kain beludru marun dengan sorotan cahaya emas',
+    macro: '/images/products/golden-de-brume-box.webp',
+    macroAlt: 'Kemasan box OMOO Golden de Brume 30 ml di atas hamparan pasir senja',
+    card: '/images/products/golden-de-brume-mood.webp',
+    cardAlt: 'OMOO Golden de Brume Eau de Parfum 30 ml',
+    galleryImages: [
+      {
+        url: '/images/products/golden-de-brume-mood.webp',
+        alt: 'OMOO Golden de Brume 30 ml di atas kain beludru marun bercahaya emas',
+        label: 'Edisi Beludru',
+      },
+      {
+        url: '/images/products/golden-de-brume-studio.webp',
+        alt: 'Foto studio close-up botol OMOO Golden de Brume 30 ml',
+        label: 'Detail Botol',
+      },
+      {
+        url: '/images/products/golden-de-brume-box.webp',
+        alt: 'Kemasan box OMOO Golden de Brume 30 ml di bukit pasir senja',
+        label: 'Kemasan Box',
+      },
+    ],
+    notes: {
+      top: ['Cardamom', 'Saffron thread', 'Mandarin zest'],
+      heart: ['Golden amber', 'Toasted Tonka', 'Damask rose'],
+      base: ['Sandalwood', 'Benzoin resin', 'Warm vanilla'],
+    },
+    material: {
+      name: 'Golden Amber',
+      origin: 'Oman & Nusantara',
+      phrase: 'Kabut emas, resin hangat, senja gurun.',
+    },
+    story: [
+      'Golden de Brume menangkap momen keemasan menjelang petang—hangat, memikat, namun tetap lembut memeluk kulit seperti kain beludru.',
+      'Perpaduan resin amber, rempah cardamom, dan sandalwood lembut meninggalkan jejak elegan yang berkelas dari sore hingga larut malam.',
+    ],
+    quote: {
+      text: 'Seperti kabut keemasan yang bertahan hangat jauh setelah matahari tenggelam.',
+      attribution: 'OMOO Studio, Jakarta',
+    },
+    performance: {
+      concentration: '20%',
+      maceration: 'Delapan minggu',
+      longevity: '8 sampai 11 jam',
+      sillage: 'Hangat & memeluk',
+    },
+    related: ['rare', 'emerald'],
+  },
+  {
+    slug: 'rare',
+    edition: 'OM-03',
+    name: 'Rare',
+    family: 'Citrus',
+    tagline: 'Bitter orange blossom, molten honey, dark woods.',
+    description:
+      'Karakter berani dalam flacon hitam berlabel emas: kesegaran jeruk matang dan bunga neroli yang diselimuti madu hangat dan kayu gelap.',
+    price: 545000,
+    volume: '30 ml',
+    concentration: 'Eau de parfum, 20%',
+    bottle: '/images/products/rare-mood.webp',
+    bottleAlt: 'Botol hitam label emas OMOO Rare 30 ml bersama potongan jeruk segar, bunga putih, dan tetesan madu',
+    macro: '/images/products/rare-box.webp',
+    macroAlt: 'Kemasan box marmer hitam berasap OMOO Rare 30 ml',
+    card: '/images/products/rare-mood.webp',
+    cardAlt: 'OMOO Rare Eau de Parfum 30 ml',
+    galleryImages: [
+      {
+        url: '/images/products/rare-mood.webp',
+        alt: 'Botol OMOO Rare 30 ml bersama jeruk, bunga neroli, dan sirup madu keemasan',
+        label: 'Citrus & Madu',
+      },
+      {
+        url: '/images/products/rare-stage.webp',
+        alt: 'Botol hitam OMOO Rare 30 ml di atas panggung kabut dramatis',
+        label: 'Edisi Malam',
+      },
+      {
+        url: '/images/products/rare-box.webp',
+        alt: 'Kemasan box marmer hitam OMOO Rare 30 ml',
+        label: 'Kemasan Box',
+      },
+    ],
+    notes: {
+      top: ['Bitter orange', 'Blood mandarin', 'Citrus peel'],
+      heart: ['Orange blossom', 'Wild honey', 'Spiced jasmine'],
+      base: ['Smoked oud', 'Patchouli', 'Dark amber'],
+    },
+    material: {
+      name: 'Neroli & Honey',
+      origin: 'Seville & Aceh',
+      phrase: 'Jeruk pahit, tetes madu, kayu hitam.',
+    },
+    story: [
+      'Rare mematahkan anggapan bahwa aroma citrus selalu ringan. Kami mempertemukan perasan jeruk segar dan bunga orange blossom dengan madu liar serta kayu gelap yang intens.',
+      'Hasilnya adalah aroma berlapis emas yang tegas, sensual, dan sulit dilupakan di ruangan mana pun Anda melangkah.',
+    ],
+    quote: {
+      text: 'Kontras antara kesegaran jeruk dan kedalaman kayu gelap berbalut madu.',
+      attribution: 'OMOO Studio, Jakarta',
+    },
+    performance: {
+      concentration: '20%',
+      maceration: 'Delapan minggu',
+      longevity: '9 sampai 12 jam',
+      sillage: 'Berani & berkarakter',
+    },
+    related: ['golden-de-brume', 'youth-lumina'],
+  },
+  {
+    slug: 'youth-lumina',
+    edition: 'OM-04',
+    name: 'Youth & Lumina',
+    family: 'Floral',
+    tagline: 'Pink peony mist, velvet peach, luminous musk.',
+    description:
+      'Pancaran energi muda yang ceria dan berkilau: perpaduan kelopak mawar merah muda, buah persik lembut, dan vanilla praline yang ringan di kulit.',
+    price: 495000,
+    volume: '30 ml',
+    concentration: 'Eau de parfum, 20%',
+    bottle: '/images/products/youth-lumina-mood.webp',
+    bottleAlt: 'Botol OMOO Youth & Lumina 30 ml dengan kepulan kabut merah muda artistik',
+    macro: '/images/products/youth-lumina-box.webp',
+    macroAlt: 'Kemasan box pastel artistik OMOO Youth & Lumina 30 ml',
+    card: '/images/products/youth-lumina-mood.webp',
+    cardAlt: 'OMOO Youth & Lumina Eau de Parfum 30 ml',
+    galleryImages: [
+      {
+        url: '/images/products/youth-lumina-mood.webp',
+        alt: 'OMOO Youth & Lumina 30 ml dengan kepulan kabut floral merah muda',
+        label: 'Luminous Mist',
+      },
+      {
+        url: '/images/products/youth-lumina-studio.webp',
+        alt: 'Foto studio close-up botol OMOO Youth & Lumina 30 ml',
+        label: 'Detail Botol',
+      },
+      {
+        url: '/images/products/youth-lumina-box.webp',
+        alt: 'Kemasan box OMOO Youth & Lumina 30 ml',
+        label: 'Kemasan Box',
+      },
+    ],
+    notes: {
+      top: ['Pink pepper', 'White peach', 'Lychee'],
+      heart: ['Pink peony', 'Damask rose', 'Magnolia'],
+      base: ['Soft praline', 'White musk', 'Cashmere wood'],
+    },
+    material: {
+      name: 'Pink Peony',
+      origin: 'Grasse',
+      phrase: 'Kelopak mawar muda, praline lembut, kilau musk.',
+    },
+    story: [
+      'Youth & Lumina merayakan sisi yang cerah, ekspresif, dan penuh daya hidup—dituang dalam botol kaca bening bermahkota emas.',
+      'Kelopak peony merah muda dan buah lychee berpadu manis halus di atas musk lembut, cocok dipakai sehari-hari maupun momen spesial.',
+    ],
+    quote: {
+      text: 'Aroma floral modern yang bercahaya tanpa pernah terasa berlebihan.',
+      attribution: 'OMOO Studio, Jakarta',
+    },
+    performance: {
+      concentration: '20%',
+      maceration: 'Enam minggu',
+      longevity: '7 sampai 9 jam',
+      sillage: 'Memikat & lembut',
+    },
+    related: ['emerald', 'rare'],
   },
 ];
 
 export const bySlug = (slug: string) => fragrances.find((fragrance) => fragrance.slug === slug);
 
-export const featured = ['vetiver-obscura', 'fig-nocturne', 'iris-cendre', 'oud-intime'].map(
-  (slug) => bySlug(slug)!
-);
+export const featured = fragrances;
 
-export const families = ['All', 'Woody', 'Floral', 'Green', 'Fresh', 'Oriental', 'Musk'];
+export const families = ['All', 'Green', 'Oriental', 'Citrus', 'Floral'];
 
 export const materials = fragrances.map((fragrance) => ({
   ...fragrance.material,
   slug: fragrance.slug,
   edition: fragrance.edition,
-  image: fragrance.macro,
-  alt: fragrance.macroAlt,
+  image: fragrance.bottle,
+  alt: fragrance.bottleAlt,
 }));
 
 export const priceLabel = (value: number) =>

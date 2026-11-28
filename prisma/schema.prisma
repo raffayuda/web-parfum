@@ -113,6 +113,7 @@ model Fragrance {
   bottleAlt     String
   macroImage    String?
   macroAlt      String?
+  galleryImages Json?         // Array of { url, alt, label } for detail gallery switcher
   
   // Stored as JSON for flexible aromatic notes & stories
   notes         Json          // { top: [], heart: [], base: [] }
@@ -138,6 +139,7 @@ model Fragrance {
 enum SectionTemplate {
   HERO_EDITORIAL      // Full/split typography hero with atmosphere background
   HERO_SPLIT          // Text + full-height photography
+  EDITORIAL_CAROUSEL  // Asymmetric luxury lookbook showcase carousel
   FRAGRANCE_GRID      // Live catalog grid with family filter & availability tag
   MATERIAL_STORY      // Origin, raw ingredients showcase (Haiti Vetiver, etc.)
   PROCESS_STEPS       // Atelier craft sequence (Compose, Macerate, Bottle)

@@ -747,7 +747,7 @@ export const CertificatesTab: React.FC = () => {
               label="Nama Produk / Keterangan di Sertifikat *"
               value={formData.productName}
               onChange={(e) => setFormData({ ...formData, productName: e.target.value })}
-              placeholder="Contoh: Vetiver Obscura Extrait de Parfum"
+              placeholder="Contoh: Emerald Eau de Parfum 30 ml"
               required
             />
           </div>

@@ -67,7 +67,7 @@ export const OrdersTab: React.FC = () => {
   const [manualCity, setManualCity] = useState('Jakarta Selatan');
   const [manualPostal, setManualPostal] = useState('12190');
   const [manualCourier, setManualCourier] = useState('JNE YES');
-  const [manualPerfumeSlug, setManualPerfumeSlug] = useState('vetiver-obscura');
+  const [manualPerfumeSlug, setManualPerfumeSlug] = useState('emerald');
   const [manualQuantity, setManualQuantity] = useState('1');
   const [manualPaymentStatus, setManualPaymentStatus] = useState('PROCESSING');
   const [manualAdminNotes, setManualAdminNotes] = useState('Pesanan diinput manual oleh Admin Concierge.');
@@ -247,7 +247,7 @@ export const OrdersTab: React.FC = () => {
     setManualCity('Jakarta Selatan');
     setManualPostal('12190');
     setManualCourier('JNE YES');
-    setManualPerfumeSlug(perfumes[0]?.slug || 'vetiver-obscura');
+    setManualPerfumeSlug(perfumes[0]?.slug || 'emerald');
     setManualQuantity('1');
     setManualPaymentStatus('PROCESSING');
     setManualAdminNotes('Pesanan diinput manual oleh Admin Concierge.');
@@ -316,7 +316,7 @@ export const OrdersTab: React.FC = () => {
           ? 'Konfirmasi Pesanan Selesai'
           : 'Konfirmasi Kembalikan Proses Pesanan'
       }
-      size="sm"
+      maxWidth="sm"
     >
       <div className="space-y-4">
         <div className="flex items-start gap-3">

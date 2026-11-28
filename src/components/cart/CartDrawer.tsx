@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'motion/react';
-import { ShoppingBag, X, Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
+import { ShoppingBag, X, Trash2, Plus, Minus, ArrowRight, MessageSquare, Lock, QrCode } from 'lucide-react';
 import {
   type CartItem,
   getCartItems,
@@ -11,30 +11,61 @@ import {
   formatIdr,
 } from '../../lib/cart';
 import { resolvePublicImageUrl } from '../../data/images';
+import { api } from '../../lib/api';
+import { toast } from 'sonner';
 
 export const CartDrawer: React.FC = () => {
   const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [items, setItems] = useState<CartItem[]>([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [adminWaNumber, setAdminWaNumber] = useState('6281200000000');
 
   useEffect(() => {
     setMounted(true);
     const sync = () => setItems(getCartItems());
+    const syncAuth = () => {
+      try {
+        const cached = localStorage.getItem('omoo_customer_user');
+        setIsLoggedIn(Boolean(cached && JSON.parse(cached)?.id));
+      } catch {
+        setIsLoggedIn(false);
+      }
+    };
     sync();
+    syncAuth();
+
+    api
+      .getSettings()
+      .then((res) => {
+        const wa = res?.data?.whatsappNumber;
+        if (wa) {
+          const digits = String(wa).replace(/\D/g, '');
+          if (digits) {
+            setAdminWaNumber(digits.startsWith('0') ? `62${digits.slice(1)}` : digits);
+          }
+        }
+      })
+      .catch(() => {});
 
     const handleOpen = () => {
       sync();
+      syncAuth();
       setIsOpen(true);
     };
 
     window.addEventListener('omoo:cart-changed', sync);
     window.addEventListener('omoo:open-cart', handleOpen);
+    window.addEventListener('omoo:auth-changed', syncAuth);
     window.addEventListener('storage', sync);
+    window.addEventListener('storage', syncAuth);
 
     return () => {
       window.removeEventListener('omoo:cart-changed', sync);
       window.removeEventListener('omoo:open-cart', handleOpen);
+      window.removeEventListener('omoo:auth-changed', syncAuth);
       window.removeEventListener('storage', sync);
+      window.removeEventListener('storage', syncAuth);
     };
   }, []);
 
@@ -53,6 +84,12 @@ export const CartDrawer: React.FC = () => {
 
   const totalCount = items.reduce((sum, i) => sum + i.quantity, 0);
   const totalAmount = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+
+  const waCartText =
+    `Halo Admin OMOO, saya ingin memesan produk berikut:\n\n` +
+    items.map((i) => `- ${i.quantity}x ${i.name} (${i.volume}) — ${formatIdr(i.price * i.quantity)}`).join('\n') +
+    `\n\n*Total Perkiraan:* ${formatIdr(totalAmount)}\nMohon info ketersediaan dan pengiriman. Terima kasih.`;
+  const waCartUrl = `https://wa.me/${adminWaNumber}?text=${encodeURIComponent(waCartText)}`;
 
   const drawerContent = (
     <AnimatePresence>
@@ -202,22 +239,55 @@ export const CartDrawer: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2.5">
+                  {isLoggedIn ? (
+                    <a
+                      href="/checkout?mode=cart"
+                      onClick={() => setIsOpen(false)}
+                      className="w-full inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-ink text-bg hover:bg-ink/90 text-xs font-semibold uppercase tracking-[0.14em] transition-colors"
+                    >
+                      <QrCode className="w-4 h-4 text-accent" />
+                      <span>Checkout QRIS Sekarang</span>
+                      <ArrowRight className="w-4 h-4 text-accent" />
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsOpen(false);
+                        toast.info('Silakan masuk atau daftar akun untuk bayar via QRIS agar pesanan tersimpan aman di My Orders.');
+                        window.dispatchEvent(new Event('omoo:open-account-modal'));
+                      }}
+                      className="w-full inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-ink text-bg hover:bg-ink/90 text-xs font-semibold uppercase tracking-[0.14em] transition-colors cursor-pointer"
+                    >
+                      <Lock className="w-4 h-4 text-accent" />
+                      <span>Login / Daftar untuk Bayar QRIS</span>
+                    </button>
+                  )}
+
                   <a
-                    href="/checkout?mode=cart"
+                    href={waCartUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     onClick={() => setIsOpen(false)}
-                    className="w-full inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-ink text-bg hover:bg-ink/90 text-xs font-semibold uppercase tracking-[0.14em] transition-colors"
+                    className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 border border-line bg-bg hover:border-ink text-ink text-xs font-semibold uppercase tracking-[0.12em] transition-colors"
                   >
-                    <span>Checkout Sekarang</span>
-                    <ArrowRight className="w-4 h-4 text-accent" />
+                    <MessageSquare className="w-4 h-4 text-emerald-600" />
+                    <span>{isLoggedIn ? 'Pesan Keranjang via WhatsApp' : 'Pesan via WhatsApp (Tanpa Akun)'}</span>
                   </a>
+
+                  {!isLoggedIn && (
+                    <p className="text-[0.62rem] text-muted text-center leading-relaxed">
+                      Pembayaran QRIS membutuhkan akun OMOO agar nomor pesanan, resi &amp; poin Collector VIP tidak hilang.
+                    </p>
+                  )}
 
                   <button
                     type="button"
                     onClick={() => {
                       clearCart();
                     }}
-                    className="w-full py-2 text-[0.68rem] uppercase tracking-[0.12em] text-muted hover:text-red-600 transition-colors cursor-pointer"
+                    className="w-full py-1.5 text-[0.68rem] uppercase tracking-[0.12em] text-muted hover:text-red-600 transition-colors cursor-pointer"
                   >
                     Kosongkan Keranjang
                   </button>

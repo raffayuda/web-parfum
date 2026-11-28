@@ -29,6 +29,7 @@ import {
   Plus,
   Minus,
   Trash2,
+  Lock,
 } from 'lucide-react';
 
 interface Province {
@@ -82,12 +83,12 @@ export const CheckoutPage: React.FC = () => {
   // Multi-item Cart / Order Items
   const [cartItems, setCartItems] = useState<CartItem[]>([
     {
-      slug: 'vetiver-obscura',
-      name: 'Vetiver Obscura',
+      slug: 'emerald',
+      name: 'Emerald',
       edition: 'OM-01',
-      volume: '50 ml / Extrait',
-      price: 2450000,
-      bottleImage: '/images/bottle-vetiver.jpg',
+      volume: '30 ml / Eau de Parfum',
+      price: 485000,
+      bottleImage: '/images/products/emerald-lifestyle.webp',
       quantity: 1,
     },
   ]);
@@ -99,6 +100,7 @@ export const CheckoutPage: React.FC = () => {
 
   // Customer Form
   const [loggedInUser, setLoggedInUser] = useState<any>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [loyaltyInfo, setLoyaltyInfo] = useState<any>(null);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -145,31 +147,41 @@ export const CheckoutPage: React.FC = () => {
 
   // 1. Initial Load: Product, Logged-in Customer, and Provinces
   useEffect(() => {
-    // Load logged-in customer if any + refresh live loyalty tier
-    const cachedUser = localStorage.getItem('omoo_customer_user');
-    if (cachedUser) {
-      try {
-        const u = JSON.parse(cachedUser);
-        setLoggedInUser(u);
-        if (u.name) setName(u.name);
-        if (u.email) setEmail(u.email);
-        if (u.phone) setPhone(u.phone);
-      } catch {}
-    }
+    const refreshAuth = () => {
+      const cachedUser = localStorage.getItem('omoo_customer_user');
+      if (cachedUser) {
+        try {
+          const u = JSON.parse(cachedUser);
+          setLoggedInUser(u);
+          if (u.name) setName((prev) => prev || u.name);
+          if (u.email) setEmail((prev) => prev || u.email);
+          if (u.phone) setPhone((prev) => prev || u.phone);
+        } catch {}
+      } else {
+        setLoggedInUser(null);
+      }
 
-    api
-      .getMe()
-      .then((res) => {
-        if (res.success && res.user) {
-          setLoggedInUser(res.user);
-          if (res.loyalty) setLoyaltyInfo(res.loyalty);
-          localStorage.setItem('omoo_customer_user', JSON.stringify(res.user));
-          setName((prev) => prev || res.user.name || '');
-          setEmail((prev) => prev || res.user.email || '');
-          setPhone((prev) => prev || res.user.phone || '');
-        }
-      })
-      .catch(() => {});
+      api
+        .getMe()
+        .then((res) => {
+          if (res.success && res.user) {
+            setLoggedInUser(res.user);
+            if (res.loyalty) setLoyaltyInfo(res.loyalty);
+            localStorage.setItem('omoo_customer_user', JSON.stringify(res.user));
+            setName((prev) => prev || res.user.name || '');
+            setEmail((prev) => prev || res.user.email || '');
+            setPhone((prev) => prev || res.user.phone || '');
+          } else if (res && res.user === null) {
+            setLoggedInUser(null);
+          }
+        })
+        .catch(() => {})
+        .finally(() => setIsCheckingAuth(false));
+    };
+
+    refreshAuth();
+    window.addEventListener('omoo:auth-changed', refreshAuth);
+    window.addEventListener('storage', refreshAuth);
 
     // Load Store Settings (Admin WhatsApp number & shippingFee)
     api
@@ -751,10 +763,10 @@ export const CheckoutPage: React.FC = () => {
           {
             slug: 'discovery-set',
             name: 'OMOO Discovery Set',
-            edition: 'SET-06',
-            volume: '6 x 2 ml Vial',
-            price: 450000,
-            bottleImage: '/images/discovery-set.jpg',
+            edition: 'SET-04',
+            volume: '4 x 2 ml Vial',
+            price: 195000,
+            bottleImage: '/images/products/trio-editorial.webp',
             quantity: 1,
           },
         ];
@@ -776,14 +788,109 @@ export const CheckoutPage: React.FC = () => {
           slug: found.slug,
           name: found.name,
           edition: found.edition || 'OM-01',
-          volume: found.volume || '50 ml / Extrait',
-          price: Number(found.price) || 2450000,
+          volume: found.volume || '30 ml / Eau de Parfum',
+          price: Number(found.price) || 485000,
           bottleImage: resolvePublicImageUrl(found.bottleImage),
           quantity: 1,
         },
       ];
     });
   };
+
+  const guestWaMessage =
+    `Halo Admin OMOO, saya ingin memesan langsung via WhatsApp:\n\n` +
+    cartItems.map((i) => `- ${i.quantity}x ${i.name} (${i.volume}) — ${formatIdr(i.price * i.quantity)}`).join('\n') +
+    `\n\n*Subtotal:* ${formatIdr(cartItems.reduce((s, i) => s + i.price * i.quantity, 0))}\nMohon info ketersediaan dan ongkos kirim. Terima kasih.`;
+  const guestWaUrl = `https://wa.me/${adminWaNumber}?text=${encodeURIComponent(guestWaMessage)}`;
+
+  if (!isCheckingAuth && !loggedInUser) {
+    const waitingSubtotal = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0);
+    return (
+      <div className="min-h-screen bg-bg text-ink py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto space-y-8">
+          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.12em] text-muted border-b border-line pb-4">
+            <a href="/" className="hover:text-ink transition-colors">OMOO</a>
+            <span>/</span>
+            <a href="/collection" className="hover:text-ink transition-colors">Collection</a>
+            <span>/</span>
+            <span className="text-ink font-semibold">Login untuk Checkout QRIS</span>
+          </div>
+
+          <div className="border border-line bg-surface/25 p-6 sm:p-10 space-y-6">
+            <div className="flex items-start gap-4">
+              <div className="w-11 h-11 border border-accent/40 bg-accent/10 flex items-center justify-center shrink-0">
+                <Lock className="w-5 h-5 text-accent" />
+              </div>
+              <div className="space-y-2">
+                <span className="text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-accent block">
+                  Keamanan Pesanan &amp; Pelacakan
+                </span>
+                <h1 className="font-display text-3xl sm:text-4xl font-light text-ink leading-tight">
+                  Masuk untuk melanjutkan Checkout QRIS.
+                </h1>
+                <p className="text-xs sm:text-sm text-muted leading-relaxed">
+                  Agar nomor pesanan, bukti transfer QRIS, dan nomor resi kurir tersimpan aman di akun <strong>My Orders</strong> Anda (tidak hilang meski browser ditutup), silakan masuk atau daftar akun OMOO terlebih dahulu.
+                </p>
+              </div>
+            </div>
+
+            {cartItems.length > 0 && (
+              <div className="border border-line bg-bg/70 p-4 space-y-3">
+                <p className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-muted">
+                  Produk Pilihan Anda ({cartItems.length} varian — Tersimpan Aman)
+                </p>
+                <div className="divide-y divide-line/60">
+                  {cartItems.map((item) => (
+                    <div key={item.slug || item.name} className="py-2.5 flex items-center justify-between gap-3 text-xs">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <img
+                          src={resolvePublicImageUrl(item.bottleImage)}
+                          alt={item.name}
+                          className="w-10 h-12 object-cover border border-line shrink-0"
+                        />
+                        <div className="min-w-0">
+                          <p className="font-medium text-ink truncate">{item.name}</p>
+                          <p className="text-[0.65rem] text-muted">{item.quantity}x • {item.volume}</p>
+                        </div>
+                      </div>
+                      <span className="font-mono font-semibold text-ink shrink-0">
+                        {formatIdr(item.price * item.quantity)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div className="pt-2 border-t border-line flex items-center justify-between text-xs">
+                  <span className="text-muted uppercase tracking-wider">Subtotal Produk</span>
+                  <span className="font-display text-xl text-ink font-semibold">{formatIdr(waitingSubtotal)}</span>
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new Event('omoo:open-account-modal'))}
+                className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 bg-ink text-bg hover:bg-ink/90 text-xs font-semibold uppercase tracking-[0.14em] transition-colors cursor-pointer"
+              >
+                <QrCode className="w-4 h-4 text-accent" />
+                <span>Masuk / Daftar &amp; Lanjut Bayar QRIS</span>
+              </button>
+
+              <a
+                href={guestWaUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 border border-line bg-surface/40 hover:border-ink text-ink text-xs font-semibold uppercase tracking-[0.12em] transition-colors"
+              >
+                <MessageSquare className="w-4 h-4 text-emerald-600" />
+                <span>Pesan via WhatsApp (Tanpa Akun)</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const orderItemsListText = (orderResult?.items || cartItems)
     .map((item: any) => `- ${item.quantity}x ${item.name} (${item.volume})`)

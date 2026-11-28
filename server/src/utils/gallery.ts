@@ -18,82 +18,82 @@ export const GALLERY_PAGE_SLUG = 'gallery-items';
 
 export const DEFAULT_GALLERY_ITEMS: GalleryItem[] = [
   {
-    id: 'gal-maserasi-01',
-    title: 'Proses Maserasi Batch Pertama',
-    category: 'Dokumentasi Pembuatan',
+    id: 'gal-trio-01',
+    title: 'Koleksi Tiga Box Signature 30 ml',
+    category: 'Material & Botol',
     eventOrLocation: 'Studio OMOO Jakarta',
     capturedDate: 'November 2026',
-    image: '/images/atelier.jpg',
+    image: '/images/products/trio-editorial.webp',
     description:
-      'Tahap pengendapan konsentrat extrait dalam botol kaca tertutup bersuhu terkendali sebelum disaring dan dikemas. Langkah ini menyatukan karakter top, heart, dan base notes agar terasa bulat di kulit.',
-    aspect: '16 / 10',
+      'Tiga edisi kemasan resmi OMOO Eau de Parfum 30 ml — Golden de Brume, Rare, dan Emerald — tertata di bawah cahaya matahari studio.',
+    aspect: '4 / 5',
     featured: true,
+    createdAt: '2026-11-26T10:00:00.000Z',
+  },
+  {
+    id: 'gal-emerald-02',
+    title: 'Morning Tea & Emerald 30 ml',
+    category: 'Material & Botol',
+    eventOrLocation: 'Atelier Lookup OMOO',
+    capturedDate: 'November 2026',
+    image: '/images/products/emerald-lifestyle.webp',
+    description:
+      'Karakter hijau tenang varian Emerald Eau de Parfum bersama seduhan teh hijau hangat dan arsip botani di studio.',
+    aspect: '4 / 3',
+    featured: true,
+    createdAt: '2026-11-24T10:00:00.000Z',
+  },
+  {
+    id: 'gal-rare-03',
+    title: 'Eksplorasi Citrus & Madu — Rare',
+    category: 'Material & Botol',
+    eventOrLocation: 'Arsip Formula OMOO',
+    capturedDate: 'November 2026',
+    image: '/images/products/rare-mood.webp',
+    description:
+      'Flacon hitam label emas OMOO Rare bersama bahan baku jeruk segar, bunga orange blossom, dan tetes madu keemasan.',
+    aspect: '4 / 5',
+    featured: true,
+    createdAt: '2026-11-22T10:00:00.000Z',
+  },
+  {
+    id: 'gal-golden-04',
+    title: 'Golden de Brume — Velvet & Dusk Box',
+    category: 'Dokumentasi Pembuatan',
+    eventOrLocation: 'Showcase Kemasan 30 ml',
+    capturedDate: 'November 2026',
+    image: '/images/products/golden-de-brume-box.webp',
+    description:
+      'Desain kemasan edisi Golden de Brume 30 ml dengan gradasi hangat yang merepresentasikan aroma amber dan senja.',
+    aspect: '4 / 5',
+    featured: false,
+    createdAt: '2026-11-20T10:00:00.000Z',
+  },
+  {
+    id: 'gal-youth-05',
+    title: 'Youth & Lumina — Luminous Pink Mist',
+    category: 'Behind the Scenes',
+    eventOrLocation: 'Pemotretan Kampanye',
+    capturedDate: 'November 2026',
+    image: '/images/products/youth-lumina-mood.webp',
+    description:
+      'Visual atmosferik botol Youth & Lumina Eau de Parfum 30 ml dengan kabut floral merah muda yang ekspresif.',
+    aspect: '4 / 5',
+    featured: false,
     createdAt: '2026-11-18T10:00:00.000Z',
   },
   {
-    id: 'gal-popup-02',
-    title: 'Pop-Up Showcase & Tes Aroma Perdana',
-    category: 'Event & Collab',
-    eventOrLocation: 'Kemang, Jakarta Selatan',
+    id: 'gal-rare-box-06',
+    title: 'Kemasan Marmer Hitam — Edisi Rare',
+    category: 'Material & Botol',
+    eventOrLocation: 'Studio OMOO Jakarta',
     capturedDate: 'November 2026',
-    image: '/images/corridor.jpg',
+    image: '/images/products/rare-box.webp',
     description:
-      'Sesi perkenalan perdana koleksi OMOO bersama komunitas kreatif dan pencinta wewangian lokal. Pengunjung mencoba langsung seluruh varian ekstrak di atas kulit dan berdiskusi tentang komposisi favorit mereka.',
-    aspect: '4 / 5',
-    featured: true,
-    createdAt: '2026-11-14T10:00:00.000Z',
-  },
-  {
-    id: 'gal-bottling-03',
-    title: 'Pengisian & Penyegelan Botol 50 ml',
-    category: 'Behind the Scenes',
-    eventOrLocation: 'Meja Produksi Jakarta',
-    capturedDate: 'Oktober 2026',
-    image: '/images/bottle-vetiver.jpg',
-    description:
-      'Setiap botol 50 ml diisi, diperiksa kejernihan cairannya, diberi label nomor batch, dan disegel satu per satu secara manual sebelum masuk ke kotak pengiriman.',
-    aspect: '4 / 5',
-    featured: true,
-    createdAt: '2026-10-28T10:00:00.000Z',
-  },
-  {
-    id: 'gal-vetiver-04',
-    title: 'Seleksi Material Akar Vetiver',
-    category: 'Material & Botol',
-    eventOrLocation: 'Arsip Bahan Baku OMOO',
-    capturedDate: 'Oktober 2026',
-    image: '/images/macro-vetiver.jpg',
-    description:
-      'Pengujian sampel minyak atsiri akar vetiver berkarakter tanah lembap dan asap tipis yang menjadi fondasi komposisi Vetiver Obscura.',
-    aspect: '1 / 1',
-    featured: false,
-    createdAt: '2026-10-20T10:00:00.000Z',
-  },
-  {
-    id: 'gal-oud-05',
-    title: 'Eksplorasi Resin & Kayu Gaharu',
-    category: 'Material & Botol',
-    eventOrLocation: 'Arsip Bahan Baku OMOO',
-    capturedDate: 'Oktober 2026',
-    image: '/images/macro-oud.jpg',
-    description:
-      'Dokumentasi pengujian resin dan ekstrak kayu gaharu bersama komposisi rempah hangat untuk seri malam.',
-    aspect: '1 / 1',
-    featured: false,
-    createdAt: '2026-10-12T10:00:00.000Z',
-  },
-  {
-    id: 'gal-sel-06',
-    title: 'Rilis Awal Varian Sel Marin',
-    category: 'Dokumentasi Pembuatan',
-    eventOrLocation: 'Batch 01 — Jakarta',
-    capturedDate: 'Oktober 2026',
-    image: '/images/bottle-sel.jpg',
-    description:
-      'Foto dokumentasi batch perdana varian Sel Marin 50 ml setelah melewati tahap stabilisasi aroma.',
+      'Detail tekstur marmer hitam berasap pada kemasan box OMOO Rare 30 ml.',
     aspect: '4 / 5',
     featured: false,
-    createdAt: '2026-10-05T10:00:00.000Z',
+    createdAt: '2026-11-15T10:00:00.000Z',
   },
 ];
 
@@ -125,15 +125,15 @@ export async function saveGalleryItems(items: GalleryItem[]): Promise<GalleryIte
     await prisma.page.create({
       data: {
         slug: GALLERY_PAGE_SLUG,
-        title: 'Gallery & Dokumentasi',
-        description: 'Daftar foto dokumentasi, kolaborasi event, dan proses pembuatan OMOO.',
+        title: 'Galeri & Dokumentasi OMOO',
+        description: 'Daftar item dokumentasi dan galeri website OMOO.',
         isActive: true,
         sections: {
           create: {
-            name: 'Gallery Items',
-            template: SectionTemplate.GALLERY_GRID,
+            name: 'Gallery Items Store',
+            template: SectionTemplate.RICH_TEXT_MEDIA,
             order: 0,
-            contentData: { items } as any,
+            contentData: { items: items as any },
             isActive: true,
           },
         },
@@ -142,26 +142,24 @@ export async function saveGalleryItems(items: GalleryItem[]): Promise<GalleryIte
     return items;
   }
 
-  if (page.sections.length === 0) {
+  const firstSection = page.sections[0];
+  if (firstSection) {
+    await prisma.pageSection.update({
+      where: { id: firstSection.id },
+      data: { contentData: { items: items as any } },
+    });
+  } else {
     await prisma.pageSection.create({
       data: {
         pageId: page.id,
-        name: 'Gallery Items',
-        template: SectionTemplate.GALLERY_GRID,
+        name: 'Gallery Items Store',
+        template: SectionTemplate.RICH_TEXT_MEDIA,
         order: 0,
-        contentData: { items } as any,
+        contentData: { items: items as any },
         isActive: true,
       },
     });
-    return items;
   }
-
-  await prisma.pageSection.update({
-    where: { id: page.sections[0].id },
-    data: {
-      contentData: { items } as any,
-    },
-  });
 
   return items;
 }

@@ -20,9 +20,9 @@ interface Props {
 const {
   class: className,
   eyebrow = 'Discovery set',
-  title = 'Six scents. One week.',
-  subtitle = 'Enam komposisi dalam vial 2 ml. Pakai satu setiap hari selama enam hari, lalu pilih aroma yang paling Anda rindukan.',
-  price = 450000,
+  title = 'Four scents. One week.',
+  subtitle = 'Empat komposisi OMOO 30 ml dalam vial 2 ml. Coba langsung di kulit Anda sebelum memilih flacon penuh.',
+  price = 195000,
   ctaText = 'Pesan Discovery Set',
 } = Astro.props;
 ---
@@ -61,7 +61,7 @@ const {
       <p data-reveal class="flex items-baseline gap-3 font-display text-3xl">
         <span data-editable-id="discovery-price">{priceLabel(price)}</span>
         <span class="font-sans text-[0.7rem] uppercase tracking-[0.08em] text-muted">
-          Enam vial 2 ml
+          Empat vial 2 ml
         </span>
       </p>
       <div data-reveal class="flex flex-wrap items-center gap-3">
@@ -70,10 +70,10 @@ const {
           product={{
             slug: 'discovery-set',
             name: 'OMOO Discovery Set',
-            edition: 'SET-06',
-            volume: '6 x 2 ml Vial',
+            edition: 'SET-04',
+            volume: '4 x 2 ml Vial',
             price: price,
-            bottleImage: '/images/discovery-set.jpg',
+            bottleImage: '/images/products/trio-editorial.webp',
           }}
           openDrawerAfterAdd
           className="px-6 py-4"

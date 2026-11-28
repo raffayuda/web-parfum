@@ -36,78 +36,84 @@ const questions = [
   {
     id: 'q1',
     title: getTxt('find-q1-title', 'Suasana apa yang Anda cari?'),
-    image: getImg('quiz-img-0', images.corridor),
-    alt: alts.corridor,
+    image: getImg('quiz-img-0', '/images/products/trio-editorial.webp'),
+    alt: 'Koleksi tiga box OMOO Eau de Parfum 30 ml',
     options: [
       {
         id: 'q1-opt1',
-        label: getTxt('find-q1-opt1-label', 'Hangat dan tenang'),
-        hint: getTxt('find-q1-opt1-hint', 'Seperti perpustakaan setelah tutup.'),
-        scores: { 'oud-intime': 3, 'vetiver-obscura': 2, 'ambrette-12': 1 },
+        label: getTxt('find-q1-opt1-label', 'Hangat dan memeluk'),
+        hint: getTxt('find-q1-opt1-hint', 'Seperti cahaya senja keemasan di gurun atau kain beludru.'),
+        scores: { 'golden-de-brume': 3, rare: 2, 'youth-lumina': 1 },
       },
       {
         id: 'q1-opt2',
-        label: getTxt('find-q1-opt2-label', 'Segar dan hijau'),
-        hint: getTxt('find-q1-opt2-hint', 'Seperti rumah kaca saat tengah hari.'),
-        scores: { 'fig-nocturne': 3, 'iris-cendre': 2, 'vetiver-obscura': 1 },
+        label: getTxt('find-q1-opt2-label', 'Segar, hijau, dan tenang'),
+        hint: getTxt('find-q1-opt2-hint', 'Seperti pagi tenang dengan secangkir teh hijau hangat.'),
+        scores: { emerald: 3, 'youth-lumina': 1, 'golden-de-brume': 1 },
       },
       {
         id: 'q1-opt3',
-        label: getTxt('find-q1-opt3-label', 'Bersih dan asin'),
-        hint: getTxt('find-q1-opt3-hint', 'Seperti pantai berbatu dan angin.'),
-        scores: { 'sel-brut': 3, 'fig-nocturne': 1, 'ambrette-12': 1 },
+        label: getTxt('find-q1-opt3-label', 'Cerah, ekspresif, dan berani'),
+        hint: getTxt('find-q1-opt3-hint', 'Bunga berkilau atau citrus berpadu madu yang memikat.'),
+        scores: { rare: 3, 'youth-lumina': 2, 'golden-de-brume': 1 },
       },
     ],
   },
   {
     id: 'q2',
     title: getTxt('find-q2-title', 'Material apa yang paling Anda sukai?'),
-    image: getImg('quiz-img-1', images.atelier),
-    alt: alts.atelier,
+    image: getImg('quiz-img-1', '/images/products/emerald-lifestyle.webp'),
+    alt: 'OMOO Emerald 30 ml bersama teh hijau hangat',
     options: [
       {
         id: 'q2-opt1',
-        label: getTxt('find-q2-opt1-label', 'Akar dan asap'),
-        hint: getTxt('find-q2-opt1-hint', 'Vetiver, oud, kayu.'),
-        scores: { 'vetiver-obscura': 3, 'oud-intime': 2, 'fig-nocturne': 1 },
+        label: getTxt('find-q2-opt1-label', 'Teh hijau dan embun pagi'),
+        hint: getTxt('find-q2-opt1-hint', 'Green tea, bergamot, white cedar.'),
+        scores: { emerald: 3, 'youth-lumina': 1 },
       },
       {
         id: 'q2-opt2',
-        label: getTxt('find-q2-opt2-label', 'Bunga dan bedak'),
-        hint: getTxt('find-q2-opt2-hint', 'Iris, violet, suede.'),
-        scores: { 'iris-cendre': 3, 'ambrette-12': 2, 'oud-intime': 1 },
+        label: getTxt('find-q2-opt2-label', 'Amber emas dan kayu cendana'),
+        hint: getTxt('find-q2-opt2-hint', 'Saffron, golden amber, sandalwood.'),
+        scores: { 'golden-de-brume': 3, rare: 2 },
       },
       {
         id: 'q2-opt3',
-        label: getTxt('find-q2-opt3-label', 'Garam dan getah'),
-        hint: getTxt('find-q2-opt3-hint', 'Fig, citrus, udara laut.'),
-        scores: { 'sel-brut': 3, 'fig-nocturne': 2, 'ambrette-12': 1 },
+        label: getTxt('find-q2-opt3-label', 'Jeruk pahit dan madu liar'),
+        hint: getTxt('find-q2-opt3-hint', 'Bitter orange, neroli, smoked oud.'),
+        scores: { rare: 3, 'golden-de-brume': 1, emerald: 1 },
+      },
+      {
+        id: 'q2-opt4',
+        label: getTxt('find-q2-opt4-label', 'Kelopak peony dan buah segar'),
+        hint: getTxt('find-q2-opt4-hint', 'Pink peony, white peach, soft musk.'),
+        scores: { 'youth-lumina': 3, emerald: 1 },
       },
     ],
   },
   {
     id: 'q3',
     title: getTxt('find-q3-title', 'Seberapa kuat jejak yang Anda inginkan?'),
-    image: getImg('quiz-img-2', images.macroOud),
-    alt: alts.macroOud,
+    image: getImg('quiz-img-2', '/images/products/rare-mood.webp'),
+    alt: 'OMOO Rare 30 ml bersama jeruk segar dan madu',
     options: [
       {
         id: 'q3-opt1',
-        label: getTxt('find-q3-opt1-label', 'Dekat di kulit'),
-        hint: getTxt('find-q3-opt1-hint', 'Hanya tercium oleh Anda.'),
-        scores: { 'ambrette-12': 3, 'iris-cendre': 2, 'sel-brut': 1 },
+        label: getTxt('find-q3-opt1-label', 'Dekat dan menenangkan'),
+        hint: getTxt('find-q3-opt1-hint', 'Bersih, jernih, cocok untuk aktivitas harian.'),
+        scores: { emerald: 3, 'youth-lumina': 2, 'golden-de-brume': 1 },
       },
       {
         id: 'q3-opt2',
-        label: getTxt('find-q3-opt2-label', 'Sepanjang lengan'),
-        hint: getTxt('find-q3-opt2-hint', 'Terasa saat orang mendekat.'),
-        scores: { 'fig-nocturne': 3, 'sel-brut': 2, 'vetiver-obscura': 1 },
+        label: getTxt('find-q3-opt2-label', 'Memikat lembut saat mendekat'),
+        hint: getTxt('find-q3-opt2-hint', 'Manis-floral yang berkilau elegan.'),
+        scores: { 'youth-lumina': 3, 'golden-de-brume': 2, emerald: 1 },
       },
       {
         id: 'q3-opt3',
-        label: getTxt('find-q3-opt3-label', 'Memenuhi ruangan'),
-        hint: getTxt('find-q3-opt3-hint', 'Jejak yang panjang dan berani.'),
-        scores: { 'oud-intime': 3, 'vetiver-obscura': 2, 'iris-cendre': 1 },
+        label: getTxt('find-q3-opt3-label', 'Memenuhi ruangan dan tahan lama'),
+        hint: getTxt('find-q3-opt3-hint', 'Jejak yang berani, hangat, dan berkarakter.'),
+        scores: { rare: 3, 'golden-de-brume': 2, 'youth-lumina': 1 },
       },
     ],
   },
@@ -316,7 +322,7 @@ const questions = [
   const progress = document.querySelector<HTMLElement>('[data-quiz-progress]');
   const back = document.querySelector<HTMLButtonElement>('[data-back]');
   const restart = document.querySelector<HTMLButtonElement>('[data-restart]');
-  const priority = ['vetiver-obscura', 'iris-cendre', 'fig-nocturne', 'sel-brut', 'oud-intime', 'ambrette-12'];
+  const priority = ['emerald', 'golden-de-brume', 'rare', 'youth-lumina'];
 
   let index = 0;
   const answers: Record<string, number>[] = [];

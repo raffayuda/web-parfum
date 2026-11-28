@@ -6,22 +6,27 @@ export const MAX_UPLOAD_BYTES = 2 * 1024 * 1024; // 2 MB
  */
 export async function compressImageFile(
   file: File,
-  options: { maxDimension?: number; quality?: number } = {}
+  options: { maxDimension?: number; quality?: number; allowLargeInput?: boolean } = {}
 ): Promise<File> {
   if (!file.type.startsWith('image/')) {
     throw new Error('Format file harus berupa gambar (JPG, PNG, atau WEBP).');
   }
 
-  if (file.size > MAX_UPLOAD_BYTES) {
-    throw new Error('Ukuran gambar terlalu besar. Maksimal ukuran kirim adalah 2 MB.');
+  const maxRawBytes = options.allowLargeInput ? 15 * 1024 * 1024 : MAX_UPLOAD_BYTES;
+  if (file.size > maxRawBytes) {
+    throw new Error(
+      options.allowLargeInput
+        ? 'Ukuran file gambar terlalu besar (maksimal 15 MB sebelum dikompres ke WebP).'
+        : 'Ukuran gambar terlalu besar. Maksimal ukuran kirim adalah 2 MB.'
+    );
   }
 
   if (typeof document === 'undefined') {
     return file;
   }
 
-  const maxDim = options.maxDimension ?? 1280;
-  const quality = options.quality ?? 0.78;
+  const maxDim = options.maxDimension ?? 1400;
+  const quality = options.quality ?? 0.82;
 
   return new Promise((resolve) => {
     const img = new Image();

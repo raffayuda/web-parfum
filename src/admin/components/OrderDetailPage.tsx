@@ -708,7 +708,7 @@ const OrderDetailContent: React.FC<OrderDetailPageProps> = ({ orderId }) => {
             ? 'Konfirmasi Pesanan Selesai'
             : 'Konfirmasi Kembalikan Proses Pesanan'
         }
-        size="sm"
+        maxWidth="sm"
       >
         <div className="space-y-4">
           <div className="flex items-start gap-3">

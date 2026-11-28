@@ -33,13 +33,13 @@ const ASPECT_OPTIONS = [
 ];
 
 const PRESET_IMAGES = [
+  { label: 'Trio Box OMOO', url: '/images/products/trio-editorial.webp' },
+  { label: 'Emerald Lifestyle', url: '/images/products/emerald-lifestyle.webp' },
+  { label: 'Golden de Brume Mood', url: '/images/products/golden-de-brume-mood.webp' },
+  { label: 'Rare Citrus & Madu', url: '/images/products/rare-mood.webp' },
+  { label: 'Youth & Lumina Mist', url: '/images/products/youth-lumina-mood.webp' },
   { label: 'Ruang Maserasi', url: '/images/atelier.jpg' },
   { label: 'Koridor Studio', url: '/images/corridor.jpg' },
-  { label: 'Botol Vetiver', url: '/images/bottle-vetiver.jpg' },
-  { label: 'Botol Sel Marin', url: '/images/bottle-sel.jpg' },
-  { label: 'Botol Iris Cendre', url: '/images/bottle-iris.jpg' },
-  { label: 'Akar Vetiver', url: '/images/macro-vetiver.jpg' },
-  { label: 'Kayu Gaharu', url: '/images/macro-oud.jpg' },
 ];
 
 interface GalleryFormState {

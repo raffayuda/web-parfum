@@ -64,7 +64,7 @@ const cardImage = resolvePublicImageUrl((fragrance as any).bottleImage || fragra
       <div
         class="mt-1 flex justify-between gap-4 text-[0.7rem] uppercase tracking-[0.06em] text-muted"
       >
-        <span>{fragrance.volume} / Extrait</span>
+        <span>{fragrance.volume} / Eau de Parfum</span>
         <span>{priceLabel(fragrance.price)}</span>
       </div>
     </div>
@@ -80,7 +80,7 @@ const cardImage = resolvePublicImageUrl((fragrance as any).bottleImage || fragra
         edition: fragrance.edition,
         volume: fragrance.volume,
         price: Number(fragrance.price),
-        bottleImage: typeof cardImage === 'string' ? cardImage : '/images/bottle-vetiver.jpg',
+        bottleImage: typeof cardImage === 'string' ? cardImage : '/images/products/emerald-lifestyle.webp',
         isAvailable: fragrance.isAvailable,
       }}
       className="w-full"
